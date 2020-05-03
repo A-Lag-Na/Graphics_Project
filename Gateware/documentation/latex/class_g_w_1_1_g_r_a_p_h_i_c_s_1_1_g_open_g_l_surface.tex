@@ -1,0 +1,213 @@
+\hypertarget{class_g_w_1_1_g_r_a_p_h_i_c_s_1_1_g_open_g_l_surface}{}\doxysection{GW\+::G\+R\+A\+P\+H\+I\+CS\+::G\+Open\+G\+L\+Surface Class Reference}
+\label{class_g_w_1_1_g_r_a_p_h_i_c_s_1_1_g_open_g_l_surface}\index{GW::GRAPHICS::GOpenGLSurface@{GW::GRAPHICS::GOpenGLSurface}}
+Inheritance diagram for GW\+::G\+R\+A\+P\+H\+I\+CS\+::G\+Open\+G\+L\+Surface\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=1.503356cm]{class_g_w_1_1_g_r_a_p_h_i_c_s_1_1_g_open_g_l_surface}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\footnotesize template$<$typename... Args$>$ }\\\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} \mbox{\hyperlink{class_g_w_1_1_g_r_a_p_h_i_c_s_1_1_g_open_g_l_surface_a5564a6f6d5e1aa2e3599bbdcf1a0571e}{Get\+Aspect\+Ratio}} (Args \&\&... parameter) const
+\item 
+{\footnotesize template$<$typename... Args$>$ }\\\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} \mbox{\hyperlink{class_g_w_1_1_g_r_a_p_h_i_c_s_1_1_g_open_g_l_surface_ac1cba479638aaa61398b8c69ab1bac50}{Get\+Context}} (Args \&\&... parameter) const
+\item 
+{\footnotesize template$<$typename... Args$>$ }\\\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} \mbox{\hyperlink{class_g_w_1_1_g_r_a_p_h_i_c_s_1_1_g_open_g_l_surface_a91721d6d4deffd4c6246cee04ec83874}{Universal\+Swap\+Buffers}} (Args \&\&... parameter)
+\item 
+{\footnotesize template$<$typename... Args$>$ }\\\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} \mbox{\hyperlink{class_g_w_1_1_g_r_a_p_h_i_c_s_1_1_g_open_g_l_surface_afe931258eb694d135af0e5e4324ac39a}{Query\+Extension\+Function}} (Args \&\&... parameter)
+\item 
+{\footnotesize template$<$typename... Args$>$ }\\\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} \mbox{\hyperlink{class_g_w_1_1_g_r_a_p_h_i_c_s_1_1_g_open_g_l_surface_a479d657a5e70c1edd47260cc439635df}{Enable\+Swap\+Control}} (Args \&\&... parameter)
+\item 
+reimplemented proxy functions should be ignored by doxygen \mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+Return}} \mbox{\hyperlink{class_g_w_1_1_g_r_a_p_h_i_c_s_1_1_g_open_g_l_surface_a28bfbe9fd91633916766ac553f13fc1a}{Create}} (\mbox{\hyperlink{class_g_w_1_1_s_y_s_t_e_m_1_1_g_window}{G\+W\+::\+S\+Y\+S\+T\+E\+M\+::\+G\+Window}} \+\_\+gwindow, unsigned long long \+\_\+init\+Mask)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+
+
+Definition at line 44 of file G\+Open\+G\+L\+Surface.\+h.
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_g_w_1_1_g_r_a_p_h_i_c_s_1_1_g_open_g_l_surface_a5564a6f6d5e1aa2e3599bbdcf1a0571e}\label{class_g_w_1_1_g_r_a_p_h_i_c_s_1_1_g_open_g_l_surface_a5564a6f6d5e1aa2e3599bbdcf1a0571e}} 
+\index{GW::GRAPHICS::GOpenGLSurface@{GW::GRAPHICS::GOpenGLSurface}!GetAspectRatio@{GetAspectRatio}}
+\index{GetAspectRatio@{GetAspectRatio}!GW::GRAPHICS::GOpenGLSurface@{GW::GRAPHICS::GOpenGLSurface}}
+\doxysubsubsection{\texorpdfstring{GetAspectRatio()}{GetAspectRatio()}}
+{\footnotesize\ttfamily template$<$typename... Args$>$ \\
+\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} G\+W\+::\+G\+R\+A\+P\+H\+I\+C\+S\+::\+G\+Open\+G\+L\+Surface\+::\+Get\+Aspect\+Ratio (\begin{DoxyParamCaption}\item[{Args \&\&...}]{parameter }\end{DoxyParamCaption}) const}
+
+
+
+Returns the aspect ratio for the current window. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ out}}  & {\em \+\_\+out\+Ratio} & Will contain the calculated aspect ratio.\\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em G\+Return\+::\+S\+U\+C\+C\+E\+SS} & The current aspect ratio was calculated and returned. \\
+\hline
+{\em G\+Return\+::\+F\+A\+I\+L\+U\+RE} & No active G\+Window exists to calculate an aspect ratio from. \\
+\hline
+{\em G\+Return\+::\+E\+M\+P\+T\+Y\+\_\+\+P\+R\+O\+XY} & The proxy is empty \\
+\hline
+\end{DoxyRetVals}
+
+
+Definition at line 66 of file G\+Open\+G\+L\+Surface.\+h.
+
+\mbox{\Hypertarget{class_g_w_1_1_g_r_a_p_h_i_c_s_1_1_g_open_g_l_surface_ac1cba479638aaa61398b8c69ab1bac50}\label{class_g_w_1_1_g_r_a_p_h_i_c_s_1_1_g_open_g_l_surface_ac1cba479638aaa61398b8c69ab1bac50}} 
+\index{GW::GRAPHICS::GOpenGLSurface@{GW::GRAPHICS::GOpenGLSurface}!GetContext@{GetContext}}
+\index{GetContext@{GetContext}!GW::GRAPHICS::GOpenGLSurface@{GW::GRAPHICS::GOpenGLSurface}}
+\doxysubsubsection{\texorpdfstring{GetContext()}{GetContext()}}
+{\footnotesize\ttfamily template$<$typename... Args$>$ \\
+\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} G\+W\+::\+G\+R\+A\+P\+H\+I\+C\+S\+::\+G\+Open\+G\+L\+Surface\+::\+Get\+Context (\begin{DoxyParamCaption}\item[{Args \&\&...}]{parameter }\end{DoxyParamCaption}) const}
+
+
+
+Returns the current Open\+GL context. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ out}}  & {\em \+\_\+out\+Context} & Will contain the address of the Open\+GL context.\\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em G\+Return\+::\+S\+U\+C\+C\+E\+SS} & The existing Open\+GL context was returned. \\
+\hline
+{\em G\+Return\+::\+F\+A\+I\+L\+U\+RE} & No Open\+GL context exists to retrieve. \\
+\hline
+{\em G\+Return\+::\+E\+M\+P\+T\+Y\+\_\+\+P\+R\+O\+XY} & The proxy is empty \\
+\hline
+\end{DoxyRetVals}
+
+
+Definition at line 77 of file G\+Open\+G\+L\+Surface.\+h.
+
+\mbox{\Hypertarget{class_g_w_1_1_g_r_a_p_h_i_c_s_1_1_g_open_g_l_surface_a91721d6d4deffd4c6246cee04ec83874}\label{class_g_w_1_1_g_r_a_p_h_i_c_s_1_1_g_open_g_l_surface_a91721d6d4deffd4c6246cee04ec83874}} 
+\index{GW::GRAPHICS::GOpenGLSurface@{GW::GRAPHICS::GOpenGLSurface}!UniversalSwapBuffers@{UniversalSwapBuffers}}
+\index{UniversalSwapBuffers@{UniversalSwapBuffers}!GW::GRAPHICS::GOpenGLSurface@{GW::GRAPHICS::GOpenGLSurface}}
+\doxysubsubsection{\texorpdfstring{UniversalSwapBuffers()}{UniversalSwapBuffers()}}
+{\footnotesize\ttfamily template$<$typename... Args$>$ \\
+\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} G\+W\+::\+G\+R\+A\+P\+H\+I\+C\+S\+::\+G\+Open\+G\+L\+Surface\+::\+Universal\+Swap\+Buffers (\begin{DoxyParamCaption}\item[{Args \&\&...}]{parameter }\end{DoxyParamCaption})}
+
+
+
+Calls the appropriate method (depending on platform) to swap the front and back buffers. 
+
+
+\begin{DoxyRetVals}{Return values}
+{\em G\+Return\+::\+S\+U\+C\+C\+E\+SS} & The front and back buffers were successfully swapped. \\
+\hline
+{\em G\+Return\+::\+F\+A\+I\+L\+U\+RE} & No valid Open\+GL context exists to perform a buffer swap on. \\
+\hline
+\end{DoxyRetVals}
+
+
+Definition at line 85 of file G\+Open\+G\+L\+Surface.\+h.
+
+\mbox{\Hypertarget{class_g_w_1_1_g_r_a_p_h_i_c_s_1_1_g_open_g_l_surface_afe931258eb694d135af0e5e4324ac39a}\label{class_g_w_1_1_g_r_a_p_h_i_c_s_1_1_g_open_g_l_surface_afe931258eb694d135af0e5e4324ac39a}} 
+\index{GW::GRAPHICS::GOpenGLSurface@{GW::GRAPHICS::GOpenGLSurface}!QueryExtensionFunction@{QueryExtensionFunction}}
+\index{QueryExtensionFunction@{QueryExtensionFunction}!GW::GRAPHICS::GOpenGLSurface@{GW::GRAPHICS::GOpenGLSurface}}
+\doxysubsubsection{\texorpdfstring{QueryExtensionFunction()}{QueryExtensionFunction()}}
+{\footnotesize\ttfamily template$<$typename... Args$>$ \\
+\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} G\+W\+::\+G\+R\+A\+P\+H\+I\+C\+S\+::\+G\+Open\+G\+L\+Surface\+::\+Query\+Extension\+Function (\begin{DoxyParamCaption}\item[{Args \&\&...}]{parameter }\end{DoxyParamCaption})}
+
+
+
+Queries if a requested Open\+GL extension or function is supported. 
+
+This funtion accepts either an Open\+GL extension or Open\+GL function (or both) and searches the total list of supported extensions (generated upon creation of the context) to see if that extension/function is supported. When a function name is queried, this function will return it\textquotesingle{}s appropriate address if supported.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em \+\_\+extension} & The exact name of an Open\+GL, W\+GL, or G\+LX extension. \\
+\hline
+\mbox{\texttt{ in}}  & {\em \+\_\+func\+Name} & The exact name of an Open\+GL, W\+GL, or G\+LX function. \\
+\hline
+\mbox{\texttt{ out}}  & {\em \+\_\+out\+Func\+Address} & The address of a function pointer that matches the queried function (\+\_\+func\+Name).\\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em G\+Return\+::\+S\+U\+C\+C\+E\+SS} & The extension/function is supported, and the address was returned successfully (if requested). \\
+\hline
+{\em G\+Return\+::\+I\+N\+V\+A\+L\+I\+D\+\_\+\+A\+R\+G\+U\+M\+E\+NT} & This function was called with an incorrect set of parameters. \\
+\hline
+{\em G\+Return\+::\+F\+A\+I\+L\+U\+RE} & The requested extension/function is not supported. \\
+\hline
+{\em G\+Return\+::\+E\+M\+P\+T\+Y\+\_\+\+P\+R\+O\+XY} & The proxy is empty \\
+\hline
+\end{DoxyRetVals}
+
+
+Definition at line 106 of file G\+Open\+G\+L\+Surface.\+h.
+
+\mbox{\Hypertarget{class_g_w_1_1_g_r_a_p_h_i_c_s_1_1_g_open_g_l_surface_a479d657a5e70c1edd47260cc439635df}\label{class_g_w_1_1_g_r_a_p_h_i_c_s_1_1_g_open_g_l_surface_a479d657a5e70c1edd47260cc439635df}} 
+\index{GW::GRAPHICS::GOpenGLSurface@{GW::GRAPHICS::GOpenGLSurface}!EnableSwapControl@{EnableSwapControl}}
+\index{EnableSwapControl@{EnableSwapControl}!GW::GRAPHICS::GOpenGLSurface@{GW::GRAPHICS::GOpenGLSurface}}
+\doxysubsubsection{\texorpdfstring{EnableSwapControl()}{EnableSwapControl()}}
+{\footnotesize\ttfamily template$<$typename... Args$>$ \\
+\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} G\+W\+::\+G\+R\+A\+P\+H\+I\+C\+S\+::\+G\+Open\+G\+L\+Surface\+::\+Enable\+Swap\+Control (\begin{DoxyParamCaption}\item[{Args \&\&...}]{parameter }\end{DoxyParamCaption})}
+
+
+
+Enables or disables v-\/synchronization in regards to buffer swapping. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em \+\_\+toggle} & Determines whether to enable or disable v-\/sync.\\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em S\+U\+C\+C\+E\+SS} & The appropriate function was called to enable v-\/sync. \\
+\hline
+{\em F\+E\+A\+T\+U\+R\+E\+\_\+\+U\+N\+S\+U\+P\+P\+O\+R\+T\+ED} & The extension required to use this functionality was not supported. \\
+\hline
+{\em F\+A\+I\+L\+U\+RE} & No valid Open\+GL context exists. \\
+\hline
+{\em G\+Return\+::\+E\+M\+P\+T\+Y\+\_\+\+P\+R\+O\+XY} & The proxy is empty \\
+\hline
+\end{DoxyRetVals}
+
+
+Definition at line 118 of file G\+Open\+G\+L\+Surface.\+h.
+
+\mbox{\Hypertarget{class_g_w_1_1_g_r_a_p_h_i_c_s_1_1_g_open_g_l_surface_a28bfbe9fd91633916766ac553f13fc1a}\label{class_g_w_1_1_g_r_a_p_h_i_c_s_1_1_g_open_g_l_surface_a28bfbe9fd91633916766ac553f13fc1a}} 
+\index{GW::GRAPHICS::GOpenGLSurface@{GW::GRAPHICS::GOpenGLSurface}!Create@{Create}}
+\index{Create@{Create}!GW::GRAPHICS::GOpenGLSurface@{GW::GRAPHICS::GOpenGLSurface}}
+\doxysubsubsection{\texorpdfstring{Create()}{Create()}}
+{\footnotesize\ttfamily reimplemented proxy functions should be ignored by doxygen \mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+Return}} G\+W\+::\+G\+R\+A\+P\+H\+I\+C\+S\+::\+G\+Open\+G\+L\+Surface\+::\+Create (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_g_w_1_1_s_y_s_t_e_m_1_1_g_window}{G\+W\+::\+S\+Y\+S\+T\+E\+M\+::\+G\+Window}}}]{\+\_\+gwindow,  }\item[{unsigned long long}]{\+\_\+init\+Mask }\end{DoxyParamCaption})}
+
+
+
+Creates and outputs a new \mbox{\hyperlink{class_g_w_1_1_g_r_a_p_h_i_c_s_1_1_g_open_g_l_surface}{G\+Open\+G\+L\+Surface}} object. 
+
+Initializes a handle to a \mbox{\hyperlink{class_g_w_1_1_g_r_a_p_h_i_c_s_1_1_g_open_g_l_surface}{G\+Open\+G\+L\+Surface}} object with an existing G\+Window. The created \mbox{\hyperlink{class_g_w_1_1_g_r_a_p_h_i_c_s_1_1_g_direct_x11_surface}{G\+Direct\+X11\+Surface}} object will have its reference count initialized to one and register as a listener to the provided G\+Window object.
+
+This function accepts a bit mask that can hold supported \textquotesingle{}G\+Graphics\+Init\+Options\textquotesingle{}, which will be taken into account when creating the context. To ignore this mask, simply pass in 0 when calling this function and the context will be created with default settings.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em \+\_\+g\+Win} & A pointer to an existing G\+Window object. \\
+\hline
+\mbox{\texttt{ in}}  & {\em \+\_\+init\+Mask} & The bit mask that can hold special initialization options. \\
+\hline
+\mbox{\texttt{ out}}  & {\em \+\_\+out\+Surface} & Will contain the \mbox{\hyperlink{class_g_w_1_1_g_r_a_p_h_i_c_s_1_1_g_direct_x11_surface}{G\+Direct\+X11\+Surface}} object if successfully created.\\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em G\+Return\+::\+S\+U\+C\+C\+E\+SS} & A \mbox{\hyperlink{class_g_w_1_1_g_r_a_p_h_i_c_s_1_1_g_open_g_l_surface}{G\+Open\+G\+L\+Surface}} object was successfully created. \\
+\hline
+{\em G\+Return\+::\+F\+A\+I\+L\+U\+RE} & A \mbox{\hyperlink{class_g_w_1_1_g_r_a_p_h_i_c_s_1_1_g_open_g_l_surface}{G\+Open\+G\+L\+Surface}} object was not created. \\
+\hline
+{\em G\+Return\+::\+I\+N\+V\+A\+L\+I\+D\+\_\+\+A\+R\+G\+U\+M\+E\+NT} & \+\_\+gwindow is invalid. \\
+\hline
+\end{DoxyRetVals}

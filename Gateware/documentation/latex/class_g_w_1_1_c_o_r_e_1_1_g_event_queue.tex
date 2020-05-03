@@ -1,0 +1,97 @@
+\hypertarget{class_g_w_1_1_c_o_r_e_1_1_g_event_queue}{}\doxysection{GW\+::C\+O\+RE\+::G\+Event\+Queue Class Reference}
+\label{class_g_w_1_1_c_o_r_e_1_1_g_event_queue}\index{GW::CORE::GEventQueue@{GW::CORE::GEventQueue}}
+Inheritance diagram for GW\+::C\+O\+RE\+::G\+Event\+Queue\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=1.426752cm]{class_g_w_1_1_c_o_r_e_1_1_g_event_queue}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\footnotesize template$<$typename... Args$>$ }\\\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_queue_a8c3c931f92b776d250796833c308b929}{Peek}} (Args \&\&... parameter) const
+\item 
+{\footnotesize template$<$typename... Args$>$ }\\\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_queue_ae50a36c71867cfd75f5735f1452a940a}{Max}} (Args \&\&... parameter) const
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Receives and stores all events produced by an interface derived from \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_generator}{G\+Event\+Generator}}. You must provide the Event\+Queue a maximum storage capcity as the underying container is a circular quque. Accepts an std\+::function$<$void()$>$ as the callback function/lambda for flexibility. Use std\+::bind to supply your own arguments to your callback, the only restriction is the void return type. Because all events are captured (assuming adequate storage) you may process events later when ready to do so. 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{MyEventQueue.Create( 16, MyEventGenerator, \textcolor{keyword}{nullptr}); \textcolor{comment}{// if you only need the last event, use GEventReceiver}}
+\DoxyCodeLine{GEvent g; }
+\DoxyCodeLine{\mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_generator_a04fc03468fe943441d3064e3e0bce298}{GEventGenerator::Events}} e; \textcolor{comment}{// replace with desired Generator}}
+\DoxyCodeLine{\mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_generator_a23db3bc6833d34c7e30e835ff6add48f}{GEventGenerator::EVENT\_DATA}} d; }
+\DoxyCodeLine{\textcolor{keywordflow}{while}(+MyEventQueue.Pop(g)) \textcolor{comment}{// later, possibly in main loop...}}
+\DoxyCodeLine{    \textcolor{keywordflow}{if}(+g.Read(e,d))}
+\DoxyCodeLine{        \textcolor{keywordflow}{if}(e == GEventGenerator::Events::NON\_EVENT) \textcolor{comment}{// replace with actual event}}
+\DoxyCodeLine{            std::cout << d.noData; \textcolor{comment}{// replace with actual data}}
+\end{DoxyCode}
+ 
+
+Definition at line 66 of file G\+Event\+Queue.\+h.
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_g_w_1_1_c_o_r_e_1_1_g_event_queue_a8c3c931f92b776d250796833c308b929}\label{class_g_w_1_1_c_o_r_e_1_1_g_event_queue_a8c3c931f92b776d250796833c308b929}} 
+\index{GW::CORE::GEventQueue@{GW::CORE::GEventQueue}!Peek@{Peek}}
+\index{Peek@{Peek}!GW::CORE::GEventQueue@{GW::CORE::GEventQueue}}
+\doxysubsubsection{\texorpdfstring{Peek()}{Peek()}}
+{\footnotesize\ttfamily template$<$typename... Args$>$ \\
+\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} G\+W\+::\+C\+O\+R\+E\+::\+G\+Event\+Queue\+::\+Peek (\begin{DoxyParamCaption}\item[{Args \&\&...}]{parameter }\end{DoxyParamCaption}) const}
+
+
+
+Examines but does not remove a waiting event if one is available based on it\textquotesingle{}s historical index. 
+
+Same operation as \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_queue_a8c3c931f92b776d250796833c308b929}{Peek()}} in \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver}{G\+Event\+Receiver}} but can also be used to examine the Queue\textquotesingle{}s current backlog.
+
+
+\begin{DoxyParams}[1]{Parameters}
+ & {\em \+\_\+event\+Index} & The event you wish to examine from 0 to \char`\"{}\+Waiting\char`\"{}-\/1, with 0 being the most recent. \\
+\hline
+\mbox{\texttt{ out}}  & {\em \+\_\+out\+Event} & (O\+U\+T\+P\+UT) A copy of the event at \textquotesingle{}\+\_\+event\+Index\textquotesingle{} waiting it\textquotesingle{}s turn to be processed.\\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em G\+Return\+::\+S\+U\+C\+C\+E\+SS} & Successfully copied a waiting event from the Queue. \\
+\hline
+{\em G\+Return\+::\+F\+A\+I\+L\+U\+RE} & There were no waiting events that could be inspected. \\
+\hline
+{\em G\+Return\+::\+I\+N\+V\+A\+L\+I\+D\+\_\+\+A\+R\+G\+U\+M\+E\+NT} & The provided \+\_\+event\+Index was out of bounds. \\
+\hline
+\end{DoxyRetVals}
+
+
+Definition at line 90 of file G\+Event\+Queue.\+h.
+
+\mbox{\Hypertarget{class_g_w_1_1_c_o_r_e_1_1_g_event_queue_ae50a36c71867cfd75f5735f1452a940a}\label{class_g_w_1_1_c_o_r_e_1_1_g_event_queue_ae50a36c71867cfd75f5735f1452a940a}} 
+\index{GW::CORE::GEventQueue@{GW::CORE::GEventQueue}!Max@{Max}}
+\index{Max@{Max}!GW::CORE::GEventQueue@{GW::CORE::GEventQueue}}
+\doxysubsubsection{\texorpdfstring{Max()}{Max()}}
+{\footnotesize\ttfamily template$<$typename... Args$>$ \\
+\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} G\+W\+::\+C\+O\+R\+E\+::\+G\+Event\+Queue\+::\+Max (\begin{DoxyParamCaption}\item[{Args \&\&...}]{parameter }\end{DoxyParamCaption}) const}
+
+
+
+Reports the Maximum amount of Events that this \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_queue}{G\+Event\+Queue}} instance can record. ~\newline
+ 
+
+This returns the same number that is passed to the \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_queue}{G\+Event\+Queue}} \char`\"{}\+Create\char`\"{} function. Any events recorded while the Queue is at capcity will cause the oldest event to be lost. Whenever an Event is replaced without processing, it will increase the internal \char`\"{}\+Missed\char`\"{} count.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ out}}  & {\em \+\_\+out\+Capacity} & (O\+U\+T\+P\+UT) The maximum capacity of the Event Queue.\\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em G\+Return\+::\+S\+U\+C\+C\+E\+SS} & The maximum capacity was successfully reported. \\
+\hline
+\end{DoxyRetVals}
+
+
+Definition at line 101 of file G\+Event\+Queue.\+h.
+

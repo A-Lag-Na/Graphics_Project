@@ -1,0 +1,144 @@
+\hypertarget{class_g_w_1_1_c_o_r_e_1_1_g_thread_shared}{}\doxysection{GW\+::C\+O\+RE\+::G\+Thread\+Shared Class Reference}
+\label{class_g_w_1_1_c_o_r_e_1_1_g_thread_shared}\index{GW::CORE::GThreadShared@{GW::CORE::GThreadShared}}
+Inheritance diagram for GW\+::C\+O\+RE\+::G\+Thread\+Shared\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_g_w_1_1_c_o_r_e_1_1_g_thread_shared}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\footnotesize template$<$typename... Args$>$ }\\\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_thread_shared_aa7a3c4948e2980429e52290c196744c2}{Lock\+Async\+Read}} (Args \&\&... parameter) const
+\item 
+{\footnotesize template$<$typename... Args$>$ }\\\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_thread_shared_a8cf148af32cfa4790bf74effd33c9395}{Unlock\+Async\+Read}} (Args \&\&... parameter) const
+\item 
+{\footnotesize template$<$typename... Args$>$ }\\\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_thread_shared_a5546a0c9b40e36fd6b90a0549675e911}{Lock\+Sync\+Write}} (Args \&\&... parameter)
+\item 
+{\footnotesize template$<$typename... Args$>$ }\\\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_thread_shared_a20eb35143a6eabfbb4255d5855680278}{Unlock\+Sync\+Write}} (Args \&\&... parameter)
+\item 
+\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+Return}} \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_thread_shared_ab3b1f1e036efeb7f0b90c56bd7a662e1}{Create}} ()
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Proxy to a base class that can efficiently lock and unlock resources for Gateware developers. Most end users should note that most Gateware thread safe interfaces will privately inherit this interface. This means that casting these Proxys to this base Proxy will fail. This is intended behavior by the designer. 
+
+Definition at line 60 of file G\+Thread\+Shared.\+h.
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_g_w_1_1_c_o_r_e_1_1_g_thread_shared_aa7a3c4948e2980429e52290c196744c2}\label{class_g_w_1_1_c_o_r_e_1_1_g_thread_shared_aa7a3c4948e2980429e52290c196744c2}} 
+\index{GW::CORE::GThreadShared@{GW::CORE::GThreadShared}!LockAsyncRead@{LockAsyncRead}}
+\index{LockAsyncRead@{LockAsyncRead}!GW::CORE::GThreadShared@{GW::CORE::GThreadShared}}
+\doxysubsubsection{\texorpdfstring{LockAsyncRead()}{LockAsyncRead()}}
+{\footnotesize\ttfamily template$<$typename... Args$>$ \\
+\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} G\+W\+::\+C\+O\+R\+E\+::\+G\+Thread\+Shared\+::\+Lock\+Async\+Read (\begin{DoxyParamCaption}\item[{Args \&\&...}]{parameter }\end{DoxyParamCaption}) const}
+
+
+
+Locks a resource for Reading. (prevents writes from other threads) 
+
+Prevents other threads from writing data to a resource while you access it. (you should N\+OT modify it) Use the Unlock\+Async\+Read function as soon as you are done to prevent processing delays. If a resource is currently locked for writing, this operation will block until it is free.
+
+
+\begin{DoxyRetVals}{Return values}
+{\em S\+U\+C\+C\+E\+SS} & Succesfully locked resource for asynchronus reads.(if supported by the platform) \\
+\hline
+{\em F\+A\+I\+L\+U\+RE} & Could not lock resource for reading.(timeout) \\
+\hline
+\end{DoxyRetVals}
+
+
+Definition at line 76 of file G\+Thread\+Shared.\+h.
+
+\mbox{\Hypertarget{class_g_w_1_1_c_o_r_e_1_1_g_thread_shared_a8cf148af32cfa4790bf74effd33c9395}\label{class_g_w_1_1_c_o_r_e_1_1_g_thread_shared_a8cf148af32cfa4790bf74effd33c9395}} 
+\index{GW::CORE::GThreadShared@{GW::CORE::GThreadShared}!UnlockAsyncRead@{UnlockAsyncRead}}
+\index{UnlockAsyncRead@{UnlockAsyncRead}!GW::CORE::GThreadShared@{GW::CORE::GThreadShared}}
+\doxysubsubsection{\texorpdfstring{UnlockAsyncRead()}{UnlockAsyncRead()}}
+{\footnotesize\ttfamily template$<$typename... Args$>$ \\
+\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} G\+W\+::\+C\+O\+R\+E\+::\+G\+Thread\+Shared\+::\+Unlock\+Async\+Read (\begin{DoxyParamCaption}\item[{Args \&\&...}]{parameter }\end{DoxyParamCaption}) const}
+
+
+
+Unlocks a resource that is currently locked for reading. (potnentially allows writes from other threads) 
+
+Releases a resource once you have finished accessing it. (Again... do N\+OT modify the resource in question) Use the Lock\+Async\+Read function before calling this function. If a resource is currently locked for writing, this operation will block until it is free.
+
+
+\begin{DoxyRetVals}{Return values}
+{\em S\+U\+C\+C\+E\+SS} & Succesfully locked resource for asynchronus reads.(if supported by the platform) \\
+\hline
+{\em F\+A\+I\+L\+U\+RE} & Could not lock resource for reading.(timeout) \\
+\hline
+\end{DoxyRetVals}
+
+
+Definition at line 86 of file G\+Thread\+Shared.\+h.
+
+\mbox{\Hypertarget{class_g_w_1_1_c_o_r_e_1_1_g_thread_shared_a5546a0c9b40e36fd6b90a0549675e911}\label{class_g_w_1_1_c_o_r_e_1_1_g_thread_shared_a5546a0c9b40e36fd6b90a0549675e911}} 
+\index{GW::CORE::GThreadShared@{GW::CORE::GThreadShared}!LockSyncWrite@{LockSyncWrite}}
+\index{LockSyncWrite@{LockSyncWrite}!GW::CORE::GThreadShared@{GW::CORE::GThreadShared}}
+\doxysubsubsection{\texorpdfstring{LockSyncWrite()}{LockSyncWrite()}}
+{\footnotesize\ttfamily template$<$typename... Args$>$ \\
+\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} G\+W\+::\+C\+O\+R\+E\+::\+G\+Thread\+Shared\+::\+Lock\+Sync\+Write (\begin{DoxyParamCaption}\item[{Args \&\&...}]{parameter }\end{DoxyParamCaption})}
+
+
+
+Locks a resource for writing. 
+
+Prevents other threads from reading and/or writing data from/to a resource. Use the Unlock\+Sync\+Write function as soon as you are done to prevent processing delays.
+
+
+\begin{DoxyRetVals}{Return values}
+{\em S\+U\+C\+C\+E\+SS} & Succesfully locked resource for writing. \\
+\hline
+{\em F\+A\+I\+L\+U\+RE} & Could not lock resource for writing. \\
+\hline
+\end{DoxyRetVals}
+
+
+Definition at line 95 of file G\+Thread\+Shared.\+h.
+
+\mbox{\Hypertarget{class_g_w_1_1_c_o_r_e_1_1_g_thread_shared_a20eb35143a6eabfbb4255d5855680278}\label{class_g_w_1_1_c_o_r_e_1_1_g_thread_shared_a20eb35143a6eabfbb4255d5855680278}} 
+\index{GW::CORE::GThreadShared@{GW::CORE::GThreadShared}!UnlockSyncWrite@{UnlockSyncWrite}}
+\index{UnlockSyncWrite@{UnlockSyncWrite}!GW::CORE::GThreadShared@{GW::CORE::GThreadShared}}
+\doxysubsubsection{\texorpdfstring{UnlockSyncWrite()}{UnlockSyncWrite()}}
+{\footnotesize\ttfamily template$<$typename... Args$>$ \\
+\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} G\+W\+::\+C\+O\+R\+E\+::\+G\+Thread\+Shared\+::\+Unlock\+Sync\+Write (\begin{DoxyParamCaption}\item[{Args \&\&...}]{parameter }\end{DoxyParamCaption})}
+
+
+
+Unlocks a resource once you have finished writing to it.(re-\/enable reads) 
+
+Allows other threads to read and/or write data from/to a resource after editing. Use the Lock\+Sync\+Write function before calling this function.
+
+
+\begin{DoxyRetVals}{Return values}
+{\em S\+U\+C\+C\+E\+SS} & Succesfully unlocked a resource. \\
+\hline
+{\em F\+A\+I\+L\+U\+RE} & Could not unlock the resource. \\
+\hline
+\end{DoxyRetVals}
+
+
+Definition at line 104 of file G\+Thread\+Shared.\+h.
+
+\mbox{\Hypertarget{class_g_w_1_1_c_o_r_e_1_1_g_thread_shared_ab3b1f1e036efeb7f0b90c56bd7a662e1}\label{class_g_w_1_1_c_o_r_e_1_1_g_thread_shared_ab3b1f1e036efeb7f0b90c56bd7a662e1}} 
+\index{GW::CORE::GThreadShared@{GW::CORE::GThreadShared}!Create@{Create}}
+\index{Create@{Create}!GW::CORE::GThreadShared@{GW::CORE::GThreadShared}}
+\doxysubsubsection{\texorpdfstring{Create()}{Create()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+Return}} G\+W\+::\+C\+O\+R\+E\+::\+G\+Thread\+Shared\+::\+Create (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Creates a valid \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_thread_shared}{G\+Thread\+Shared}} Object. 
+
+\mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_thread_shared}{G\+Thread\+Shared}} can be thought of as an std\+::mutex that is potentially optimized per-\/platform. While mainly used internally by Gateware you can also make use of this to efficiently protect resources.
+
+
+\begin{DoxyRetVals}{Return values}
+{\em G\+Return\+::\+S\+U\+C\+C\+E\+SS} & This always succeeds.(unless you run out of memory) \\
+\hline
+\end{DoxyRetVals}

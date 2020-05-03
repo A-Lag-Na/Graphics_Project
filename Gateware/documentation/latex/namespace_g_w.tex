@@ -1,0 +1,127 @@
+\hypertarget{namespace_g_w}{}\doxysection{GW Namespace Reference}
+\label{namespace_g_w}\index{GW@{GW}}
+\doxysubsection*{Namespaces}
+\begin{DoxyCompactItemize}
+\item 
+ \mbox{\hyperlink{namespace_g_w_1_1_a_u_d_i_o}{A\+U\+D\+IO}}
+\item 
+ \mbox{\hyperlink{namespace_g_w_1_1_c_o_r_e}{C\+O\+RE}}
+\item 
+ \mbox{\hyperlink{namespace_g_w_1_1_g_r_a_p_h_i_c_s}{G\+R\+A\+P\+H\+I\+CS}}
+\item 
+ \mbox{\hyperlink{namespace_g_w_1_1_i_n_p_u_t}{I\+N\+P\+UT}}
+\item 
+ \mbox{\hyperlink{namespace_g_w_1_1_m_a_t_h}{M\+A\+TH}}
+\item 
+ \mbox{\hyperlink{namespace_g_w_1_1_s_y_s_t_e_m}{S\+Y\+S\+T\+EM}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{struct_g_w_1_1_g_event}{G\+Event}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}\label{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}} 
+enum \mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+Return}} \+: int \{ \newline
+{\bfseries H\+A\+R\+D\+W\+A\+R\+E\+\_\+\+U\+N\+A\+V\+A\+I\+L\+A\+B\+LE} = -\/15, 
+{\bfseries D\+E\+A\+D\+L\+O\+CK} = -\/14, 
+{\bfseries U\+N\+E\+X\+P\+E\+C\+T\+E\+D\+\_\+\+R\+E\+S\+U\+LT} = -\/13, 
+{\bfseries R\+E\+S\+O\+U\+R\+C\+E\+\_\+\+L\+O\+C\+K\+ED} = -\/12, 
+\newline
+{\bfseries D\+I\+S\+C\+O\+N\+N\+E\+C\+T\+ED} = -\/11, 
+{\bfseries P\+R\+E\+M\+A\+T\+U\+R\+E\+\_\+\+D\+E\+A\+L\+L\+O\+C\+A\+T\+I\+ON} = -\/10, 
+{\bfseries F\+U\+N\+C\+T\+I\+O\+N\+\_\+\+D\+E\+P\+R\+E\+C\+A\+T\+ED} = -\/9, 
+{\bfseries F\+E\+A\+T\+U\+R\+E\+\_\+\+U\+N\+S\+U\+P\+P\+O\+R\+T\+ED} = -\/8, 
+\newline
+{\bfseries F\+I\+L\+E\+\_\+\+N\+O\+T\+\_\+\+F\+O\+U\+ND} = -\/7, 
+{\bfseries I\+N\+T\+E\+R\+F\+A\+C\+E\+\_\+\+U\+N\+S\+U\+P\+P\+O\+R\+T\+ED} = -\/6, 
+{\bfseries M\+E\+M\+O\+R\+Y\+\_\+\+C\+O\+R\+R\+U\+P\+T\+I\+ON} = -\/5, 
+{\bfseries I\+N\+V\+A\+L\+I\+D\+\_\+\+A\+R\+G\+U\+M\+E\+NT} = -\/4, 
+\newline
+{\bfseries I\+G\+N\+O\+R\+ED} = -\/3, 
+{\bfseries E\+X\+P\+I\+R\+E\+D\+\_\+\+P\+R\+O\+XY} = -\/2, 
+{\bfseries F\+A\+I\+L\+U\+RE} = -\/1, 
+{\bfseries E\+M\+P\+T\+Y\+\_\+\+P\+R\+O\+XY} = 0, 
+\newline
+{\bfseries S\+U\+C\+C\+E\+SS} = +1, 
+{\bfseries R\+E\+D\+U\+N\+D\+A\+NT} = +2
+ \}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+The \mbox{\hyperlink{namespace_g_w_1_1_s_y_s_t_e_m}{S\+Y\+S\+T\+EM}} namespace to which all Gateware interfaces/structures/defines must belong.
+
+G\+Controller inherits directly from G\+Broadcasting.
+
+G\+Thread\+Shared inherits directly from G\+Interface\+Interface.
+
+Contains all defined elements shared among base interfaces.
+
+The core namespace to which all Gateware structures \& classes must belong.
+
+The core namespace to which all Gateware interfaces must belong.
+
+The core namespace to which all Gateware interfaces/structures/defines must belong.
+
+File\+: \mbox{\hyperlink{_g_audio_8h_source}{G\+Audio.\+h}} Purpose\+: A Gateware interface that handles sounds and music. Dependencies\+: win32\mbox{[}X\+Audio2\mbox{]} linux\mbox{[}Pulseaudio\mbox{]} apple\mbox{[}A\+V\+Foundation\mbox{]} Author\+: T\+Jay Cargle, Alexandr Kozyrev (new architecture) Contributors\+: Jacob Pendleton Interface Status\+: Beta Asynchronous\+: Yes Copyright\+: 7th\+Gate Software L\+LC. License\+: M\+IT
+
+File\+: \mbox{\hyperlink{_g_audio3_d_8h_source}{G\+Audio3\+D.\+h}} Purpose\+: A Gateware interface that handles spacial sounds and music. Author\+: Jacob Pendleton Contributors\+: Alexandr Kozyrev (new arch) Interface Status\+: Beta Copyright\+: 7th\+Gate Software L\+LC. License\+: M\+IT
+
+File\+: \mbox{\hyperlink{_g_music_8h_source}{G\+Music.\+h}} Purpose\+: A Gateware internal interface that handles music. Dependencies\+: G\+Audio Author\+: T\+Jay Cargle, Alexandr Kozyrev (new architecture) Contributors\+: Jacob Pendleton Interface Status\+: Beta Asynchronous\+: Yes Copyright\+: 7th\+Gate Software L\+LC. License\+: M\+IT
+
+File\+: \mbox{\hyperlink{_g_music3_d_8h_source}{G\+Music3\+D.\+h}} Purpose\+: A Gateware interface that handles spacial music. Author\+: Jacob Pendleton Contributors\+: Alexandr Kozyrev (new arch) Interface Status\+: Beta Copyright\+: 7th\+Gate Software L\+LC. License\+: M\+IT
+
+File\+: \mbox{\hyperlink{_g_sound_8h_source}{G\+Sound.\+h}} Purpose\+: A Gateware internal interface that handles sounds. Dependencies\+: G\+Audio Author\+: T\+Jay Cargle, Alexandr Kozyrev (new architecture) Contributors\+: Jacob Pendleton Interface Status\+: Beta Asynchronous\+: Yes Copyright\+: 7th\+Gate Software L\+LC. License\+: M\+IT
+
+File\+: \mbox{\hyperlink{_g_sound3_d_8h_source}{G\+Sound3\+D.\+h}} Purpose\+: A Gateware interface that handles spacial sounds. Author\+: Jacob Pendleton Contributors\+: Alexandr Kozyrev (new arch) Interface Status\+: Beta Copyright\+: 7th\+Gate Software L\+LC. License\+: M\+IT
+
+File\+: \mbox{\hyperlink{_g_core_defines_8h_source}{G\+Core\+Defines.\+h}} Purpose\+: Lists the core \#defines, enums, M\+A\+C\+R\+OS \& root template/classes/structures used by the Gateware interfaces. Dependencies\+: Any first-\/party per-\/platform libraries that need to be manually linked will be noted in these sections. Author\+: Lari H. Norri Contributors\+: N/A Interface Status\+: Alpha (GatewareX) Copyright\+: 7th\+Gate Software L\+LC. License\+: M\+IT
+
+File\+: \mbox{\hyperlink{_g_event_generator_8h_source}{G\+Event\+Generator.\+h}} Purpose\+: A Gateware interface that enables broadcasting of custom G\+Events to potential subscribers. Dependencies\+: win32\mbox{[}\mbox{]} linux\mbox{[}\mbox{]} apple\mbox{[}\mbox{]} Asynchronus\+: Y\+ES Author\+: Lari H. Norri Contributors\+: N/A Interface Status\+: Beta Copyright\+: 7th\+Gate Software L\+LC. License\+: M\+IT
+
+File\+: \mbox{\hyperlink{_g_event_queue_8h_source}{G\+Event\+Queue.\+h}} Purpose\+: A Gateware interface that allows anyone to receive \& store events from a G\+Event\+Generator or derived class. Dependencies\+: win32\mbox{[}\mbox{]} linux\mbox{[}\mbox{]} apple\mbox{[}\mbox{]} Asynchronus\+: Y\+ES Author\+: Lari H. Norri Contributors\+: N/A Interface Status\+: Beta Copyright\+: 7th\+Gate Software L\+LC. License\+: M\+IT
+
+File\+: \mbox{\hyperlink{_g_event_receiver_8h_source}{G\+Event\+Receiver.\+h}} Purpose\+: A Gateware interface that allows anyone to receive events from a G\+Event\+Generator or derived class. Dependencies\+: win32\mbox{[}\mbox{]} linux\mbox{[}\mbox{]} apple\mbox{[}\mbox{]} Asynchronus\+: Y\+ES Author\+: Lari H. Norri Contributors\+: N/A Interface Status\+: Beta Copyright\+: 7th\+Gate Software L\+LC. License\+: M\+IT
+
+File\+: \mbox{\hyperlink{_g_interface_8h_source}{G\+Interface.\+h}} Purpose\+: The fundamental interface which all Gateware interfaces must adhere to at a minimum. Dependencies\+: win32\mbox{[}\mbox{]} linux\mbox{[}\mbox{]} apple\mbox{[}\mbox{]} Asynchronus\+: Y\+ES Author\+: Lari H. Norri Contributors\+: N/A Interface Status\+: Release Copyright\+: 7th\+Gate Software L\+LC. License\+: M\+IT The core namespace to which all Gateware interfaces/structures/defines must belong.
+
+File\+: \mbox{\hyperlink{_g_thread_shared_8h_source}{G\+Thread\+Shared.\+h}} Purpose\+: Identify a Gateware interface which supports(if possible) asynchronus resource access across multiple threads. Dependencies\+: win32\mbox{[}\mbox{]} linux\mbox{[}\mbox{]} apple\mbox{[}\mbox{]} Asynchronus\+: Y\+ES Author\+: Lari H. Norri Contributors\+: N/A Interface Status\+: Release Copyright\+: 7th\+Gate Software L\+LC. License\+: M\+IT The core namespace to which all Gateware interfaces/structures/defines must belong.
+
+File\+: \mbox{\hyperlink{_g_direct_x11_surface_8h_source}{G\+Direct\+X11\+Surface.\+h}} Purpose\+: A Gateware interface initializes a Direct\+X11 rendering surface and manages it\textquotesingle{}s core resources. Author\+: Andre Reid Contributors\+: Kai Huang Interface Status\+: Beta Copyright\+: 7th\+Gate Software L\+LC. License\+: M\+IT
+
+File\+: \mbox{\hyperlink{_g_direct_x12_surface_8h_source}{G\+Direct\+X12\+Surface.\+h}} Purpose\+: A Gateware interface initializes a Direct\+X12 rendering surface and manages it\textquotesingle{}s core resources. Author\+: Kai Huang Contributors\+: None Interface Status\+: Beta Copyright\+: 7th\+Gate Software L\+LC. License\+: M\+IT
+
+File\+: \mbox{\hyperlink{_g_graphics_defines_8h_source}{G\+Graphics\+Defines.\+h}} Purpose\+: A Gateware interface contains useful resources for G\+Graphics libraries. Author\+: Andre Reid Contributors\+: Jadon Lindburg Interface Status\+: Beta Copyright\+: 7th\+Gate Software L\+LC. License\+: M\+IT
+
+File\+: \mbox{\hyperlink{_g_open_g_l_surface_8h_source}{G\+Open\+G\+L\+Surface.\+h}} Purpose\+: A Gateware interface initializes an Open\+GL rendering surface and manages it\textquotesingle{}s core resources. Author\+: Andre Reid Contributors\+: Kai Huang Interface Status\+: Beta Copyright\+: 7th\+Gate Software L\+LC. License\+: M\+IT
+
+File\+: \mbox{\hyperlink{_g_raster_surface_8h_source}{G\+Raster\+Surface.\+h}} Purpose\+: A Gateware interface that allows efficiently drawing a raster to the screen. Dependencies\+: win32\mbox{[}\mbox{]} linux\mbox{[}\mbox{]} apple\mbox{[}\mbox{]} Asynchronous\+: Y\+ES Author\+: Jadon Lindburg Contributors\+: N/A Last Modified\+: 02/10/2020 Interface Status\+: Alpha (GatewareX) Copyright\+: 7th\+Gate Software L\+LC. License\+: M\+IT
+
+File\+: \mbox{\hyperlink{_g_vulkan_surface_8h_source}{G\+Vulkan\+Surface.\+h}} Purpose\+: A Gateware interface initializes a Vulkan rendering surface and manages it\textquotesingle{}s core resources. Author\+: Derrick Ramirez Contributors\+: N/A Interface Status\+: Beta Copyright\+: 7th\+Gate Software L\+LC. License\+: M\+IT
+
+File\+: \mbox{\hyperlink{_g_buffered_input_8h_source}{G\+Buffered\+Input.\+h}} Purpose\+: This Interface offers event based thread safe raw buffered input. Asynchronus\+: Y\+ES Author\+: Peter Farber Contributors\+: Alexandr Kozyrev, Kai Huang Interface Status\+: Beta Copyright\+: 7th\+Gate Software L\+LC. License\+: M\+IT
+
+File\+: \mbox{\hyperlink{_g_controller_8h_source}{G\+Controller.\+h}} Purpose\+: A Gateware interface handles controller input and provides disconnection and connection events Author\+: Devin Wright Contributors\+: Kai Huang Interface Status\+: Beta Copyright\+: 7th\+Gate Software L\+LC. License\+: M\+IT
+
+File\+: \mbox{\hyperlink{_g_input_8h_source}{G\+Input.\+h}} Purpose\+: A Gateware interface that handles high-\/speed keyboard and mouse input. Asynchronus\+: NO Author\+: Peter Farber Contributors\+: Lari Norri, Alexandr Kozyrev Interface Status\+: Beta Copyright\+: 7th\+Gate Software L\+LC. License\+: M\+IT
+
+File\+: \mbox{\hyperlink{_g_collision_8h_source}{G\+Collision.\+h}} Purpose\+: A Gateware interface that handles all collision functions. Author\+: Ryan Bickell Contributors\+: N/A Interface Status\+: Beta Copyright\+: 7th\+Gate Software L\+LC. License\+: M\+IT
+
+File\+: \mbox{\hyperlink{_g_matrix_8h_source}{G\+Matrix.\+h}} Purpose\+: A Gateware interface that handles Martix functions. Asynchronus\+: NO Author\+: Shuo-\/\+Yi Chang Contributors\+: Caio Tavares Interface Status\+: Beta Copyright\+: 7th\+Gate Software L\+LC. License\+: M\+IT
+
+File\+: \mbox{\hyperlink{_g_quaternion_8h_source}{G\+Quaternion.\+h}} Purpose\+: A Gateware interface that handles quaternion functions. Asynchronus\+: Y\+ES Author\+: Shuo-\/\+Yi Chang Contributors\+: Kai Huang Interface Status\+: Beta Copyright\+: 7th\+Gate Software L\+LC. License\+: M\+IT
+
+File\+: \mbox{\hyperlink{_g_vector_8h_source}{G\+Vector.\+h}} Purpose\+: A Gateware interface that handles all vector functions. Asynchronus\+: NO Author\+: Shuo-\/\+Yi Chang Contributors\+: Chris Kennedy Interface Status\+: Beta Copyright\+: 7th\+Gate Software L\+LC. License\+: M\+IT
+
+File\+: \mbox{\hyperlink{_g_concurrent_8h_source}{G\+Concurrent.\+h}} Purpose\+: A Gateware interface that provides a simple way to parallelize various operations. Dependencies\+: win32\mbox{[}\mbox{]} linux\mbox{[}\mbox{]} apple\mbox{[}\mbox{]} Asynchronus\+: Y\+ES Author\+: Lari H. Norri Contributors\+: N/A Interface Status\+: Beta Copyright\+: 7th\+Gate Software L\+LC. License\+: M\+IT
+
+File\+: \mbox{\hyperlink{_g_daemon_8h_source}{G\+Daemon.\+h}} Purpose\+: A Gateware interface that allows simple and efficient managment of recurring thread work. Dependencies\+: win32\mbox{[}\mbox{]} linux\mbox{[}\mbox{]} apple\mbox{[}\mbox{]} Asynchronus\+: Y\+ES Author\+: Lari H. Norri Contributors\+: N/A Interface Status\+: Beta Copyright\+: 7th\+Gate Software L\+LC. License\+: M\+IT
+
+File\+: \mbox{\hyperlink{_g_file_8h_source}{G\+File.\+h}} Purpose\+: A Gateware interface that handles both binary and textual file io and directory. Dependencies\+: Windows\mbox{[}(none)\mbox{]} Linux\mbox{[}(none)\mbox{]} Mac\mbox{[}(none)\mbox{]} Author\+: Justin W. Parks Contributors\+: Lari H. Norri, Anthony G. Balsamo, Kai Huang Interface Status\+: Beta Asynchronous\+: Yes\mbox{[}X\mbox{]} No\mbox{[}\mbox{]} Copyright\+: 7th\+Gate Software L\+LC. License\+: M\+IT
+
+File\+: \mbox{\hyperlink{_g_log_8h_source}{G\+Log.\+h}} Purpose\+: A Gateware interface that handles logging in a thread safe manner. Author\+: Justin W. Parks Contributors\+: Anthony G. Balsamo Interface Status\+: Beta Copyright\+: 7th\+Gate Software L\+LC. License\+: M\+IT
+
+File\+: \mbox{\hyperlink{_g_window_8h_source}{G\+Window.\+h}} Purpose\+: A Gateware interface that creates a window and handles its properties. Author\+: Nic Russell Contributors\+: Shuo\+Yi Chang, Andre Reid, Kai Huang Interface Status\+: Beta Copyright\+: 7th\+Gate Software L\+LC. License\+: M\+IT 

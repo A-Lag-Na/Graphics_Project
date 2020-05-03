@@ -1,0 +1,177 @@
+\hypertarget{class_g_w_1_1_c_o_r_e_1_1_g_event_generator}{}\doxysection{GW\+::C\+O\+RE\+::G\+Event\+Generator Class Reference}
+\label{class_g_w_1_1_c_o_r_e_1_1_g_event_generator}\index{GW::CORE::GEventGenerator@{GW::CORE::GEventGenerator}}
+Inheritance diagram for GW\+::C\+O\+RE\+::G\+Event\+Generator\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_g_w_1_1_c_o_r_e_1_1_g_event_generator}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+typedef force\+Raw\+::\+Events \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_generator_a04fc03468fe943441d3064e3e0bce298}{Events}}
+\item 
+typedef force\+Raw\+::\+E\+V\+E\+N\+T\+\_\+\+D\+A\+TA \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_generator_a23db3bc6833d34c7e30e835ff6add48f}{E\+V\+E\+N\+T\+\_\+\+D\+A\+TA}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\footnotesize template$<$typename... Args$>$ }\\\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_generator_aef3b6f2f8b933329b0e430577f53de57}{Register}} (Args \&\&... parameter)
+\item 
+{\footnotesize template$<$typename... Args$>$ }\\\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_generator_a022e6981a8d6d7ea878d57b7cdbd3542}{Observers}} (Args \&\&... parameter) const
+\item 
+{\footnotesize template$<$typename... Args$>$ }\\\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_generator_afd827f34c559ece817736a06233a71ce}{Push}} (Args \&\&... parameter)
+\item 
+\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+Return}} \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_generator_a05f5ef11b70cb8b01b074fe609cedec1}{Create}} ()
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Can be used as a handle to any derived generator type. You can also use this Proxy to push custom events to create your own messaging system. 
+
+Definition at line 66 of file G\+Event\+Generator.\+h.
+
+
+
+\doxysubsection{Member Typedef Documentation}
+\mbox{\Hypertarget{class_g_w_1_1_c_o_r_e_1_1_g_event_generator_a04fc03468fe943441d3064e3e0bce298}\label{class_g_w_1_1_c_o_r_e_1_1_g_event_generator_a04fc03468fe943441d3064e3e0bce298}} 
+\index{GW::CORE::GEventGenerator@{GW::CORE::GEventGenerator}!Events@{Events}}
+\index{Events@{Events}!GW::CORE::GEventGenerator@{GW::CORE::GEventGenerator}}
+\doxysubsubsection{\texorpdfstring{Events}{Events}}
+{\footnotesize\ttfamily typedef force\+Raw\+:: \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_generator_a04fc03468fe943441d3064e3e0bce298}{Events}} \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_generator_a04fc03468fe943441d3064e3e0bce298}{G\+W\+::\+C\+O\+R\+E\+::\+G\+Event\+Generator\+::\+Events}}}
+
+
+
+All event generators have a defined series of events. 
+
+A sample event enum, all event generators have them.
+
+Events\+::\+N\+O\+N\+\_\+\+E\+V\+E\+NT An example event, not actually used. 
+
+Definition at line 79 of file G\+Event\+Generator.\+h.
+
+\mbox{\Hypertarget{class_g_w_1_1_c_o_r_e_1_1_g_event_generator_a23db3bc6833d34c7e30e835ff6add48f}\label{class_g_w_1_1_c_o_r_e_1_1_g_event_generator_a23db3bc6833d34c7e30e835ff6add48f}} 
+\index{GW::CORE::GEventGenerator@{GW::CORE::GEventGenerator}!EVENT\_DATA@{EVENT\_DATA}}
+\index{EVENT\_DATA@{EVENT\_DATA}!GW::CORE::GEventGenerator@{GW::CORE::GEventGenerator}}
+\doxysubsubsection{\texorpdfstring{EVENT\_DATA}{EVENT\_DATA}}
+{\footnotesize\ttfamily typedef force\+Raw\+:: \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_generator_a23db3bc6833d34c7e30e835ff6add48f}{E\+V\+E\+N\+T\+\_\+\+D\+A\+TA}} \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_generator_a23db3bc6833d34c7e30e835ff6add48f}{G\+W\+::\+C\+O\+R\+E\+::\+G\+Event\+Generator\+::\+E\+V\+E\+N\+T\+\_\+\+D\+A\+TA}}}
+
+
+
+All event generators must have some kind of event data. 
+
+A sample event data packet, all event generators have them.
+
+E\+V\+E\+N\+T\+\_\+\+D\+A\+T\+A\+::no\+Data An example of event data, not actually used. 
+
+Definition at line 86 of file G\+Event\+Generator.\+h.
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_g_w_1_1_c_o_r_e_1_1_g_event_generator_aef3b6f2f8b933329b0e430577f53de57}\label{class_g_w_1_1_c_o_r_e_1_1_g_event_generator_aef3b6f2f8b933329b0e430577f53de57}} 
+\index{GW::CORE::GEventGenerator@{GW::CORE::GEventGenerator}!Register@{Register}}
+\index{Register@{Register}!GW::CORE::GEventGenerator@{GW::CORE::GEventGenerator}}
+\doxysubsubsection{\texorpdfstring{Register()}{Register()}}
+{\footnotesize\ttfamily template$<$typename... Args$>$ \\
+\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} G\+W\+::\+C\+O\+R\+E\+::\+G\+Event\+Generator\+::\+Register (\begin{DoxyParamCaption}\item[{Args \&\&...}]{parameter }\end{DoxyParamCaption})}
+
+
+
+Listen for all events pushed by this \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_generator}{G\+Event\+Generator}}. 
+
+Links a specific static function callback to be triggered on any event pushed to this generator. A \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_interface}{G\+Interface}} is required to control the lifetime of the linked function. Sharing will make it permanent.
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+observer} & Any valid Gateware Proxy object, used to control the lifetime of this listener. \\
+\hline
+{\em \+\_\+callback} & Static callback function that accepts a reference to the \mbox{\hyperlink{struct_g_w_1_1_g_event}{G\+Event}} \& active observer.\\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em G\+Return\+::\+I\+N\+V\+A\+L\+I\+D\+\_\+\+A\+R\+G\+U\+M\+E\+NT} & An empty/expired proxy or null callback were provided. \\
+\hline
+{\em G\+Return\+::\+S\+U\+C\+C\+E\+SS} & The provided callback and proxy object will be informed of any new events. \\
+\hline
+\end{DoxyRetVals}
+
+
+Definition at line 98 of file G\+Event\+Generator.\+h.
+
+\mbox{\Hypertarget{class_g_w_1_1_c_o_r_e_1_1_g_event_generator_a022e6981a8d6d7ea878d57b7cdbd3542}\label{class_g_w_1_1_c_o_r_e_1_1_g_event_generator_a022e6981a8d6d7ea878d57b7cdbd3542}} 
+\index{GW::CORE::GEventGenerator@{GW::CORE::GEventGenerator}!Observers@{Observers}}
+\index{Observers@{Observers}!GW::CORE::GEventGenerator@{GW::CORE::GEventGenerator}}
+\doxysubsubsection{\texorpdfstring{Observers()}{Observers()}}
+{\footnotesize\ttfamily template$<$typename... Args$>$ \\
+\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} G\+W\+::\+C\+O\+R\+E\+::\+G\+Event\+Generator\+::\+Observers (\begin{DoxyParamCaption}\item[{Args \&\&...}]{parameter }\end{DoxyParamCaption}) const}
+
+
+
+Returns the amount of proxies observing this generator. 
+
+Counts the amount of valid proxies which have been registered to receive events from this system.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ out}}  & {\em \+\_\+out\+Count} & (O\+U\+T\+P\+UT) The number of valid proxies registered to receive events.\\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em G\+Return\+::\+S\+U\+C\+C\+E\+SS} & This operation will always succeed. \\
+\hline
+\end{DoxyRetVals}
+
+
+Definition at line 107 of file G\+Event\+Generator.\+h.
+
+\mbox{\Hypertarget{class_g_w_1_1_c_o_r_e_1_1_g_event_generator_afd827f34c559ece817736a06233a71ce}\label{class_g_w_1_1_c_o_r_e_1_1_g_event_generator_afd827f34c559ece817736a06233a71ce}} 
+\index{GW::CORE::GEventGenerator@{GW::CORE::GEventGenerator}!Push@{Push}}
+\index{Push@{Push}!GW::CORE::GEventGenerator@{GW::CORE::GEventGenerator}}
+\doxysubsubsection{\texorpdfstring{Push()}{Push()}}
+{\footnotesize\ttfamily template$<$typename... Args$>$ \\
+\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} G\+W\+::\+C\+O\+R\+E\+::\+G\+Event\+Generator\+::\+Push (\begin{DoxyParamCaption}\item[{Args \&\&...}]{parameter }\end{DoxyParamCaption})}
+
+
+
+Push a new \mbox{\hyperlink{struct_g_w_1_1_g_event}{G\+Event}} to all registered \& valid listeners. 
+
+Broadcasts a new event to all proxy objects who are actively observing this Event Generator.
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+new\+Event} & The \mbox{\hyperlink{struct_g_w_1_1_g_event}{G\+Event}} you want all listeners to receive. (first come first serve) ~\newline
+\\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em G\+Return\+::\+R\+E\+D\+U\+N\+D\+A\+NT} & There is no one currently registered to listen for these events. \\
+\hline
+{\em G\+Return\+::\+S\+U\+C\+C\+E\+SS} & The event was successfully delivered to all non-\/empty proxies. ~\newline
+ \\
+\hline
+\end{DoxyRetVals}
+
+
+Definition at line 117 of file G\+Event\+Generator.\+h.
+
+\mbox{\Hypertarget{class_g_w_1_1_c_o_r_e_1_1_g_event_generator_a05f5ef11b70cb8b01b074fe609cedec1}\label{class_g_w_1_1_c_o_r_e_1_1_g_event_generator_a05f5ef11b70cb8b01b074fe609cedec1}} 
+\index{GW::CORE::GEventGenerator@{GW::CORE::GEventGenerator}!Create@{Create}}
+\index{Create@{Create}!GW::CORE::GEventGenerator@{GW::CORE::GEventGenerator}}
+\doxysubsubsection{\texorpdfstring{Create()}{Create()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+Return}} G\+W\+::\+C\+O\+R\+E\+::\+G\+Event\+Generator\+::\+Create (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Creates an \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_generator}{G\+Event\+Generator}}. 
+
+This proxy is a general implementation of how Gateware communicates events. If you would like to create your own communication system, you can use this object to spawn a \mbox{\hyperlink{struct_g_w_1_1_g_event}{G\+Event}}. This Proxy is meant to be used with \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver}{G\+Event\+Receiver}}.
+
+
+\begin{DoxyRetVals}{Return values}
+{\em G\+Return\+::\+S\+U\+C\+C\+E\+SS} & This always succeeds.(unless you run out of memory) \\
+\hline
+\end{DoxyRetVals}

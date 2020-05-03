@@ -1,0 +1,88 @@
+\hypertarget{class_g_w_1_1_a_u_d_i_o_1_1_g_sound3_d}{}\doxysection{GW\+::A\+U\+D\+IO\+::G\+Sound3D Class Reference}
+\label{class_g_w_1_1_a_u_d_i_o_1_1_g_sound3_d}\index{GW::AUDIO::GSound3D@{GW::AUDIO::GSound3D}}
+Inheritance diagram for GW\+::A\+U\+D\+IO\+::G\+Sound3D\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=1.297798cm]{class_g_w_1_1_a_u_d_i_o_1_1_g_sound3_d}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_g_w_1_1_a_u_d_i_o_1_1_g_sound3_d_ab7dcdafd543c37d294449522162c92d8}\label{class_g_w_1_1_a_u_d_i_o_1_1_g_sound3_d_ab7dcdafd543c37d294449522162c92d8}} 
+{\bfseries G\+A\+T\+E\+W\+A\+R\+E\+\_\+\+P\+R\+O\+X\+Y\+\_\+\+C\+L\+A\+SS} (\mbox{\hyperlink{class_g_w_1_1_a_u_d_i_o_1_1_g_sound3_d}{G\+Sound3D}})
+\item 
+{\footnotesize template$<$typename... Args$>$ }\\\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} \mbox{\hyperlink{class_g_w_1_1_a_u_d_i_o_1_1_g_sound3_d_a224ffde997a0bfad083b6b12bd0bc01f}{Update\+Position}} (Args \&\&... parameter)
+\item 
+{\footnotesize template$<$typename... Args$>$ }\\\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} \mbox{\hyperlink{class_g_w_1_1_a_u_d_i_o_1_1_g_sound3_d_ae56d6b8f58665925a54e8b04f603c96e}{Update\+Attenuation}} (Args \&\&... parameter)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+
+
+Definition at line 45 of file G\+Sound3\+D.\+h.
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_g_w_1_1_a_u_d_i_o_1_1_g_sound3_d_a224ffde997a0bfad083b6b12bd0bc01f}\label{class_g_w_1_1_a_u_d_i_o_1_1_g_sound3_d_a224ffde997a0bfad083b6b12bd0bc01f}} 
+\index{GW::AUDIO::GSound3D@{GW::AUDIO::GSound3D}!UpdatePosition@{UpdatePosition}}
+\index{UpdatePosition@{UpdatePosition}!GW::AUDIO::GSound3D@{GW::AUDIO::GSound3D}}
+\doxysubsubsection{\texorpdfstring{UpdatePosition()}{UpdatePosition()}}
+{\footnotesize\ttfamily template$<$typename... Args$>$ \\
+\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} G\+W\+::\+A\+U\+D\+I\+O\+::\+G\+Sound3\+D\+::\+Update\+Position (\begin{DoxyParamCaption}\item[{Args \&\&...}]{parameter }\end{DoxyParamCaption})}
+
+
+
+Updates the position of the sound source. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em \+\_\+position} & The position of the music as a G\+V\+E\+C\+T\+O\+RF.\\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em F\+A\+I\+L\+U\+RE} & Failed to spatialize/set correct volume. \\
+\hline
+{\em S\+U\+C\+C\+E\+SS} & Position was successfully set and volume updated. \\
+\hline
+\end{DoxyRetVals}
+
+
+Definition at line 59 of file G\+Sound3\+D.\+h.
+
+\mbox{\Hypertarget{class_g_w_1_1_a_u_d_i_o_1_1_g_sound3_d_ae56d6b8f58665925a54e8b04f603c96e}\label{class_g_w_1_1_a_u_d_i_o_1_1_g_sound3_d_ae56d6b8f58665925a54e8b04f603c96e}} 
+\index{GW::AUDIO::GSound3D@{GW::AUDIO::GSound3D}!UpdateAttenuation@{UpdateAttenuation}}
+\index{UpdateAttenuation@{UpdateAttenuation}!GW::AUDIO::GSound3D@{GW::AUDIO::GSound3D}}
+\doxysubsubsection{\texorpdfstring{UpdateAttenuation()}{UpdateAttenuation()}}
+{\footnotesize\ttfamily template$<$typename... Args$>$ \\
+\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} G\+W\+::\+A\+U\+D\+I\+O\+::\+G\+Sound3\+D\+::\+Update\+Attenuation (\begin{DoxyParamCaption}\item[{Args \&\&...}]{parameter }\end{DoxyParamCaption})}
+
+
+
+Updates the attenuation curve of the sound between \+\_\+min\+Radius and \+\_\+max\+Radius. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em \+\_\+min\+Radius} & The radius at which the sound is at max volume. \\
+\hline
+\mbox{\texttt{ in}}  & {\em \+\_\+max\+Radius} & The radius at which the sound is silent. \\
+\hline
+\mbox{\texttt{ in}}  & {\em \+\_\+attenuation} & The type of curve between \+\_\+min\+Radius and \+\_\+max\+Radius.\\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em I\+N\+V\+A\+L\+I\+D\+\_\+\+A\+R\+G\+U\+M\+E\+NT} & Passed in \+\_\+attenuation is not a defined G\+A\+T\+T\+E\+N\+U\+A\+T\+I\+ON. \\
+\hline
+{\em I\+N\+V\+A\+L\+I\+D\+\_\+\+A\+R\+G\+U\+M\+E\+NT} & Passed in \+\_\+min\+Radius is greater than \+\_\+max\+Radius. \\
+\hline
+{\em S\+U\+C\+C\+E\+SS} & The attenuation was successfully set and volume updated. \\
+\hline
+\end{DoxyRetVals}
+
+
+Definition at line 71 of file G\+Sound3\+D.\+h.
+

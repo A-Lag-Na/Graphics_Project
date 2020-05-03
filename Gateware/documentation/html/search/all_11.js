@@ -1,0 +1,19 @@
+var searchData=
+[
+  ['universal_5fwindow_5fhandle_493',['UNIVERSAL_WINDOW_HANDLE',['../struct_g_w_1_1_s_y_s_t_e_m_1_1_u_n_i_v_e_r_s_a_l___w_i_n_d_o_w___h_a_n_d_l_e.html',1,'GW::SYSTEM']]],
+  ['universalswapbuffers_494',['UniversalSwapBuffers',['../class_g_w_1_1_g_r_a_p_h_i_c_s_1_1_g_open_g_l_surface.html#a91721d6d4deffd4c6246cee04ec83874',1,'GW::GRAPHICS::GOpenGLSurface']]],
+  ['unlockasyncread_495',['UnlockAsyncRead',['../class_g_w_1_1_c_o_r_e_1_1_g_thread_shared.html#a8cf148af32cfa4790bf74effd33c9395',1,'GW::CORE::GThreadShared']]],
+  ['unlocksyncwrite_496',['UnlockSyncWrite',['../class_g_w_1_1_c_o_r_e_1_1_g_thread_shared.html#a20eb35143a6eabfbb4255d5855680278',1,'GW::CORE::GThreadShared']]],
+  ['unlockupdatebufferread_497',['UnlockUpdateBufferRead',['../class_g_w_1_1_g_r_a_p_h_i_c_s_1_1_g_raster_surface.html#a216255e6564038cb90c368f130211b44',1,'GW::GRAPHICS::GRasterSurface']]],
+  ['unlockupdatebufferwrite_498',['UnlockUpdateBufferWrite',['../class_g_w_1_1_g_r_a_p_h_i_c_s_1_1_g_raster_surface.html#a13e9c2d014fd8fcaf8902f05e95644a4',1,'GW::GRAPHICS::GRasterSurface']]],
+  ['update3dlistener_499',['Update3DListener',['../class_g_w_1_1_a_u_d_i_o_1_1_g_audio3_d.html#a81977f11618f526197668f975ec4c384',1,'GW::AUDIO::GAudio3D']]],
+  ['updateattenuation_500',['UpdateAttenuation',['../class_g_w_1_1_a_u_d_i_o_1_1_g_music3_d.html#ab470ca85256bbd8caa0f3ab79a427324',1,'GW::AUDIO::GMusic3D::UpdateAttenuation()'],['../class_g_w_1_1_a_u_d_i_o_1_1_g_sound3_d.html#ae56d6b8f58665925a54e8b04f603c96e',1,'GW::AUDIO::GSound3D::UpdateAttenuation()']]],
+  ['updateposition_501',['UpdatePosition',['../class_g_w_1_1_a_u_d_i_o_1_1_g_music3_d.html#aedf59e80d917f71ca4f78b21ed86190c',1,'GW::AUDIO::GMusic3D::UpdatePosition()'],['../class_g_w_1_1_a_u_d_i_o_1_1_g_sound3_d.html#a224ffde997a0bfad083b6b12bd0bc01f',1,'GW::AUDIO::GSound3D::UpdatePosition()']]],
+  ['updatesurface_502',['UpdateSurface',['../class_g_w_1_1_g_r_a_p_h_i_c_s_1_1_g_raster_surface.html#a81464953a08d0360675ccdc1512dc875',1,'GW::GRAPHICS::GRasterSurface']]],
+  ['updatesurfacesubset_503',['UpdateSurfaceSubset',['../class_g_w_1_1_g_r_a_p_h_i_c_s_1_1_g_raster_surface.html#add1094e51b15354031fd06c805e28822',1,'GW::GRAPHICS::GRasterSurface']]],
+  ['upscale_5f16x_504',['UPSCALE_16X',['../namespace_g_w_1_1_g_r_a_p_h_i_c_s.html#acec2571afa2fef3364743fa6ad83bb70ab820d39a5e10562f8ad1ddf05d4ebaeb',1,'GW::GRAPHICS']]],
+  ['upscale_5f2x_505',['UPSCALE_2X',['../namespace_g_w_1_1_g_r_a_p_h_i_c_s.html#acec2571afa2fef3364743fa6ad83bb70a93edb40ece072242d8e49102d10400b0',1,'GW::GRAPHICS']]],
+  ['upscale_5f3x_506',['UPSCALE_3X',['../namespace_g_w_1_1_g_r_a_p_h_i_c_s.html#acec2571afa2fef3364743fa6ad83bb70a4d4f75df6ce2fa6549ff9f4c5666ab2c',1,'GW::GRAPHICS']]],
+  ['upscale_5f4x_507',['UPSCALE_4X',['../namespace_g_w_1_1_g_r_a_p_h_i_c_s.html#acec2571afa2fef3364743fa6ad83bb70ac1befa27dee64158ef8204429974a160',1,'GW::GRAPHICS']]],
+  ['upscale_5f8x_508',['UPSCALE_8X',['../namespace_g_w_1_1_g_r_a_p_h_i_c_s.html#acec2571afa2fef3364743fa6ad83bb70aad6b1b92fab183873daaeb156f30edef',1,'GW::GRAPHICS']]]
+];

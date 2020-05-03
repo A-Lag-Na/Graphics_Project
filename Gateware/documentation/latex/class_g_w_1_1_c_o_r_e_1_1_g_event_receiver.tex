@@ -1,0 +1,305 @@
+\hypertarget{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver}{}\doxysection{GW\+::C\+O\+RE\+::G\+Event\+Receiver Class Reference}
+\label{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver}\index{GW::CORE::GEventReceiver@{GW::CORE::GEventReceiver}}
+Inheritance diagram for GW\+::C\+O\+RE\+::G\+Event\+Receiver\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=1.604584cm]{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\footnotesize template$<$typename... Args$>$ }\\\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver_ab2eb71cf585526e7d9494bfd0642f2b8}{Append}} (Args \&\&... parameter)
+\item 
+{\footnotesize template$<$typename... Args$>$ }\\\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver_abcef6b3e606bdf564dfd1424e05f8076}{Waiting}} (Args \&\&... parameter) const
+\item 
+{\footnotesize template$<$typename... Args$>$ }\\\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver_a1e62911d54779d69beb9455ab7642e52}{Pop}} (Args \&\&... parameter)
+\item 
+{\footnotesize template$<$typename... Args$>$ }\\\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver_a3c363271b425146011fa5ff8fb9bafad}{Peek}} (Args \&\&... parameter) const
+\item 
+{\footnotesize template$<$typename... Args$>$ }\\\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver_a325f2ed11e603bc6e935ab048a29abb3}{Missed}} (Args \&\&... parameter) const
+\item 
+{\footnotesize template$<$typename... Args$>$ }\\\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver_a38b164218e27fef7475dd9bd1b18e4f5}{Clear}} (Args \&\&... parameter)
+\item 
+{\footnotesize template$<$typename... Args$>$ }\\\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver_a1bc902f510897fd9c6d5eff63077bd61}{Invoke}} (Args \&\&... parameter) const
+\item 
+{\footnotesize template$<$typename... Args$>$ }\\\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver_aefce80017c6cce18d721c3145215c20b}{Find}} (Args \&\&... parameter)
+\item 
+\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+Return}} \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver_a6ab3f2bd62a941cee8976b9c42c5ab46}{Create}} (\mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_generator}{G\+Event\+Generator}} \&\+\_\+event\+Source, std\+::function$<$ void()$>$ \+\_\+callback)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Receives any \& all events produced by an interface derived from \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_generator}{G\+Event\+Generator}}. Accetps an std\+::function$<$void()$>$ as the callback function/lambda for flexibility. Use std\+::bind to supply your own arguments to your callback, the only restriction is the void return type. To receive more detailed information, embbed this Proxy in your callback and \char`\"{}\+Pop()\char`\"{} the most recent event. 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{MyEventReceiver.Create( MyEventGenerator, [](MyEventReceiver\&) \{}
+\DoxyCodeLine{GEvent g; }
+\DoxyCodeLine{\mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_generator_a04fc03468fe943441d3064e3e0bce298}{GEventGenerator::Events}} e; \textcolor{comment}{// substitute the generator type you care about}}
+\DoxyCodeLine{\mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_generator_a23db3bc6833d34c7e30e835ff6add48f}{GEventGenerator::EVENT\_DATA}} d;}
+\DoxyCodeLine{\textcolor{keywordflow}{if}(+MyEventReceiver.Pop(g))}
+\DoxyCodeLine{    \textcolor{keywordflow}{if}(+g.Read(e,d))}
+\DoxyCodeLine{        \textcolor{keywordflow}{if}(e == GEventGenerator::Events::NON\_EVENT) \textcolor{comment}{// substiute actual event}}
+\DoxyCodeLine{            std::cout << d.noData; \textcolor{comment}{// substitute actual data}}
+\DoxyCodeLine{\});}
+\end{DoxyCode}
+ 
+
+Definition at line 72 of file G\+Event\+Receiver.\+h.
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver_ab2eb71cf585526e7d9494bfd0642f2b8}\label{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver_ab2eb71cf585526e7d9494bfd0642f2b8}} 
+\index{GW::CORE::GEventReceiver@{GW::CORE::GEventReceiver}!Append@{Append}}
+\index{Append@{Append}!GW::CORE::GEventReceiver@{GW::CORE::GEventReceiver}}
+\doxysubsubsection{\texorpdfstring{Append()}{Append()}}
+{\footnotesize\ttfamily template$<$typename... Args$>$ \\
+\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} G\+W\+::\+C\+O\+R\+E\+::\+G\+Event\+Receiver\+::\+Append (\begin{DoxyParamCaption}\item[{Args \&\&...}]{parameter }\end{DoxyParamCaption})}
+
+
+
+Appends an event to the receiver, and increases number of waiting events. ( $>$ 1 only in \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_queue}{G\+Event\+Queue}}) ~\newline
+ 
+
+Generally end users can ignore this function as it is invoked by the connected \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_generator}{G\+Event\+Generator}}.
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+in\+Event} & The \mbox{\hyperlink{struct_g_w_1_1_g_event}{G\+Event}} you wish to send to this receiver. (will replace any waiting events)\\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em G\+Return\+::\+S\+U\+C\+C\+E\+SS} & The event was appended to this receiver. (does not cause an \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver_a1bc902f510897fd9c6d5eff63077bd61}{Invoke()}} to occur) \\
+\hline
+{\em G\+Return\+::\+U\+N\+E\+X\+P\+E\+C\+T\+E\+D\+\_\+\+R\+E\+S\+U\+LT} & Internal A\+PI failure, should not happen please report this. \\
+\hline
+\end{DoxyRetVals}
+
+
+Definition at line 92 of file G\+Event\+Receiver.\+h.
+
+\mbox{\Hypertarget{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver_abcef6b3e606bdf564dfd1424e05f8076}\label{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver_abcef6b3e606bdf564dfd1424e05f8076}} 
+\index{GW::CORE::GEventReceiver@{GW::CORE::GEventReceiver}!Waiting@{Waiting}}
+\index{Waiting@{Waiting}!GW::CORE::GEventReceiver@{GW::CORE::GEventReceiver}}
+\doxysubsubsection{\texorpdfstring{Waiting()}{Waiting()}}
+{\footnotesize\ttfamily template$<$typename... Args$>$ \\
+\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} G\+W\+::\+C\+O\+R\+E\+::\+G\+Event\+Receiver\+::\+Waiting (\begin{DoxyParamCaption}\item[{Args \&\&...}]{parameter }\end{DoxyParamCaption}) const}
+
+
+
+Reports how many events have not yet been processed. ~\newline
+ 
+
+Use this to check if any events are waiting for you. (unlikely if you provide a callback)
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ out}}  & {\em \+\_\+out\+Count} & (O\+U\+T\+P\+UT) The number of waiting events.(use \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver_a1e62911d54779d69beb9455ab7642e52}{Pop()}} or \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver_a38b164218e27fef7475dd9bd1b18e4f5}{Clear()}} to remove them)\\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em G\+Return\+::\+S\+U\+C\+C\+E\+SS} & Reports the current amount of waiting events. \\
+\hline
+\end{DoxyRetVals}
+
+
+Definition at line 101 of file G\+Event\+Receiver.\+h.
+
+\mbox{\Hypertarget{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver_a1e62911d54779d69beb9455ab7642e52}\label{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver_a1e62911d54779d69beb9455ab7642e52}} 
+\index{GW::CORE::GEventReceiver@{GW::CORE::GEventReceiver}!Pop@{Pop}}
+\index{Pop@{Pop}!GW::CORE::GEventReceiver@{GW::CORE::GEventReceiver}}
+\doxysubsubsection{\texorpdfstring{Pop()}{Pop()}}
+{\footnotesize\ttfamily template$<$typename... Args$>$ \\
+\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} G\+W\+::\+C\+O\+R\+E\+::\+G\+Event\+Receiver\+::\+Pop (\begin{DoxyParamCaption}\item[{Args \&\&...}]{parameter }\end{DoxyParamCaption})}
+
+
+
+Grabs a waiting event if one is available. 
+
+If waiting is non-\/zero this operation will extract an event and reduce the number of waiting events. After a successful \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver_a1e62911d54779d69beb9455ab7642e52}{Pop()}} the number of waiting event will be reduced by 1. (waiting may be $>$ 1 in \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_queue}{G\+Event\+Queue}})
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ out}}  & {\em \+\_\+out\+Event} & (O\+U\+T\+P\+UT) The most recent event that needs to be processed.\\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em G\+Return\+::\+S\+U\+C\+C\+E\+SS} & Successfully pulled a waiting event from the Queue. \\
+\hline
+{\em G\+Return\+::\+F\+A\+I\+L\+U\+RE} & There were no waiting events that needed processing. \\
+\hline
+\end{DoxyRetVals}
+
+
+Definition at line 112 of file G\+Event\+Receiver.\+h.
+
+\mbox{\Hypertarget{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver_a3c363271b425146011fa5ff8fb9bafad}\label{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver_a3c363271b425146011fa5ff8fb9bafad}} 
+\index{GW::CORE::GEventReceiver@{GW::CORE::GEventReceiver}!Peek@{Peek}}
+\index{Peek@{Peek}!GW::CORE::GEventReceiver@{GW::CORE::GEventReceiver}}
+\doxysubsubsection{\texorpdfstring{Peek()}{Peek()}}
+{\footnotesize\ttfamily template$<$typename... Args$>$ \\
+\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} G\+W\+::\+C\+O\+R\+E\+::\+G\+Event\+Receiver\+::\+Peek (\begin{DoxyParamCaption}\item[{Args \&\&...}]{parameter }\end{DoxyParamCaption}) const}
+
+
+
+Examines but does not remove a waiting event if one is available. 
+
+Same operation as \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver_a1e62911d54779d69beb9455ab7642e52}{Pop()}} but does not remove the event or flag it as processed.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ out}}  & {\em \+\_\+out\+Event} & (O\+U\+T\+P\+UT) A copy of the current event waiting to be processed.\\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em G\+Return\+::\+S\+U\+C\+C\+E\+SS} & Successfully copied a waiting event from the Queue. \\
+\hline
+{\em G\+Return\+::\+F\+A\+I\+L\+U\+RE} & There were no waiting events that could be inspected. \\
+\hline
+\end{DoxyRetVals}
+
+
+Definition at line 122 of file G\+Event\+Receiver.\+h.
+
+\mbox{\Hypertarget{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver_a325f2ed11e603bc6e935ab048a29abb3}\label{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver_a325f2ed11e603bc6e935ab048a29abb3}} 
+\index{GW::CORE::GEventReceiver@{GW::CORE::GEventReceiver}!Missed@{Missed}}
+\index{Missed@{Missed}!GW::CORE::GEventReceiver@{GW::CORE::GEventReceiver}}
+\doxysubsubsection{\texorpdfstring{Missed()}{Missed()}}
+{\footnotesize\ttfamily template$<$typename... Args$>$ \\
+\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} G\+W\+::\+C\+O\+R\+E\+::\+G\+Event\+Receiver\+::\+Missed (\begin{DoxyParamCaption}\item[{Args \&\&...}]{parameter }\end{DoxyParamCaption}) const}
+
+
+
+Reports how many events were not processed before they were replaced. 
+
+If an event was not processed via \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver_a1e62911d54779d69beb9455ab7642e52}{Pop()}}, \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver_a38b164218e27fef7475dd9bd1b18e4f5}{Clear()}}, or \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver_aefce80017c6cce18d721c3145215c20b}{Find()}} and ends up being replaced it will increase the internal event miss count. Use this operation to see how many events have been lost. N\+O\+TE\+: if you use \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver_a1e62911d54779d69beb9455ab7642e52}{Pop()}} or equivalent during a callback missing events will not be an issue.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ out}}  & {\em \+\_\+out\+Count} & (O\+U\+T\+P\+UT) Number of events that were not processed.\\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em G\+Return\+::\+S\+U\+C\+C\+E\+SS} & Reports the current amount of missed events. \\
+\hline
+\end{DoxyRetVals}
+
+
+Definition at line 133 of file G\+Event\+Receiver.\+h.
+
+\mbox{\Hypertarget{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver_a38b164218e27fef7475dd9bd1b18e4f5}\label{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver_a38b164218e27fef7475dd9bd1b18e4f5}} 
+\index{GW::CORE::GEventReceiver@{GW::CORE::GEventReceiver}!Clear@{Clear}}
+\index{Clear@{Clear}!GW::CORE::GEventReceiver@{GW::CORE::GEventReceiver}}
+\doxysubsubsection{\texorpdfstring{Clear()}{Clear()}}
+{\footnotesize\ttfamily template$<$typename... Args$>$ \\
+\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} G\+W\+::\+C\+O\+R\+E\+::\+G\+Event\+Receiver\+::\+Clear (\begin{DoxyParamCaption}\item[{Args \&\&...}]{parameter }\end{DoxyParamCaption})}
+
+
+
+Removes any \& all waiting events without processing them. (Can only be $>$ 1 in \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_queue}{G\+Event\+Queue}}) 
+
+All pending events are removed. The internal missed event count will not be reset. N\+O\+TE\+: Though you cannot reset the internal miss count it is possible to track it\textquotesingle{}s change. ~\newline
+
+
+
+\begin{DoxyRetVals}{Return values}
+{\em G\+Return\+::\+S\+U\+C\+C\+E\+SS} & All waiting events were removed successfully. \\
+\hline
+{\em G\+Return\+::\+F\+A\+I\+L\+U\+RE} & There were no waiting events, nothing was cleared. \\
+\hline
+\end{DoxyRetVals}
+
+
+Definition at line 142 of file G\+Event\+Receiver.\+h.
+
+\mbox{\Hypertarget{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver_a1bc902f510897fd9c6d5eff63077bd61}\label{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver_a1bc902f510897fd9c6d5eff63077bd61}} 
+\index{GW::CORE::GEventReceiver@{GW::CORE::GEventReceiver}!Invoke@{Invoke}}
+\index{Invoke@{Invoke}!GW::CORE::GEventReceiver@{GW::CORE::GEventReceiver}}
+\doxysubsubsection{\texorpdfstring{Invoke()}{Invoke()}}
+{\footnotesize\ttfamily template$<$typename... Args$>$ \\
+\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} G\+W\+::\+C\+O\+R\+E\+::\+G\+Event\+Receiver\+::\+Invoke (\begin{DoxyParamCaption}\item[{Args \&\&...}]{parameter }\end{DoxyParamCaption}) const}
+
+
+
+Invokes the associated callback function/lamda from the current thread. 
+
+Allows you to call the callback function if one is attatched. Generally you wouldn\textquotesingle{}t want to do this as this handled for you by the Event Generator.
+
+
+\begin{DoxyRetVals}{Return values}
+{\em G\+Return\+::\+S\+U\+C\+C\+E\+SS} & Function is valid and was called. \\
+\hline
+{\em G\+Return\+::\+F\+A\+I\+L\+U\+RE} & No callback is associated with this Receiver. \\
+\hline
+\end{DoxyRetVals}
+
+
+Definition at line 151 of file G\+Event\+Receiver.\+h.
+
+\mbox{\Hypertarget{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver_aefce80017c6cce18d721c3145215c20b}\label{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver_aefce80017c6cce18d721c3145215c20b}} 
+\index{GW::CORE::GEventReceiver@{GW::CORE::GEventReceiver}!Find@{Find}}
+\index{Find@{Find}!GW::CORE::GEventReceiver@{GW::CORE::GEventReceiver}}
+\doxysubsubsection{\texorpdfstring{Find()}{Find()}}
+{\footnotesize\ttfamily template$<$typename... Args$>$ \\
+\mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+W\+::\+G\+Return}} G\+W\+::\+C\+O\+R\+E\+::\+G\+Event\+Receiver\+::\+Find (\begin{DoxyParamCaption}\item[{Args \&\&...}]{parameter }\end{DoxyParamCaption})}
+
+
+
+Finds a specific Event/\+Data\+Chunk and optionally can remove it and/or return the associated data. 
+
+A conveinence function that can be used instead of \char`\"{}\+Pop/\+Peek\char`\"{} to search waiting events.
+
+
+\begin{DoxyParams}[1]{Parameters}
+ & {\em \+\_\+check} & The specific enum of the event you are looking for, can also be a specific bit of data. \\
+\hline
+ & {\em \+\_\+remove} & Should the function remove the waiting event if it is found? true == Pop, false == Peek \\
+\hline
+\mbox{\texttt{ out}}  & {\em \+\_\+out\+Data} & (O\+U\+T\+P\+UT) (O\+P\+T\+I\+O\+N\+AL) Returns the data block associated with the event if found.\\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em G\+Return\+::\+S\+U\+C\+C\+E\+SS} & Operation successfully found and/or removed the event/data in question. \\
+\hline
+{\em G\+Return\+::\+F\+A\+I\+L\+U\+RE} & No Event or Data was present matching the provided Query. \\
+\hline
+\end{DoxyRetVals}
+
+
+Definition at line 163 of file G\+Event\+Receiver.\+h.
+
+\mbox{\Hypertarget{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver_a6ab3f2bd62a941cee8976b9c42c5ab46}\label{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver_a6ab3f2bd62a941cee8976b9c42c5ab46}} 
+\index{GW::CORE::GEventReceiver@{GW::CORE::GEventReceiver}!Create@{Create}}
+\index{Create@{Create}!GW::CORE::GEventReceiver@{GW::CORE::GEventReceiver}}
+\doxysubsubsection{\texorpdfstring{Create()}{Create()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{namespace_g_w_af46a07bcad99edbe1e92a9fc99078617}{G\+Return}} G\+W\+::\+C\+O\+R\+E\+::\+G\+Event\+Receiver\+::\+Create (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_generator}{G\+Event\+Generator}} \&}]{\+\_\+event\+Source,  }\item[{std\+::function$<$ void()$>$}]{\+\_\+callback }\end{DoxyParamCaption})}
+
+
+
+Allocates \& Intializes a \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_receiver}{G\+Event\+Receiver}}. 
+
+A G\+Event\+Reciever is capable of receiving and reacting to events created by a \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_generator}{G\+Event\+Generator}}. You can use this class whenever there is a Gateware class that spawns events you wish to know about.
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+event\+Source} & The G\+Event\+Reciever you wish to receive messages from. \\
+\hline
+{\em \+\_\+callback} & The function or lambda you wish to be invoked when an event is received. (optional can pass nullptr). May be invoked from a different thread. If you need to receive messages on the current thread consider \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_queue}{G\+Event\+Queue}} instead. ~\newline
+\\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em G\+Return\+::\+S\+U\+C\+C\+E\+SS} & The receiver was correctly bound and registered to the generator provided. \\
+\hline
+{\em G\+Return\+::\+I\+N\+V\+A\+L\+I\+D\+\_\+\+A\+R\+G\+U\+M\+E\+NT} & A valid \mbox{\hyperlink{class_g_w_1_1_c_o_r_e_1_1_g_event_generator}{G\+Event\+Generator}} must be provided. \\
+\hline
+{\em G\+Return\+::\+U\+N\+E\+X\+P\+E\+C\+T\+E\+D\+\_\+\+R\+E\+S\+U\+LT} & Internal A\+PI failure, should not happen please report this. \\
+\hline
+\end{DoxyRetVals}
