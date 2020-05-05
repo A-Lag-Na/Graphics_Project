@@ -48,7 +48,7 @@ bool Render();
 // lets pop a window and use D3D11 to clear to a green screen
 int main()
 {
-	Initialize(800, 800);
+	//Initialize(800, 800);
 
 	if (+win.Create(0, 0, 800, 600, GWindowStyle::WINDOWEDBORDERED))
 	{
@@ -68,35 +68,6 @@ int main()
 bool Initialize(int screenWidth, int screenHeight)
 {
 	bool result;
-
-	// Grab handles to all DX11 base interfaces
-	d3d11.GetDevice((void**)&myDevice);
-	d3d11.GetSwapchain((void**)&mySwapChain);
-	d3d11.GetImmediateContext((void**)&myContext);
-
-
-
-
-	// Create the vertex shader
-	//myDevice->CreateVertexShader(VertexShader, sizeof(VertexShader), nullptr, &myVertexShader);
-
-	// Create the pixel shader
-	//myDevice->CreatePixelShader(PixelShader, sizeof(PixelShader), nullptr, &myPixelShader);
-
-	// Create the pixel shader
-	//myDevice->CreatePixelShader(skyboxPixelShader, sizeof(skyboxPixelShader), nullptr, &cubePixelShader);
-
-	// Define the input layout
-	D3D11_INPUT_ELEMENT_DESC layout[] =
-	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};
-	UINT numElements = ARRAYSIZE(layout);
-
-	// Create the input layout
-	//myDevice->CreateInputLayout(layout, numElements, VertexShader, sizeof(VertexShader), &vertexFormat);
 
 	//Camera Code
 	//-----------
@@ -129,6 +100,26 @@ bool Frame()
 {
 	bool result;
 
+	d3d11.GetDevice((void**)&myDevice);
+
+	// Create the vertex shader
+	HRESULT hr = myDevice->CreateVertexShader(VertexShader, sizeof(VertexShader), nullptr, vertexShader.GetAddressOf());
+
+	// Create the pixel shader
+	hr = myDevice->CreatePixelShader(PixelShader, sizeof(PixelShader), nullptr, pixelShader.GetAddressOf());
+
+	// Define the input layout
+	D3D11_INPUT_ELEMENT_DESC layout[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+	UINT numElements = ARRAYSIZE(layout);
+
+	// Create the input layout
+	myDevice->CreateInputLayout(layout, numElements, VertexShader, sizeof(VertexShader), &vertexFormat);
+
 	// Render the graphics scene.
 	result = Render();
 	if (!result)
@@ -145,17 +136,23 @@ bool Render()
 	bool result;
 
 	
+
+	// Initialize stuff here
 	Triangle tri(win, d3d11);
+
 	
+	// Render Loop here
 	while (+win.ProcessWindowEvents())
 	{
 		// Generate the view matrix based on the camera's position.
-		m_Camera->Render();
+		//m_Camera->Render();
 
 		// Get the view matrix from the camera
-		m_Camera->GetViewMatrix(viewMatrix);
-		m_Camera->GetProjectionMatrix(projectionMatrix);
-		m_Camera->GetWorldMatrix(worldMatrix);
+		//m_Camera->GetViewMatrix(viewMatrix);
+		//m_Camera->GetProjectionMatrix(projectionMatrix);
+		//m_Camera->GetWorldMatrix(worldMatrix);
+
+		//
 
 		IDXGISwapChain* swap;
 		ID3D11DeviceContext* con;
@@ -174,6 +171,8 @@ bool Render()
 			con->Release();
 		}
 	}
+
+	// Shutdown stuff here
 	Shutdown();
 
 	return true;
