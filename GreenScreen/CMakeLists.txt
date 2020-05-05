@@ -22,6 +22,8 @@ add_executable (GreenScreen
 	# Header & CPP files go here
 	main.cpp
 	triangle.h
+	Camera.h
+	Camera.cpp
 	${VERTEX_SHADERS}
 	${PIXEL_SHADERS}
 )
