@@ -1,0 +1,3 @@
+C:/Users/Alegna Medina/Documents/Full Sail/2020/AprilMay/Project4withAlegna/GreenScreen/CMakeFiles/GreenScreen.dir
+C:/Users/Alegna Medina/Documents/Full Sail/2020/AprilMay/Project4withAlegna/GreenScreen/CMakeFiles/ALL_BUILD.dir
+C:/Users/Alegna Medina/Documents/Full Sail/2020/AprilMay/Project4withAlegna/GreenScreen/CMakeFiles/ZERO_CHECK.dir
