@@ -10,18 +10,33 @@
 // With what we want & what we don't defined we can include the API
 #include "../Gateware/Gateware.h"
 #include "triangle.h" // example rendering code (not Gateware code!)
-#include "Camera.h"
 // open some namespaces to compact the code a bit
 using namespace GW;
 using namespace CORE;
 using namespace SYSTEM;
 using namespace GRAPHICS;
 
+//Added includes
+#include "Camera.h"
+#include "PixelShader.h"
+#include "VertexShader.h"
+
 
 Camera* m_Camera = 0;
 GWindow win;
 GEventReceiver msgs;
 GDirectX11Surface d3d11;
+
+//Added components for rendering in this .cpp
+
+Microsoft::WRL::ComPtr <ID3D11Device> myDevice;
+Microsoft::WRL::ComPtr <IDXGISwapChain> mySwapChain;
+Microsoft::WRL::ComPtr <ID3D11DeviceContext> myContext;
+
+Microsoft::WRL::ComPtr<ID3D11Buffer>		vertexBuffer;
+Microsoft::WRL::ComPtr<ID3D11VertexShader>	vertexShader;
+Microsoft::WRL::ComPtr<ID3D11PixelShader>	pixelShader;
+Microsoft::WRL::ComPtr<ID3D11InputLayout>	vertexFormat;
 
 float clr[] = { 57 / 255.0f, 1.0f, 20 / 255.0f, 1 }; // start with a neon green
 
@@ -54,6 +69,37 @@ bool Initialize(int screenWidth, int screenHeight)
 {
 	bool result;
 
+	// Grab handles to all DX11 base interfaces
+	d3d11.GetDevice((void**)&myDevice);
+	d3d11.GetSwapchain((void**)&mySwapChain);
+	d3d11.GetImmediateContext((void**)&myContext);
+
+
+
+
+	// Create the vertex shader
+	//myDevice->CreateVertexShader(VertexShader, sizeof(VertexShader), nullptr, &myVertexShader);
+
+	// Create the pixel shader
+	//myDevice->CreatePixelShader(PixelShader, sizeof(PixelShader), nullptr, &myPixelShader);
+
+	// Create the pixel shader
+	//myDevice->CreatePixelShader(skyboxPixelShader, sizeof(skyboxPixelShader), nullptr, &cubePixelShader);
+
+	// Define the input layout
+	D3D11_INPUT_ELEMENT_DESC layout[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+	UINT numElements = ARRAYSIZE(layout);
+
+	// Create the input layout
+	//myDevice->CreateInputLayout(layout, numElements, VertexShader, sizeof(VertexShader), &vertexFormat);
+
+	//Camera Code
+	//-----------
 	// Create the camera object.
 	m_Camera = new Camera;
 	if (!m_Camera)
@@ -64,7 +110,7 @@ bool Initialize(int screenWidth, int screenHeight)
 	// Set the initial position of the camera.
 	m_Camera->Initialize(screenWidth, screenHeight);
 	m_Camera->SetPosition(0.0f, 0.0f, -10.0f);
-
+	//-----------
 
 	return true;
 }
