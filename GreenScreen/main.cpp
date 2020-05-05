@@ -144,15 +144,18 @@ bool Render()
 	// Render Loop here
 	while (+win.ProcessWindowEvents())
 	{
+
+
+		/* Commented these out cause they wouldn't build due to viewMatrix, projectionMatrix, and worldMatrix being null
 		// Generate the view matrix based on the camera's position.
-		//m_Camera->Render();
+		m_Camera->Render();
 
-		// Get the view matrix from the camera
-		//m_Camera->GetViewMatrix(viewMatrix);
-		//m_Camera->GetProjectionMatrix(projectionMatrix);
-		//m_Camera->GetWorldMatrix(worldMatrix);
+		//Get the view matrix from the camera
+		m_Camera->GetViewMatrix(viewMatrix);
+		m_Camera->GetProjectionMatrix(projectionMatrix);
+		m_Camera->GetWorldMatrix(worldMatrix);
 
-		//
+		*/
 
 		IDXGISwapChain* swap;
 		ID3D11DeviceContext* con;
