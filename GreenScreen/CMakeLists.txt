@@ -27,6 +27,9 @@ add_executable (GreenScreen
 	Camera.h
 	Camera.cpp
 	FBXLoader.h
+	DDSTextureLoader.h
+	DDSTextureLoader.cpp
+	Structs.cpp
 	${VERTEX_SHADERS}
 	${PIXEL_SHADERS}
 )

@@ -21,6 +21,8 @@ using namespace GRAPHICS;
 #include "PixelShader.h"
 #include "VertexShader.h"
 
+#include "DDSTextureLoader.h"
+#include "FBXLoader.h"
 
 Camera* m_Camera = 0;
 GWindow win;
@@ -28,15 +30,23 @@ GEventReceiver msgs;
 GDirectX11Surface d3d11;
 
 //Added components for rendering in this .cpp
+//---------------------------------------------
+Microsoft::WRL::ComPtr<ID3D11Device> myDevice;
+Microsoft::WRL::ComPtr<IDXGISwapChain> mySwapChain;
+Microsoft::WRL::ComPtr<ID3D11DeviceContext> myContext;
 
-Microsoft::WRL::ComPtr <ID3D11Device> myDevice;
-Microsoft::WRL::ComPtr <IDXGISwapChain> mySwapChain;
-Microsoft::WRL::ComPtr <ID3D11DeviceContext> myContext;
-
-Microsoft::WRL::ComPtr<ID3D11Buffer>		vertexBuffer;
+/*Generic names like vertexBuffer are placeholders, 
+when we are rendering multiple objects we will have multiple vertex
+buffers, and will need more specific names for them.*/
+Microsoft::WRL::ComPtr<ID3D11InputLayout>	vertexFormat;
 Microsoft::WRL::ComPtr<ID3D11VertexShader>	vertexShader;
 Microsoft::WRL::ComPtr<ID3D11PixelShader>	pixelShader;
-Microsoft::WRL::ComPtr<ID3D11InputLayout>	vertexFormat;
+
+Microsoft::WRL::ComPtr<ID3D11Buffer>	vertexBuffer;
+Microsoft::WRL::ComPtr<ID3D11Buffer>	indexBuffer;
+
+SimpleMesh simpleMesh;
+//---------------------------------------------
 
 float clr[] = { 57 / 255.0f, 1.0f, 20 / 255.0f, 1 }; // start with a neon green
 
@@ -100,6 +110,8 @@ bool Frame()
 {
 	bool result;
 
+	//I'm unsure if this code is supposed to go here or at the top of Render().
+	//-------------------------------------------------------------------------
 	d3d11.GetDevice((void**)&myDevice);
 
 	// Create the vertex shader
@@ -119,6 +131,7 @@ bool Frame()
 
 	// Create the input layout
 	myDevice->CreateInputLayout(layout, numElements, VertexShader, sizeof(VertexShader), &vertexFormat);
+	//--------------------------------------------------------------------------
 
 	// Render the graphics scene.
 	result = Render();
