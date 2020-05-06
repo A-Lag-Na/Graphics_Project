@@ -1,3 +1,4 @@
+#pragma once
 // Simple basecode showing how to create a window and attatch a d3d11surface
 #define GATEWARE_ENABLE_CORE // All libraries need this
 #define GATEWARE_ENABLE_SYSTEM // Graphics libs require system level libraries
@@ -22,7 +23,7 @@ using namespace GRAPHICS;
 #include "VertexShader.h"
 
 #include "DDSTextureLoader.h"
-#include "FBXLoader.h"
+//#include "FBXLoader.h"
 
 Camera* m_Camera = 0;
 GWindow win;
@@ -45,7 +46,7 @@ Microsoft::WRL::ComPtr<ID3D11PixelShader>	pixelShader;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	vertexBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	indexBuffer;
 
-SimpleMesh simpleMesh;
+//SimpleMesh sMesh;
 //---------------------------------------------
 
 float clr[] = { 57 / 255.0f, 1.0f, 20 / 255.0f, 1 }; // start with a neon green
@@ -111,8 +112,11 @@ bool Frame()
 	bool result;
 
 	//I'm unsure if this code is supposed to go here or at the top of Render().
+	//I have to initialize it after d3d11.Create() is called.
 	//-------------------------------------------------------------------------
 	d3d11.GetDevice((void**)&myDevice);
+	d3d11.GetSwapchain((void**)&mySwapChain);
+	d3d11.GetImmediateContext((void**)&myContext);
 
 	// Create the vertex shader
 	HRESULT hr = myDevice->CreateVertexShader(VertexShader, sizeof(VertexShader), nullptr, vertexShader.GetAddressOf());
@@ -131,6 +135,66 @@ bool Frame()
 
 	// Create the input layout
 	myDevice->CreateInputLayout(layout, numElements, VertexShader, sizeof(VertexShader), &vertexFormat);
+	
+	// Set primitive topology
+	myContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	
+	//Code commented out here is copy-pasted from my old project, and needs to be updated.
+	//------------------------------------------------------------------------------------
+	/*//Making Vertex Buffer
+	D3D11_BUFFER_DESC bd = {};
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.ByteWidth = sizeof(SimpleVertex) * simpleMesh.vertexList.size();
+	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bd.CPUAccessFlags = 0;
+	
+	D3D11_SUBRESOURCE_DATA InitData = {};
+	InitData.pSysMem = simpleMesh.vertexList.data();
+	myDevice->CreateBuffer(&bd, &InitData, &myVertexBuffer);
+	
+	// Set vertex buffer
+	UINT stride = sizeof(SimpleVertex);
+	UINT offset = 0;
+	myContext->IASetVertexBuffers(0, 1, &myVertexBuffer, &stride, &offset);
+	
+	////Create Index Buffer
+	UINT size = simpleMesh.indicesList.size();
+	meshSizes.push_back(size);
+	
+	ZeroMemory(&bd, sizeof(bd));
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.ByteWidth = sizeof(int) * size;
+	bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	bd.CPUAccessFlags = 0;
+	InitData.pSysMem = simpleMesh.indicesList.data();
+	myDevice->CreateBuffer(&bd, &InitData, &myIndexBuffer);
+	
+	// Set index buffer
+	myContext->IASetIndexBuffer(myIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	
+	//---------
+	//Texturing
+	//---------
+	
+	// Load corvette Texture
+	CreateDDSTextureFromFile(myDevice, L"vette_color.dds", nullptr, &mySRV);
+
+	//Load skybox Texture
+	CreateDDSTextureFromFile(myDevice, L"SunsetSkybox.dds", nullptr, &skyboxSRV);
+
+	// Create the sample state
+	D3D11_SAMPLER_DESC sampDesc = {};
+	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	sampDesc.MinLOD = 0;
+	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	myDevice->CreateSamplerState(&sampDesc, &myLinearSampler);
+	
+	*/
+
 	//--------------------------------------------------------------------------
 
 	// Render the graphics scene.

@@ -26,7 +26,7 @@ add_executable (GreenScreen
 	triangle.h
 	Camera.h
 	Camera.cpp
-	FBXLoader.h
+	#FBXLoader.h comment this in when .libs are linked properly.
 	DDSTextureLoader.h
 	DDSTextureLoader.cpp
 	Structs.cpp
