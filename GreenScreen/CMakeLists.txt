@@ -26,6 +26,7 @@ add_executable (GreenScreen
 	triangle.h
 	Camera.h
 	Camera.cpp
+	FBXLoader.h
 	${VERTEX_SHADERS}
 	${PIXEL_SHADERS}
 )
