@@ -19,13 +19,17 @@ using namespace GRAPHICS;
 
 //Added includes
 #include "Camera.h"
-#include "PixelShader.h"
-#include "VertexShader.h"
+#include "Model.h"
+
 
 #include "DDSTextureLoader.h"
 //#include "FBXLoader.h"
 
+const float SCREEN_DEPTH = 1000.0f;
+const float SCREEN_NEAR = 0.1f;
+
 Camera* m_Camera = 0;
+Model* m_Model = 0;
 GWindow win;
 GEventReceiver msgs;
 GDirectX11Surface d3d11;
@@ -46,6 +50,10 @@ Microsoft::WRL::ComPtr<ID3D11PixelShader>	pixelShader;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	vertexBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	indexBuffer;
 
+IDXGISwapChain* swap;
+ID3D11DeviceContext* con;
+ID3D11RenderTargetView* view;
+
 //SimpleMesh sMesh;
 //---------------------------------------------
 
@@ -59,19 +67,24 @@ bool Render();
 // lets pop a window and use D3D11 to clear to a green screen
 int main()
 {
-	//Initialize(800, 800);
+	
+
 
 	if (+win.Create(0, 0, 800, 600, GWindowStyle::WINDOWEDBORDERED))
 	{
 		
-		msgs.Create(win, [&]() {
+		msgs.Create(win, [&]() 
+		{
 			if (+msgs.Find(GWindow::Events::RESIZE, true))
 				clr[2] += 0.01f; // move towards a cyan as they resize
-			});
+		});
+
 		if (+d3d11.Create(win, 0))
 		{
+			
 			Frame();
 		}
+		
 	}
 	return 0; // that's all folks
 }
@@ -79,6 +92,9 @@ int main()
 bool Initialize(int screenWidth, int screenHeight)
 {
 	bool result;
+
+	 d3d11.GetDevice((void**)&myDevice);
+	 +d3d11.GetImmediateContext((void**)&con);
 
 	//Camera Code
 	//-----------
@@ -90,9 +106,19 @@ bool Initialize(int screenWidth, int screenHeight)
 	}
 
 	// Set the initial position of the camera.
-	m_Camera->Initialize(screenWidth, screenHeight);
+	m_Camera->Initialize(screenWidth, screenHeight, SCREEN_NEAR, SCREEN_DEPTH);
 	m_Camera->SetPosition(0.0f, 0.0f, -10.0f);
 	//-----------
+
+	// Create the model object.
+	m_Model = new Model;
+	if (!m_Model)
+	{
+		return false;
+	}
+
+	// Initialize the model object.
+	result = m_Model->Initialize( *myDevice.GetAddressOf(), con,  islandmodel_data , islandmodel_indicies);
 
 	return true;
 }
@@ -105,39 +131,50 @@ void Shutdown()
 		delete m_Camera;
 		m_Camera = 0;
 	}
+
+	// Release the model object.
+	if (m_Model)
+	{
+		m_Model->Shutdown();
+		delete m_Model;
+		m_Model = 0;
+	}
+
 }
 
 bool Frame()
 {
 	bool result;
 
-	//I'm unsure if this code is supposed to go here or at the top of Render().
-	//I have to initialize it after d3d11.Create() is called.
-	//-------------------------------------------------------------------------
-	d3d11.GetDevice((void**)&myDevice);
-	d3d11.GetSwapchain((void**)&mySwapChain);
-	d3d11.GetImmediateContext((void**)&myContext);
+	Initialize(800, 800);
 
-	// Create the vertex shader
-	HRESULT hr = myDevice->CreateVertexShader(VertexShader, sizeof(VertexShader), nullptr, vertexShader.GetAddressOf());
+	////I'm unsure if this code is supposed to go here or at the top of Render().
+	////I have to initialize it after d3d11.Create() is called.
+	////-------------------------------------------------------------------------
+	//d3d11.GetDevice((void**)&myDevice);
+	//d3d11.GetSwapchain((void**)&mySwapChain);
+	//d3d11.GetImmediateContext((void**)&myContext);
 
-	// Create the pixel shader
-	hr = myDevice->CreatePixelShader(PixelShader, sizeof(PixelShader), nullptr, pixelShader.GetAddressOf());
+	//// Create the vertex shader
+	//HRESULT hr = myDevice->CreateVertexShader(VertexShader, sizeof(VertexShader), nullptr, vertexShader.GetAddressOf());
 
-	// Define the input layout
-	D3D11_INPUT_ELEMENT_DESC layout[] =
-	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};
-	UINT numElements = ARRAYSIZE(layout);
+	//// Create the pixel shader
+	//hr = myDevice->CreatePixelShader(PixelShader, sizeof(PixelShader), nullptr, pixelShader.GetAddressOf());
 
-	// Create the input layout
-	myDevice->CreateInputLayout(layout, numElements, VertexShader, sizeof(VertexShader), &vertexFormat);
-	
-	// Set primitive topology
-	myContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	//// Define the input layout
+	//D3D11_INPUT_ELEMENT_DESC layout[] =
+	//{
+	//	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	//	{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	//	{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	//};
+	//UINT numElements = ARRAYSIZE(layout);
+
+	//// Create the input layout
+	//myDevice->CreateInputLayout(layout, numElements, VertexShader, sizeof(VertexShader), &vertexFormat);
+	//
+	//// Set primitive topology
+	//myContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	
 	//Code commented out here is copy-pasted from my old project, and needs to be updated.
 	//------------------------------------------------------------------------------------
@@ -211,8 +248,8 @@ bool Render()
 {
 	XMMATRIX viewMatrix , projectionMatrix, worldMatrix;
 	bool result;
-
 	
+
 
 	// Initialize stuff here
 	Triangle tri(win, d3d11);
@@ -223,27 +260,27 @@ bool Render()
 	{
 
 
-		/* Commented these out cause they wouldn't build due to viewMatrix, projectionMatrix, and worldMatrix being null
+		//Commented these out cause they wouldn't build due to viewMatrix, projectionMatrix, and worldMatrix being null
 		// Generate the view matrix based on the camera's position.
 		m_Camera->Render();
 
 		//Get the view matrix from the camera
 		m_Camera->GetViewMatrix(viewMatrix);
-		m_Camera->GetProjectionMatrix(projectionMatrix);
 		m_Camera->GetWorldMatrix(worldMatrix);
+		m_Camera->GetProjectionMatrix(projectionMatrix);
 
-		*/
+		
 
-		IDXGISwapChain* swap;
-		ID3D11DeviceContext* con;
-		ID3D11RenderTargetView* view;
+	
 		if (+d3d11.GetImmediateContext((void**)&con) &&
 			+d3d11.GetRenderTargetView((void**)&view) &&
 			+d3d11.GetSwapchain((void**)&swap))
 		{
 		
 			con->ClearRenderTargetView(view, clr);
-			tri.Render();
+			// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
+			m_Model->Render(con);
+			//tri.Render();
 			swap->Present(1, 0);
 			// release incremented COM reference counts
 			swap->Release();

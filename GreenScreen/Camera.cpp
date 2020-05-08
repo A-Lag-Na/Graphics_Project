@@ -46,16 +46,15 @@ XMVECTOR Camera::GetRotation()
 	return XMLoadFloat3(&temp);
 }
 
-bool Camera::Initialize(int screenWidth, int screenHeight)
+bool Camera::Initialize(int screenWidth, int screenHeight , float SCREEN_NEAR, float  SCREEN_DEPTH)
 {
 	// Setup the projection matrix.
 	float fieldOfView = (float)XM_PI / 4.0f;
 	float screenAspect = (float)screenWidth / (float)screenHeight;
 
-	float screenNear = 0.1f;
-	float screenDepth = 10.0f;
 	// Create the projection matrix for 3D rendering.
-	m_projectionMatrix = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, screenNear, screenDepth);
+	m_projectionMatrix = XMMatrixPerspectiveFovLH( fieldOfView, screenAspect, SCREEN_NEAR, SCREEN_DEPTH);
+	
 
 	// Initialize the world matrix to the identity matrix.
 	m_worldMatrix = XMMatrixIdentity();
@@ -103,12 +102,14 @@ void Camera::GetViewMatrix(XMMATRIX& viewMatrix)
 	viewMatrix = m_viewMatrix;
 }
 
+void Camera::GetWorldMatrix(XMMATRIX& worldMatrix)
+{
+	worldMatrix = m_worldMatrix;
+}
+
 void Camera::GetProjectionMatrix(XMMATRIX& projectionMatrix)
 {
 	projectionMatrix = m_projectionMatrix;
 }
 
-void Camera::GetWorldMatrix(XMMATRIX& worldMatrix)
-{
-	worldMatrix = m_worldMatrix;
-}
+
