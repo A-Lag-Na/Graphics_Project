@@ -23,7 +23,8 @@ using namespace GRAPHICS;
 #include "VertexShader.h"
 
 #include "DDSTextureLoader.h"
-//#include "FBXLoader.h"
+#include "FBXLoader.h"
+#include "Structs.cpp"
 
 Camera* m_Camera = 0;
 GWindow win;
@@ -45,8 +46,6 @@ Microsoft::WRL::ComPtr<ID3D11PixelShader>	pixelShader;
 
 Microsoft::WRL::ComPtr<ID3D11Buffer>	vertexBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	indexBuffer;
-
-//SimpleMesh sMesh;
 //---------------------------------------------
 
 float clr[] = { 57 / 255.0f, 1.0f, 20 / 255.0f, 1 }; // start with a neon green
@@ -141,6 +140,8 @@ bool Frame()
 	
 	//Code commented out here is copy-pasted from my old project, and needs to be updated.
 	//------------------------------------------------------------------------------------
+	//Loading Cube
+	//LoadMesh("corvette.mesh", simpleMesh);
 	/*//Making Vertex Buffer
 	D3D11_BUFFER_DESC bd = {};
 	bd.Usage = D3D11_USAGE_DEFAULT;
