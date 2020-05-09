@@ -1,5 +1,4 @@
-//
-////Written with help of lab instructor:
+/* Commented out lighting and texturing until those features are implemented.
 cbuffer dirLight : register (b1)
 {
 	float4 dldir;
@@ -13,7 +12,7 @@ cbuffer ambLight : register(b2)
 }
 
 Texture2D baseTexture : register(t0);
-SamplerState linfilter : register(s0);
+SamplerState linfilter : register(s0); */
 
 struct VS_OUT
 {
@@ -25,12 +24,13 @@ struct VS_OUT
 
 float4 main(VS_OUT input) : SV_TARGET
 {
-	float4 baseColor = baseTexture.Sample(linfilter, input.tex); // get base color
-    float4 ambient = alcol * baseColor;
-    float4 lightColor = alcol + dlcol;
-    lightColor = saturate(lightColor);
-	float3 ldirection = -normalize(dldir);
-	float3 wnorm = normalize(input.norm);
-    float4 outColor = saturate((dot(ldirection, wnorm))) * dlcol * baseColor;
-    return saturate(outColor + ambient);
+	//float4 baseColor = baseTexture.Sample(linfilter, input.tex); // get base color
+   // float4 ambient = alcol * baseColor;
+   //float4 lightColor = alcol + dlcol;
+    //lightColor = saturate(lightColor);
+	//float3 ldirection = -normalize(dldir);
+	//float3 wnorm = normalize(input.norm);
+    //float4 outColor = saturate((dot(ldirection, wnorm))) * dlcol * baseColor;
+    //return saturate(outColor + ambient);
+    return float4(1.0f, 0.0f, 0.0f, 1.0f);
 }

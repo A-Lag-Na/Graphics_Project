@@ -4,6 +4,8 @@
 #include "PixelShader.h"
 #include "VertexShader.h"
 #include "islandmodel.h"
+//Using this to get access to SimpleMesh, and keep things clean/simple
+#include "Structs.cpp"
 
 using namespace DirectX;
 
@@ -34,7 +36,9 @@ private:
 	
 
 private:
-	ID3D11Buffer* m_vertexBuffer, * m_indexBuffer;
+	SimpleMesh simpleMesh;
+	ID3D11Buffer* m_vertexBuffer, * m_indexBuffer = nullptr;
+	//These might be unneeded, see .cpp simpleMesh.vertexList/indicesList.size()
 	int m_vertexCount, m_indexCount;
 };
 

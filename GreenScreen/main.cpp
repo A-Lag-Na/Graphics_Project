@@ -249,19 +249,13 @@ bool Render()
 {
 	XMMATRIX viewMatrix , projectionMatrix, worldMatrix;
 	bool result;
-	
-
 
 	// Initialize stuff here
 	Triangle tri(win, d3d11);
 
-	
 	// Render Loop here
 	while (+win.ProcessWindowEvents())
 	{
-
-
-
 		// Generate the view matrix based on the camera's position.
 		m_Camera->Render();
 
@@ -293,9 +287,7 @@ bool Render()
 			if(view)
 			view->Release();
 			if (con) 
-				con->Release();
-			
-			
+				con->Release();			
 		}
 	}
 
