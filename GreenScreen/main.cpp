@@ -51,9 +51,7 @@ Microsoft::WRL::ComPtr<ID3D11PixelShader>	pixelShader;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	vertexBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	indexBuffer;
 
-IDXGISwapChain* swap;
-ID3D11DeviceContext* con;
-ID3D11RenderTargetView* view;
+
 
 //SimpleMesh sMesh;
 //---------------------------------------------
@@ -97,7 +95,7 @@ bool Initialize(int screenWidth, int screenHeight)
 	bool result;
 
 	 d3d11.GetDevice((void**)&myDevice);
-	 +d3d11.GetImmediateContext((void**)&con);
+	 d3d11.GetImmediateContext((void**)&myContext);
 
 	//Camera Code
 	//-----------
@@ -121,7 +119,7 @@ bool Initialize(int screenWidth, int screenHeight)
 	}
 
 	// Initialize the model object.
-	result = m_Model->Initialize( *myDevice.GetAddressOf(), con,  islandmodel_data , islandmodel_indicies);
+	result = m_Model->Initialize( *myDevice.GetAddressOf(), *myContext.GetAddressOf(),  islandmodel_data , islandmodel_indicies);
 
 	return true;
 }
@@ -151,14 +149,31 @@ bool Frame()
 
 	Initialize(800, 800);
 
+	//I'm unsure if this code is supposed to go here or at the top of Render().
+//I have to initialize it after d3d11.Create() is called.
+//-------------------------------------------------------------------------
+	d3d11.GetSwapchain((void**)&mySwapChain);
 
+	// Create the vertex shader
+	HRESULT hr = myDevice->CreateVertexShader(VertexShader, sizeof(VertexShader), nullptr, vertexShader.GetAddressOf());
 
+	// Create the pixel shader
+	hr = myDevice->CreatePixelShader(PixelShader, sizeof(PixelShader), nullptr, pixelShader.GetAddressOf());
 
+	// Define the input layout
+	D3D11_INPUT_ELEMENT_DESC layout[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+	UINT numElements = ARRAYSIZE(layout);
 
+	// Create the input layout
+	myDevice->CreateInputLayout(layout, numElements, VertexShader, sizeof(VertexShader), &vertexFormat);
 
-	
-
-	
+	// Set primitive topology
+	myContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	
 	//Code commented out here is copy-pasted from my old project, and needs to be updated.
 	//------------------------------------------------------------------------------------
@@ -256,7 +271,9 @@ bool Render()
 		m_Camera->GetProjectionMatrix(projectionMatrix);
 
 
-		
+		IDXGISwapChain* swap;
+		ID3D11DeviceContext* con;
+		ID3D11RenderTargetView* view;
 
 	
 		if (+d3d11.GetImmediateContext((void**)&con) &&
