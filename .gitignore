@@ -248,3 +248,5 @@ Source/GVersion.hpp
 # To Allow CMake bin folder
 !GATEWARE_X/CMake/*
 Source/Shared/GVersion.hpp
+/GreenScreen/FBXLoader - Copy.h
+/GreenScreen/corvette.mesh
