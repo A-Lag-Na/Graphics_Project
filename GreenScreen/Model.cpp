@@ -40,10 +40,10 @@ void Model::Shutdown()
 	return;
 }
 
-void Model::Render(ID3D11DeviceContext* deviceContext)
+void Model::Render(ID3D11DeviceContext* deviceContext, ID3D11VertexShader* vertexShader, ID3D11PixelShader* pixelShader, ID3D11InputLayout* inputLayout, ID3D11RenderTargetView* view)
 {
 	// Put the vertex and index buffers on the graphics pipeline to prepare them for drawing.
-	RenderBuffers(deviceContext);
+	RenderBuffers(deviceContext, vertexShader, pixelShader, inputLayout, view);
 
 	return;
 }
@@ -93,17 +93,17 @@ bool Model::InitializeBuffers(ID3D11Device* device, ID3D11DeviceContext* deviceC
 	// Load the vertex array with data.
 	for (int i = 0; i < m_vertexCount; i++)
 	{
-		vertices[i].position.x = modelData[i].pos[0];
-		vertices[i].position.y = modelData[i].pos[1];
-		vertices[i].position.z = modelData[i].pos[2];
+		vertices[i].Pos.x = modelData[i].pos[0];
+		vertices[i].Pos.y = modelData[i].pos[1];
+		vertices[i].Pos.z = modelData[i].pos[2];
 
-		vertices[i].uv.x = modelData[i].uvw[0];
-		vertices[i].uv.y = modelData[i].uvw[1];
-		vertices[i].uv.z = modelData[i].uvw[2];
+		vertices[i].Tex.x = modelData[i].uvw[0];
+		vertices[i].Tex.y = modelData[i].uvw[1];
+		
 
-		vertices[i].normal.x = modelData[i].nrm[0];
-		vertices[i].normal.y = modelData[i].nrm[1];
-		vertices[i].normal.z = modelData[i].nrm[2];
+		vertices[i].Normal.x = modelData[i].nrm[0];
+		vertices[i].Normal.y = modelData[i].nrm[1];
+		vertices[i].Normal.z = modelData[i].nrm[2];
 
 	};
 
@@ -194,10 +194,18 @@ void Model::ShutdownBuffers()
 	return;
 }
 
-void Model::RenderBuffers(ID3D11DeviceContext* deviceContext)
+void Model::RenderBuffers(ID3D11DeviceContext* deviceContext, ID3D11VertexShader* vertexShader, ID3D11PixelShader* pixelShader, ID3D11InputLayout* inputLayout, ID3D11RenderTargetView* view)
 {
 	
-	//deviceContext->VSSetShader(, nullptr, 0);
+	// setup the pipeline
+	
+	ID3D11RenderTargetView* const views[] = { view };
+	deviceContext->OMSetRenderTargets(ARRAYSIZE(views), views, nullptr);
+	
 
-	return;
+	deviceContext->VSSetShader(vertexShader, nullptr, 0);
+	deviceContext->PSSetShader(pixelShader, nullptr, 0);
+	deviceContext->IASetInputLayout(inputLayout);
+	deviceContext->Draw(m_vertexCount, 0);
+	deviceContext->DrawIndexed(m_indexCount, 0, 0);
 }

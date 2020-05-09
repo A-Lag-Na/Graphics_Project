@@ -284,13 +284,18 @@ bool Render()
 			con->ClearRenderTargetView(view, clr);
 		
 			// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
-			m_Model->Render(con);
+			m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view);
 			//tri.Render();
 			swap->Present(1, 0);
 			// release incremented COM reference counts
+			if(swap)
 			swap->Release();
+			if(view)
 			view->Release();
-			con->Release();
+			if (con) 
+				con->Release();
+			
+			
 		}
 	}
 
