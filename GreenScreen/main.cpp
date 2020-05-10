@@ -58,6 +58,34 @@ Microsoft::WRL::ComPtr<ID3D11Buffer>	indexBuffer;
 
 float clr[] = { 57 / 255.0f, 1.0f, 20 / 255.0f, 1 }; // start with a neon green
 
+OBJ_VERT cubePoints[8] =
+{
+	{{ -0.5f, -0.5f,  0.5f}, { 0.0f, 0.0f, 1.0f}, { 0.0f, 0.0f, 1.0f}},
+	{{  0.5f, -0.5f,  0.5f}, { 0.0f, 1.0f, 1.0f}, { 0.0f, 1.0f, 0.0f}},
+	{{ -0.5f,  0.5f,  0.5f}, { 1.0f, 0.0f, 1.0f}, { 0.0f, 0.0f,-1.0f}},
+	{{  0.5f,  0.5f,  0.5f}, { 1.0f, 1.0f, 1.0f}, { 0.0f,-1.0f, 0.0f}},
+	{{ -0.5f,  0.5f, -0.5f}, { 0.0f, 1.0f, 1.0f}, { 1.0f, 0.0f, 0.0f}},
+	{{  0.5f,  0.5f, -0.5f}, { 1.0f, 0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}},
+	{{ -0.5f, -0.5f, -0.5f}, { 0.0f, 0.0f, 1.0f}, { 0.0f, 0.0f, 1.0f}},
+	{{  0.5f, -0.5f, -0.5f}, { 0.0f, 1.0f, 1.0f}, { 0.0f, 1.0f, 0.0f}}
+
+};
+unsigned int cubeindicies[36]
+{
+	1, 2, 3,
+	3, 2, 4,
+	3, 4, 5,
+	5, 4, 6,
+	5, 6, 7,
+	7, 6, 8,
+	7, 8, 1,
+	1, 8, 2,
+	2, 8, 4,
+	4, 8, 6,
+	7, 1, 5,
+	5, 1, 3
+};
+
 bool Initialize(int, int);
 void Shutdown();
 bool Frame();
@@ -119,7 +147,7 @@ bool Initialize(int screenWidth, int screenHeight)
 	}
 
 	// Initialize the model object.
-	result = m_Model->Initialize( *myDevice.GetAddressOf(), *myContext.GetAddressOf(),  islandmodel_data , islandmodel_indicies);
+	result = m_Model->Initialize( *myDevice.GetAddressOf(), *myContext.GetAddressOf(), cubePoints , cubeindicies);
 
 	return true;
 }

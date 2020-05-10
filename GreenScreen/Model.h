@@ -4,6 +4,7 @@
 #include "PixelShader.h"
 #include "VertexShader.h"
 #include "islandmodel.h"
+#include"cubeobj.h"
 //Using this to get access to SimpleMesh, and keep things clean/simple
 #include "Structs.cpp"
 
@@ -11,14 +12,10 @@ using namespace DirectX;
 
 class Model
 {
-	struct VertexType
-	{
-		XMFLOAT3 Pos;
-		XMFLOAT3 Normal;
-		XMFLOAT2 Tex;
-	};
-
 public:
+
+
+
 	Model();
 	Model(const Model&);
 	~Model();
