@@ -83,8 +83,8 @@ bool Model::InitializeBuffers(ID3D11Device* device, ID3D11DeviceContext* deviceC
 
 	// Set the size of simpleMesh.vertexList.
 	// Variables here for index count and vertex count are replaced with the size of the vectors in vertex/indices lists.
-	//simpleMesh.vertexList.resize(sizeof(modelData));
-	simpleMesh.vertexList.resize(8);
+	simpleMesh.vertexList.resize(sizeof(*modelData) / sizeof(modelData[0]));
+	//simpleMesh.vertexList.resize(8);
 
 	// Set the size of simpleMesh.indicesList.
 	//simpleMesh.indicesList.resize(sizeof(indicesData));
