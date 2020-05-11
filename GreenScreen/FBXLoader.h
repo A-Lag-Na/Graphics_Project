@@ -8,7 +8,7 @@ SimpleMesh simpleMesh;
 
 void LoadMesh(const char* meshFileName, SimpleMesh& mesh)
 {
-    std::fstream file{ meshFileName, std::ios_base::in | std::ios_base::binary };
+    std::ifstream file{ meshFileName, std::ios_base::in | std::ios_base::binary };
 
     assert(file.is_open());
 
