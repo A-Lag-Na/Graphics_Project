@@ -4,7 +4,7 @@
 #include "PixelShader.h"
 #include "VertexShader.h"
 #include "islandmodel.h"
-#include"cubeobj.h"
+//#include"cubeobj.h"
 //Using this to get access to SimpleMesh, and keep things clean/simple
 #include "Structs.cpp"
 

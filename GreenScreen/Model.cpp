@@ -83,10 +83,12 @@ bool Model::InitializeBuffers(ID3D11Device* device, ID3D11DeviceContext* deviceC
 
 	// Set the size of simpleMesh.vertexList.
 	// Variables here for index count and vertex count are replaced with the size of the vectors in vertex/indices lists.
-	simpleMesh.vertexList.resize(sizeof(modelData));
+	//simpleMesh.vertexList.resize(sizeof(modelData));
+	simpleMesh.vertexList.resize(8);
 
 	// Set the size of simpleMesh.indicesList.
-	simpleMesh.indicesList.resize(sizeof(indicesData));
+	//simpleMesh.indicesList.resize(sizeof(indicesData));
+	simpleMesh.indicesList.resize(36);
 
 	//The following 2 blocks of code (creating arrays) are rendered superfluous by using a simpleMesh.
 	// Create the vertex array.
@@ -107,9 +109,9 @@ bool Model::InitializeBuffers(ID3D11Device* device, ID3D11DeviceContext* deviceC
 	for (int i = 0; i < simpleMesh.vertexList.size(); i++)
 	{
 		// I'm dividing these positions to make the mesh smaller, otherwise it'd be clipped and not show up onscreen.
-		simpleMesh.vertexList[i].Pos.x = modelData[i].pos[0] / 400.f;
-		simpleMesh.vertexList[i].Pos.y = modelData[i].pos[1] / 400.f;
-		simpleMesh.vertexList[i].Pos.z = modelData[i].pos[2] / 400.f + 1.f;
+		simpleMesh.vertexList[i].Pos.x = modelData[i].pos[0] ;
+		simpleMesh.vertexList[i].Pos.y = modelData[i].pos[1] ;
+		simpleMesh.vertexList[i].Pos.z = modelData[i].pos[2] ;
 
 		simpleMesh.vertexList[i].Tex.x = modelData[i].uvw[0];
 		simpleMesh.vertexList[i].Tex.y = modelData[i].uvw[1];
