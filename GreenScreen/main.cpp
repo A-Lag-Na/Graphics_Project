@@ -48,6 +48,8 @@ Microsoft::WRL::ComPtr<ID3D11PixelShader>	pixelShader;
 
 Microsoft::WRL::ComPtr<ID3D11Buffer>	vertexBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	indexBuffer;
+Microsoft::WRL::ComPtr<ID3D11Buffer>	WVPconstantBuffer;
+WVP constantBufferData;
 
 
 
@@ -132,6 +134,16 @@ bool Initialize(int screenWidth, int screenHeight)
 	m_Camera->SetPosition(0.0f, 0.0f, -10.0f);
 	//-----------
 
+	// Constant Buffer Creation
+	//-----------
+	CD3D11_BUFFER_DESC desc = CD3D11_BUFFER_DESC(sizeof(WVP), D3D11_BIND_CONSTANT_BUFFER);
+	D3D11_SUBRESOURCE_DATA srd;
+	ZeroMemory(&srd, sizeof(srd));
+	srd.pSysMem = &constantBufferData;
+
+	HRESULT hr = myDevice->CreateBuffer(&desc, &srd, WVPconstantBuffer.GetAddressOf());
+
+
 	// Create the model object.
 	m_Model = new Model;
 	if (!m_Model)
@@ -143,10 +155,10 @@ bool Initialize(int screenWidth, int screenHeight)
 	//For now, gotta pass in vertex and index count for each model rendered (.h or hardcoded), and only hardcoded is functional.
 	
 	//Hard coded cube
-	result = m_Model->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), cubePoints, cubeIndicies, 8, 36);
+	//result = m_Model->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), cubePoints, cubeIndicies, 8, 36);
 	
 	//.h loaded code
-	//result = m_Model->Initialize( *myDevice.GetAddressOf(), *myContext.GetAddressOf(), cubeobj_data , cubeobj_indicies, 8, 36);
+	result = m_Model->Initialize( *myDevice.GetAddressOf(), *myContext.GetAddressOf(), cubeobj_data , cubeobj_indicies, 788, 1692);
 
 	return true;
 }
@@ -274,7 +286,7 @@ bool Frame()
 
 bool Render()
 {
-	XMMATRIX viewMatrix , projectionMatrix, worldMatrix;
+	XMMATRIX viewMatrix, projectionMatrix, worldMatrix;
 	bool result;
 
 	// Initialize stuff here
@@ -303,7 +315,14 @@ bool Render()
 		{
 		
 			con->ClearRenderTargetView(view, clr);
+			ZeroMemory(&constantBufferData, sizeof(WVP));
+			constantBufferData.w = XMMatrixIdentity();
+			constantBufferData.v = viewMatrix;
+			constantBufferData.p = projectionMatrix;
 		
+			// change the constant buffer data here per draw / model
+			con->UpdateSubresource(WVPconstantBuffer.Get(), 0, nullptr, &constantBufferData, 0, 0);
+			con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
 			// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
 			m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view);
 			//tri.Render();
