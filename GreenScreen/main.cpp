@@ -147,7 +147,7 @@ bool Initialize(int screenWidth, int screenHeight)
 	}
 
 	// Initialize the model object.
-	result = m_Model->Initialize( *myDevice.GetAddressOf(), *myContext.GetAddressOf(), cubePoints , cubeindicies);
+	result = m_Model->Initialize( *myDevice.GetAddressOf(), *myContext.GetAddressOf(), cubeobj_data , cubeobj_indicies);
 
 	return true;
 }
