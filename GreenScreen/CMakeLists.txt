@@ -33,6 +33,8 @@ add_executable (GreenScreen
 	Model.cpp
 	islandmodel.h
 	cubeobj.h
+	Grid.h
+	Grid.cpp
 	Structs.cpp
 	${VERTEX_SHADERS}
 	${PIXEL_SHADERS}

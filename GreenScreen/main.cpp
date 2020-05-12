@@ -20,6 +20,7 @@ using namespace GRAPHICS;
 //Added includes
 #include "Camera.h"
 #include "Model.h"
+#include "Grid.h"
 #include "DDSTextureLoader.h"
 #include "FBXLoader.h"
 #include "Structs.cpp"
@@ -29,6 +30,7 @@ const float SCREEN_NEAR = 0.1f;
 
 Camera* m_Camera = 0;
 Model* m_Model = 0;
+Grid* m_Grid = 0;
 GWindow win;
 GEventReceiver msgs;
 GDirectX11Surface d3d11;
@@ -58,6 +60,10 @@ WVP constantBufferData;
 
 float clr[] = { 57 / 255.0f, 1.0f, 20 / 255.0f, 1 }; // start with a neon green
 
+//grid
+
+
+//cube
 OBJ_VERT cubePoints[8] =
 {
 	{{ -0.5f, -0.5f,  1.5f}, { 0.0f, 0.0f, 1.0f}, { 0.0f, 0.0f, 1.0f}},
@@ -94,6 +100,8 @@ bool Render();
 // lets pop a window and use D3D11 to clear to a green screen
 int main()
 {
+	
+
 	if (+win.Create(0, 0, 800, 600, GWindowStyle::WINDOWEDBORDERED))
 	{
 		msgs.Create(win, [&]() 
@@ -143,7 +151,12 @@ bool Initialize(int screenWidth, int screenHeight)
 
 	HRESULT hr = myDevice->CreateBuffer(&desc, &srd, WVPconstantBuffer.GetAddressOf());
 
-
+	m_Grid = new Grid;
+	if (!m_Grid)
+	{
+		return false;
+	}
+	result = m_Grid->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), 800, 800, 10, 10);
 	// Create the model object.
 	m_Model = new Model;
 	if (!m_Model)
@@ -323,6 +336,7 @@ bool Render()
 			// change the constant buffer data here per draw / model
 			con->UpdateSubresource(WVPconstantBuffer.Get(), 0, nullptr, &constantBufferData, 0, 0);
 			con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
+			m_Grid->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view);
 			// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
 			m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view);
 			//tri.Render();
