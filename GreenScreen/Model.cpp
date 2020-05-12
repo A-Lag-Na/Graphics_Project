@@ -26,10 +26,12 @@ Model::~Model()
 	simpleMesh.indicesList.~vector();
 }
 
-bool Model::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext,const OBJ_VERT* modelData, const unsigned int* indicesData)
+//Because sizeof gets the byte size, and doesn't seem to be working properly, I'm making it so we just pass in the number of verticies and indices.
+bool Model::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext,const OBJ_VERT* modelData, const unsigned int* indicesData, unsigned int vertCount, unsigned int indexCount)
 {
 	bool result;
-
+	m_vertexCount = vertCount;
+	m_indexCount = indexCount;
 
 	// Initialize the vertex and index buffer that hold the geometry for the triangle.
 	result = InitializeBuffers(device, deviceContext, modelData, indicesData);
@@ -37,7 +39,6 @@ bool Model::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext,
 	{
 		return false;
 	}
-
 	return true;
 }
 
@@ -83,12 +84,10 @@ bool Model::InitializeBuffers(ID3D11Device* device, ID3D11DeviceContext* deviceC
 
 	// Set the size of simpleMesh.vertexList.
 	// Variables here for index count and vertex count are replaced with the size of the vectors in vertex/indices lists.
-	simpleMesh.vertexList.resize(sizeof(*modelData) / sizeof(modelData[0]));
-	//simpleMesh.vertexList.resize(8);
+	simpleMesh.vertexList.resize(m_vertexCount);
 
 	// Set the size of simpleMesh.indicesList.
-	//simpleMesh.indicesList.resize(sizeof(indicesData));
-	simpleMesh.indicesList.resize(36);
+	simpleMesh.indicesList.resize(m_indexCount);
 
 	//The following 2 blocks of code (creating arrays) are rendered superfluous by using a simpleMesh.
 	// Create the vertex array.
@@ -106,12 +105,12 @@ bool Model::InitializeBuffers(ID3D11Device* device, ID3D11DeviceContext* deviceC
 	//}
 
 	// Load the vertex array with data.
-	for (int i = 0; i < simpleMesh.vertexList.size(); i++)
+	for (int i = 0; i < m_vertexCount; i++)
 	{
-		// I'm dividing these positions to make the mesh smaller, otherwise it'd be clipped and not show up onscreen.
-		simpleMesh.vertexList[i].Pos.x = modelData[i].pos[0] ;
-		simpleMesh.vertexList[i].Pos.y = modelData[i].pos[1] ;
-		simpleMesh.vertexList[i].Pos.z = modelData[i].pos[2] ;
+		// I'm dividing these positions to make the mesh smaller (and further back from the camera on the z axis), otherwise it'd be clipped and not show up onscreen.
+		simpleMesh.vertexList[i].Pos.x = modelData[i].pos[0] / 50.f;
+		simpleMesh.vertexList[i].Pos.y = modelData[i].pos[1] / 50.f;
+		simpleMesh.vertexList[i].Pos.z = modelData[i].pos[2] / 50.f + 1 ;
 
 		simpleMesh.vertexList[i].Tex.x = modelData[i].uvw[0];
 		simpleMesh.vertexList[i].Tex.y = modelData[i].uvw[1];
@@ -123,16 +122,14 @@ bool Model::InitializeBuffers(ID3D11Device* device, ID3D11DeviceContext* deviceC
 	};
 
 	// Load the index array with data.
-	for (int i = 0; i < simpleMesh.indicesList.size(); i++)
+	for (int i = 0; i < m_indexCount; i++)
 	{
 		simpleMesh.indicesList[i] = indicesData[i];
-
 	};
-
 	
 	// Set up the description of the static vertex buffer.
 	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	vertexBufferDesc.ByteWidth = sizeof(SimpleVertex) * simpleMesh.vertexList.size();
+	vertexBufferDesc.ByteWidth = sizeof(SimpleVertex) * m_vertexCount;
 	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vertexBufferDesc.CPUAccessFlags = 0;
 	vertexBufferDesc.MiscFlags = 0;
@@ -153,7 +150,7 @@ bool Model::InitializeBuffers(ID3D11Device* device, ID3D11DeviceContext* deviceC
 
 	// Set up the description of the static index buffer.
 	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	indexBufferDesc.ByteWidth = sizeof(int) * simpleMesh.indicesList.size();
+	indexBufferDesc.ByteWidth = sizeof(unsigned int) * m_indexCount;
 	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	indexBufferDesc.CPUAccessFlags = 0;
 	indexBufferDesc.MiscFlags = 0;
@@ -189,7 +186,6 @@ void Model::ShutdownBuffers()
 {
 	if (m_vertexBuffer) m_vertexBuffer->Release();
 	if (m_indexBuffer)  m_indexBuffer->Release();
-	// Delete simpleMesh
 
 	return;
 }
@@ -203,5 +199,5 @@ void Model::RenderBuffers(ID3D11DeviceContext* deviceContext, ID3D11VertexShader
 	deviceContext->VSSetShader(vertexShader, nullptr, 0);
 	deviceContext->PSSetShader(pixelShader, nullptr, 0);
 	
-	deviceContext->DrawIndexed(simpleMesh.indicesList.size(), 0, 0);
+	deviceContext->DrawIndexed(m_indexCount, 0, 0);
 }

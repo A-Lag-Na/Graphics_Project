@@ -20,8 +20,6 @@ using namespace GRAPHICS;
 //Added includes
 #include "Camera.h"
 #include "Model.h"
-
-
 #include "DDSTextureLoader.h"
 #include "FBXLoader.h"
 #include "Structs.cpp"
@@ -70,7 +68,7 @@ OBJ_VERT cubePoints[8] =
 	{{  0.5f, -0.5f, 0.5f}, { 0.0f, 1.0f, 1.0f}, { 0.0f, 1.0f, 0.0f}}
 
 };
-unsigned int cubeindicies[36]
+unsigned int cubeIndicies[36]
 {
 	0, 1, 2,
 	2, 1, 3,
@@ -94,13 +92,8 @@ bool Render();
 // lets pop a window and use D3D11 to clear to a green screen
 int main()
 {
-	
-
-
 	if (+win.Create(0, 0, 800, 600, GWindowStyle::WINDOWEDBORDERED))
 	{
-		
-	
 		msgs.Create(win, [&]() 
 		{
 			if (+msgs.Find(GWindow::Events::RESIZE, true))
@@ -147,7 +140,13 @@ bool Initialize(int screenWidth, int screenHeight)
 	}
 
 	// Initialize the model object.
-	result = m_Model->Initialize( *myDevice.GetAddressOf(), *myContext.GetAddressOf(), cubePoints , cubeindicies);
+	//For now, gotta pass in vertex and index count for each model rendered (.h or hardcoded), and only hardcoded is functional.
+	
+	//Hard coded cube
+	result = m_Model->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), cubePoints, cubeIndicies, 8, 36);
+	
+	//.h loaded code
+	//result = m_Model->Initialize( *myDevice.GetAddressOf(), *myContext.GetAddressOf(), cubeobj_data , cubeobj_indicies, 8, 36);
 
 	return true;
 }

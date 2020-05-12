@@ -1,4 +1,7 @@
+#pragma once
 #include "Camera.h"
+
+//I threw my (functional) camera code from my old project at the bottom of this file. Hope it can help.
 
 Camera::Camera()
 {
@@ -112,4 +115,71 @@ void Camera::GetProjectionMatrix(XMMATRIX& projectionMatrix)
 	projectionMatrix = m_projectionMatrix;
 }
 
-
+//
+//bool LetsDrawSomeStuff::CameraControl(XMMATRIX& myCamera, bool lightSwitch)
+//{
+//	XMFLOAT4X4* w = new XMFLOAT4X4;
+//	XMStoreFloat4x4(w, myCamera);
+//	POINT currpos;
+//	// W, forwards camera control
+//
+//	if (GetAsyncKeyState(0x57))
+//	{
+//		XMMATRIX temp = XMMatrixTranslation(0.f, 0.f, .05f);
+//		myCamera = XMMatrixMultiply(temp, myCamera);
+//	}
+//	// S, backwards camera control
+//	if (GetAsyncKeyState(0x53))
+//	{
+//		XMMATRIX temp = XMMatrixTranslation(0, 0, -.05f);
+//		myCamera = XMMatrixMultiply(temp, myCamera);
+//	}
+//	// A, leftwards camera control
+//	if (GetAsyncKeyState(0x41))
+//	{
+//		XMMATRIX temp = XMMatrixTranslation(-.05f, 0, 0);
+//		myCamera = XMMatrixMultiply(temp, myCamera);
+//	}
+//	// D, rightwards camera control
+//	if (GetAsyncKeyState(0x44))
+//	{
+//		XMMATRIX temp = XMMatrixTranslation(.05f, 0, 0);
+//		myCamera = XMMatrixMultiply(temp, myCamera);
+//	}
+//	// Q, upwards camera control
+//	if (GetAsyncKeyState(0x51))
+//	{
+//		XMMATRIX temp = XMMatrixTranslation(0, 0.05f, 0);
+//		myCamera = XMMatrixMultiply(temp, myCamera);
+//	}
+//	// E, downwards camera control
+//	if (GetAsyncKeyState(0x45))
+//	{
+//		XMMATRIX temp = XMMatrixTranslation(0, -0.05f, 0);
+//		myCamera = XMMatrixMultiply(temp, myCamera);
+//	}
+//	// R, toggle overhead directional light
+//	lightSwitch = GetAsyncKeyState(0x52);
+//	GetCursorPos(&currpos);
+//	if (GetAsyncKeyState(VK_LBUTTON))
+//	{
+//		if (currpos.x != oldpos.x || currpos.y != oldpos.y);
+//		{
+//
+//			int CameraW[4] = { w->_14, w->_24, w->_34, w->_44 };
+//			float ydelta = currpos.y - oldpos.y;
+//			myCamera = XMMatrixMultiply(myCamera, XMMatrixRotationX(0.01 * ydelta));
+//			float xdelta = currpos.x - oldpos.x;
+//			myCamera = XMMatrixMultiply(myCamera, XMMatrixRotationY(0.01 * xdelta));
+//			XMStoreFloat4x4(w, myCamera);
+//			w->_14 = CameraW[0];
+//			w->_24 = CameraW[1];
+//			w->_34 = CameraW[2];
+//			w->_44 = CameraW[3];
+//			myCamera = XMLoadFloat4x4(w);
+//		}
+//	}
+//	oldpos = currpos;
+//	w = nullptr;
+//	return lightSwitch;
+//}

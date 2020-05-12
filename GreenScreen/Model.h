@@ -4,7 +4,7 @@
 #include "PixelShader.h"
 #include "VertexShader.h"
 #include "islandmodel.h"
-//#include"cubeobj.h"
+#include"cubeobj.h"
 //Using this to get access to SimpleMesh, and keep things clean/simple
 #include "Structs.cpp"
 
@@ -20,7 +20,7 @@ public:
 	Model(const Model&);
 	~Model();
 
-	bool Initialize(ID3D11Device*, ID3D11DeviceContext* ,const OBJ_VERT*, const unsigned int*);
+	bool Initialize(ID3D11Device*, ID3D11DeviceContext* ,const OBJ_VERT*, const unsigned int*, unsigned int, unsigned int);
 	void Shutdown();
 	void Render(ID3D11DeviceContext*, ID3D11VertexShader*, ID3D11PixelShader*, ID3D11InputLayout*, ID3D11RenderTargetView*);
 
@@ -35,7 +35,6 @@ private:
 private:
 	SimpleMesh simpleMesh;
 	ID3D11Buffer* m_vertexBuffer, * m_indexBuffer = nullptr;
-	//These might be unneeded, see .cpp simpleMesh.vertexList/indicesList.size()
-	int m_vertexCount, m_indexCount;
+	unsigned int m_vertexCount, m_indexCount;
 };
 
