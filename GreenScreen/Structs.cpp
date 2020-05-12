@@ -32,3 +32,8 @@ struct SimpleMesh
     vector<SimpleVertex> vertexList;
     vector<int> indicesList;
 };
+
+struct WVP
+{
+    XMMATRIX w, v, p;
+};

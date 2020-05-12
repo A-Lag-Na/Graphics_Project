@@ -66,21 +66,9 @@ int Model::GetIndexCount()
 bool Model::InitializeBuffers(ID3D11Device* device, ID3D11DeviceContext* deviceContext, const OBJ_VERT *modelData, const unsigned int *indicesData)
 {
 	//This is me changing the code to use SimpleMesh (A struct with 2 vectors, vertexList and indicesList) to make the code more readable, IMO, and help debug.
-	
-	//These two lines are replaced with simpleMesh.vertexList and simpleMesh.indices respectively.
-	//VertexType* vertices;
-	//unsigned int* indices;
 	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
 	D3D11_SUBRESOURCE_DATA vertexData, indexData;
 	HRESULT result;
-
-	unsigned int stride;
-	unsigned int offset;
-
-	// Set vertex buffer stride and offset.
-	stride = sizeof(SimpleVertex);
-	offset = 0;
-
 
 	// Set the size of simpleMesh.vertexList.
 	// Variables here for index count and vertex count are replaced with the size of the vectors in vertex/indices lists.
@@ -89,28 +77,13 @@ bool Model::InitializeBuffers(ID3D11Device* device, ID3D11DeviceContext* deviceC
 	// Set the size of simpleMesh.indicesList.
 	simpleMesh.indicesList.resize(m_indexCount);
 
-	//The following 2 blocks of code (creating arrays) are rendered superfluous by using a simpleMesh.
-	// Create the vertex array.
-	//vertices = new VertexType[m_vertexCount];
-	//if (!vertices)
-	//{
-	//	return false;
-	//}
-
-	// Create the index array.
-	//indices = new unsigned int[m_indexCount];
-	//if (!indices)
-	//{
-	//	return false;
-	//}
-
 	// Load the vertex array with data.
 	for (int i = 0; i < m_vertexCount; i++)
 	{
 		// I'm dividing these positions to make the mesh smaller (and further back from the camera on the z axis), otherwise it'd be clipped and not show up onscreen.
-		simpleMesh.vertexList[i].Pos.x = modelData[i].pos[0] / 50.f;
-		simpleMesh.vertexList[i].Pos.y = modelData[i].pos[1] / 50.f;
-		simpleMesh.vertexList[i].Pos.z = modelData[i].pos[2] / 50.f + 1 ;
+		simpleMesh.vertexList[i].Pos.x = modelData[i].pos[0] / 30.f;
+		simpleMesh.vertexList[i].Pos.y = modelData[i].pos[1] / 30.f;
+		simpleMesh.vertexList[i].Pos.z = modelData[i].pos[2] / 30.f + 1 ;
 
 		simpleMesh.vertexList[i].Tex.x = modelData[i].uvw[0];
 		simpleMesh.vertexList[i].Tex.y = modelData[i].uvw[1];
@@ -169,16 +142,6 @@ bool Model::InitializeBuffers(ID3D11Device* device, ID3D11DeviceContext* deviceC
 		return false;
 	}
 
-	//Edited following to use new vertex/index buffer
-	// Set the vertex buffer to active in the input assembler so it can be rendered.
-	deviceContext->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
-
-	// Set the index buffer to active in the input assembler so it can be rendered.
-	deviceContext->IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
-
-	// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
-	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
 	return true;
 }
 
@@ -192,10 +155,20 @@ void Model::ShutdownBuffers()
 
 void Model::RenderBuffers(ID3D11DeviceContext* deviceContext, ID3D11VertexShader* vertexShader, ID3D11PixelShader* pixelShader, ID3D11InputLayout* inputLayout, ID3D11RenderTargetView* view)
 {
+	// Set vertex buffer stride and offset.
+	unsigned int stride = sizeof(SimpleVertex);
+	unsigned int offset = 0;
+
 	// setup the pipeline
 	ID3D11RenderTargetView* const views[] = { view };
 	deviceContext->OMSetRenderTargets(ARRAYSIZE(views), views, nullptr);
 	deviceContext->IASetInputLayout(inputLayout);
+	// Set the vertex buffer to active in the input assembler so it can be rendered.
+	deviceContext->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
+	// Set the index buffer to active in the input assembler so it can be rendered.
+	deviceContext->IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
+	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	deviceContext->VSSetShader(vertexShader, nullptr, 0);
 	deviceContext->PSSetShader(pixelShader, nullptr, 0);
 	

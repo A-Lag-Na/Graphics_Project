@@ -1,7 +1,9 @@
-//cbuffer WVP : register (b0)
-//{
-//	matrix w, v, p;
-//}
+#pragma pack_matrix(row_major)
+
+cbuffer WVP : register(b0)
+{
+    matrix w, v, p;
+}
 
 struct VS_IN
 {
@@ -22,17 +24,12 @@ struct VS_OUT
 VS_OUT main(VS_IN input)
 {
 	VS_OUT output;
+    output.localpos = input.pos.xyz;
     output.pos = float4(input.pos, 1.0f);
-    output.norm = input.norm;
+    output.pos = mul(output.pos, w);
+    output.pos = mul(output.pos, v);
+    output.pos = mul(output.pos, p);
     output.tex = input.tex;
-    output.localpos = 0;
- //   output.localpos = input.pos;
-	//output.pos = float4(input.pos.xyz, 1.0f);
-	//output.pos = mul(output.pos, w);
-	//output.pos = mul(output.pos, v);
-	//output.pos = mul(output.pos, p);
-	//output.tex = input.tex;
-	//output.norm = float4(input.norm.xyz, 0.0f);
- //   output.norm = mul(output.norm, (float3x3) w).xyz;
+    output.norm = mul(float3(input.norm), (float3x3) w).xyz;
 	return  output;
 }
