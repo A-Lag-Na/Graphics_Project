@@ -128,37 +128,37 @@ bool Camera::CameraMove(XMMATRIX& myCamera)
 
 	if (GetAsyncKeyState(0x57))
 	{
-		XMMATRIX temp = XMMatrixTranslation(0.f, 0.f, .05f);
+		XMMATRIX temp = XMMatrixTranslation(0.f, 0.f, -.05f);
 		myCamera = XMMatrixMultiply(temp, myCamera);
 	}
 	// S, backwards camera control
 	if (GetAsyncKeyState(0x53))
 	{
-		XMMATRIX temp = XMMatrixTranslation(0, 0, -.05f);
+		XMMATRIX temp = XMMatrixTranslation(0, 0, .05f);
 		myCamera = XMMatrixMultiply(temp, myCamera);
 	}
 	// A, leftwards camera control
 	if (GetAsyncKeyState(0x41))
 	{
-		XMMATRIX temp = XMMatrixTranslation(-.05f, 0, 0);
+		XMMATRIX temp = XMMatrixTranslation(.05f, 0, 0);
 		myCamera = XMMatrixMultiply(temp, myCamera);
 	}
 	// D, rightwards camera control
 	if (GetAsyncKeyState(0x44))
 	{
-		XMMATRIX temp = XMMatrixTranslation(.05f, 0, 0);
+		XMMATRIX temp = XMMatrixTranslation(-.05f, 0, 0);
 		myCamera = XMMatrixMultiply(temp, myCamera);
 	}
 	// Q, upwards camera control
 	if (GetAsyncKeyState(0x51))
 	{
-		XMMATRIX temp = XMMatrixTranslation(0, 0.05f, 0);
+		XMMATRIX temp = XMMatrixTranslation(0, -0.05f, 0);
 		myCamera = XMMatrixMultiply(temp, myCamera);
 	}
 	// E, downwards camera control
 	if (GetAsyncKeyState(0x45))
 	{
-		XMMATRIX temp = XMMatrixTranslation(0, -0.05f, 0);
+		XMMATRIX temp = XMMatrixTranslation(0, 0.05f, 0);
 		myCamera = XMMatrixMultiply(temp, myCamera);
 	}
 	// R, toggle overhead directional light
