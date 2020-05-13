@@ -6,56 +6,152 @@ bool Grid::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, 
 	D3D11_SUBRESOURCE_DATA vertexData, indexData;
 	HRESULT result;
 
-	 m_vertexCount = m * n;
-	 m_indexCount = (m - 1) * (n - 1) * 2;
+	 m_vertexCount = (m - 1) * (n - 1) * 8;
+	 m_indexCount = m_vertexCount;
 
 	//Create The Vertices
 
-	float halfWidth = 0.5f * width;
-	float halfDepth = 0.5f * depth;
-	float dx = width / (n - 1);
-	float dz = depth / (m - 1);
 	float du = 1.0f / (n - 1);
 	float dv = 1.0f / (m - 1);
 
 	meshData.vertexList.resize(m_vertexCount);
-
-	for (int i = 0; i < m; ++i)
-	{
-		float z = halfDepth - i * dz;
-
-		for (int j = 0; j < n; ++j)
-		{
-			float x = -halfWidth + j * dx;
-			//Position
-			meshData.vertexList[(i * n) + j].Pos = XMFLOAT3(x, 0.0f, z);
-			//Normal
-			meshData.vertexList[(i * n) + j].Normal = XMFLOAT3(0.0f, 1.0f, 0.0f);
-			//Texture
-			meshData.vertexList[(i * n) + j].Tex.x = j * du;
-			meshData.vertexList[(i * n) + j].Tex.y = i * dv;
-		}
-	}
-
-	meshData.indicesList.resize(m_indexCount * 3); // 3 indices per face
-
-	// Iterate over each quad and compute indices.
-	int k = 0;
+	meshData.indicesList.resize(m_indexCount); // 3 indices per face
+	
+	int index = 0;
 
 	for (int i = 0; i < m - 1; ++i)
 	{
+
 		for (int j = 0; j < n - 1; ++j)
 		{
-			meshData.indicesList[k] = (i * n) + j;
-			meshData.indicesList[k + 1] = ((i * n) + j) + 1;
-			meshData.indicesList[k + 2] = ((i + 1) * n) + j;
-			meshData.indicesList[k + 3] = ((i + 1) * n) + j;
-			meshData.indicesList[k + 4] = ((i * n) + j) + 1;
-			meshData.indicesList[k + 5] = (((i + 1) * n) + j) + 1;
-			k += 6; // next quad
 
+			 //LINE 1
+			float x = (float)i;
+			float z = (float)(j + 1);
+
+			//Position UPLEFT
+			meshData.vertexList[index].Pos = XMFLOAT3(x, 0.0f, z);
+			//Normal
+			meshData.vertexList[index].Normal = XMFLOAT3(0.0f, 1.0f, 0.0f);
+			//Texture
+			meshData.vertexList[index].Tex.x = j * du;
+			meshData.vertexList[index].Tex.y = i * dv;
+
+			meshData.indicesList[index] = index;
+
+			index++;
+
+			x = (float)(i + 1);
+			z = (float)(j + 1);
+
+			//Position UPRIGHT
+			meshData.vertexList[index].Pos = XMFLOAT3(x, 0.0f, z);
+			//Normal
+			meshData.vertexList[index].Normal = XMFLOAT3(0.0f, 1.0f, 0.0f);
+			//Texture
+			meshData.vertexList[index].Tex.x = j * du;
+			meshData.vertexList[index].Tex.y = i * dv;
+
+			meshData.indicesList[index] = index;
+
+			index++;
+
+			//LINE 2
+			x = (float)(i + 1);
+			z = (float)(j + 1);
+
+			//Position UPRIGHT
+			meshData.vertexList[index].Pos = XMFLOAT3(x, 0.0f, z);
+			//Normal
+			meshData.vertexList[index].Normal = XMFLOAT3(0.0f, 1.0f, 0.0f);
+			//Texture
+			meshData.vertexList[index].Tex.x = j * du;
+			meshData.vertexList[index].Tex.y = i * dv;
+
+			meshData.indicesList[index] = index;
+
+			index++;
+
+			x = (float)(i + 1);
+			z = (float)(j);
+
+			//Position BOTRIGHT
+			meshData.vertexList[index].Pos = XMFLOAT3(x, 0.0f, z);
+			//Normal
+			meshData.vertexList[index].Normal = XMFLOAT3(0.0f, 1.0f, 0.0f);
+			//Texture
+			meshData.vertexList[index].Tex.x = j * du;
+			meshData.vertexList[index].Tex.y = i * dv;
+
+			meshData.indicesList[index] = index;
+
+			index++;
+
+			//LINE 3
+			x = (float)(i + 1);
+			z = (float)(j);
+
+			//Position BOTRIGHT
+			meshData.vertexList[index].Pos = XMFLOAT3(x, 0.0f, z);
+			//Normal
+			meshData.vertexList[index].Normal = XMFLOAT3(0.0f, 1.0f, 0.0f);
+			//Texture
+			meshData.vertexList[index].Tex.x = j * du;
+			meshData.vertexList[index].Tex.y = i * dv;
+
+			meshData.indicesList[index] = index;
+
+			index++;
+
+			x = (float)(i);
+			z = (float)(j);
+
+			//Position BOTLEFT
+			meshData.vertexList[index].Pos = XMFLOAT3(x, 0.0f, z);
+			//Normal
+			meshData.vertexList[index].Normal = XMFLOAT3(0.0f, 1.0f, 0.0f);
+			//Texture
+			meshData.vertexList[index].Tex.x = j * du;
+			meshData.vertexList[index].Tex.y = i * dv;
+
+			meshData.indicesList[index] = index;
+
+			index++;
+
+			//LINE 4
+			x = (float)(i);
+			z = (float)(j);
+
+			//Position BOTLEFT
+			meshData.vertexList[index].Pos = XMFLOAT3(x, 0.0f, z);
+			//Normal
+			meshData.vertexList[index].Normal = XMFLOAT3(0.0f, 1.0f, 0.0f);
+			//Texture
+			meshData.vertexList[index].Tex.x = j * du;
+			meshData.vertexList[index].Tex.y = i * dv;
+
+			meshData.indicesList[index] = index;
+
+			index++;
+
+			x = (float)(i);
+			z = (float)(j + 1);
+
+			//Position UPLEFT
+			meshData.vertexList[index].Pos = XMFLOAT3(x, 0.0f, z);
+			//Normal
+			meshData.vertexList[index].Normal = XMFLOAT3(0.0f, 1.0f, 0.0f);
+			//Texture
+			meshData.vertexList[index].Tex.x = j * du;
+			meshData.vertexList[index].Tex.y = i * dv;
+
+			meshData.indicesList[index] = index;
+
+			index++;
 		}
 	}
+
+	
 
 	// Set up the description of the static vertex buffer.
 	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -115,10 +211,10 @@ void Grid::Render(ID3D11DeviceContext* deviceContext, ID3D11VertexShader* vertex
 	// Set the index buffer to active in the input assembler so it can be rendered.
 	deviceContext->IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 	// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
-	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
 	deviceContext->VSSetShader(vertexShader, nullptr, 0);
 	deviceContext->PSSetShader(pixelShader, nullptr, 0);
 	//deviceContext->PSSetSamplers(0, 1, &myLinearSampler);
 
-	deviceContext->DrawIndexed(m_indexCount * 3, 0, 0);
+	deviceContext->DrawIndexed(m_indexCount, 0, 0);
 }
