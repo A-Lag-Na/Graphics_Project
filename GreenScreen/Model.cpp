@@ -8,6 +8,7 @@ Model::Model()
 	m_indexBuffer = nullptr;
 	m_vertexCount = 0;
 	m_indexCount = 0;
+	m_scale = 1.f;
 };
 
 Model::Model(const Model& other)
@@ -17,6 +18,7 @@ Model::Model(const Model& other)
 	m_indexBuffer = other.m_indexBuffer;
 	m_vertexCount = other.m_vertexCount;
 	m_indexCount = other.m_indexCount;
+	m_scale = other.m_scale;
 }
 
 
@@ -26,12 +28,13 @@ Model::~Model()
 	simpleMesh.indicesList.~vector();
 }
 
-//Because sizeof gets the byte size, and doesn't seem to be working properly, I'm making it so we just pass in the number of verticies and indices.
-bool Model::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext,const OBJ_VERT* modelData, const unsigned int* indicesData, unsigned int vertCount, unsigned int indexCount)
+//Higher scaling factor == smaller model
+bool Model::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext,const OBJ_VERT* modelData, const unsigned int* indicesData, unsigned int vertCount, unsigned int indexCount, float scalingFactor)
 {
 	bool result;
 	m_vertexCount = vertCount;
 	m_indexCount = indexCount;
+	m_scale = scalingFactor;
 
 	// Initialize the vertex and index buffer that hold the geometry for the triangle.
 	result = InitializeBuffers(device, deviceContext, modelData, indicesData);
@@ -81,9 +84,9 @@ bool Model::InitializeBuffers(ID3D11Device* device, ID3D11DeviceContext* deviceC
 	for (int i = 0; i < m_vertexCount; i++)
 	{
 		// I'm dividing these positions to make the mesh smaller (and further back from the camera on the z axis), otherwise it'd be clipped and not show up onscreen.
-		simpleMesh.vertexList[i].Pos.x = modelData[i].pos[0] / 30.f;
-		simpleMesh.vertexList[i].Pos.y = modelData[i].pos[1] / 30.f;
-		simpleMesh.vertexList[i].Pos.z = modelData[i].pos[2] / 30.f + 1 ;
+		simpleMesh.vertexList[i].Pos.x = modelData[i].pos[0] / m_scale;
+		simpleMesh.vertexList[i].Pos.y = modelData[i].pos[1] / m_scale;
+		simpleMesh.vertexList[i].Pos.z = modelData[i].pos[2] / m_scale + 1 ;
 
 		simpleMesh.vertexList[i].Tex.x = modelData[i].uvw[0];
 		simpleMesh.vertexList[i].Tex.y = modelData[i].uvw[1];
@@ -171,6 +174,7 @@ void Model::RenderBuffers(ID3D11DeviceContext* deviceContext, ID3D11VertexShader
 	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	deviceContext->VSSetShader(vertexShader, nullptr, 0);
 	deviceContext->PSSetShader(pixelShader, nullptr, 0);
+	deviceContext->PSSetSamplers(0, 1, &myLinearSampler);
 	
 	deviceContext->DrawIndexed(m_indexCount, 0, 0);
 }

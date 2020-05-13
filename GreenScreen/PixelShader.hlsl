@@ -9,10 +9,10 @@ cbuffer ambLight : register(b2)
 {
     float4 aldir;
     float4 alcol;
-}
+}*/
 
 Texture2D baseTexture : register(t0);
-SamplerState linfilter : register(s0); */
+SamplerState linfilter : register(s0);
 
 struct VS_OUT
 {
@@ -24,7 +24,7 @@ struct VS_OUT
 
 float4 main(VS_OUT input) : SV_TARGET
 {
-	//float4 baseColor = baseTexture.Sample(linfilter, input.tex); // get base color
+	float4 baseColor = baseTexture.Sample(linfilter, input.tex); // get base color
    // float4 ambient = alcol * baseColor;
    //float4 lightColor = alcol + dlcol;
     //lightColor = saturate(lightColor);
@@ -32,5 +32,5 @@ float4 main(VS_OUT input) : SV_TARGET
 	//float3 wnorm = normalize(input.norm);
     //float4 outColor = saturate((dot(ldirection, wnorm))) * dlcol * baseColor;
     //return saturate(outColor + ambient);
-    return float4(1.0f, 0.0f, 0.0f, 1.0f);
+    return baseColor;
 }

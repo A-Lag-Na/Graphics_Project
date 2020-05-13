@@ -156,7 +156,8 @@ bool Initialize(int screenWidth, int screenHeight)
 	{
 		return false;
 	}
-	result = m_Grid->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), 800, 800, 10, 10);
+	//Create Grid
+	result = m_Grid->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), 20, 20, 10, 10);
 	// Create the model object.
 	m_Model = new Model;
 	if (!m_Model)
@@ -168,10 +169,10 @@ bool Initialize(int screenWidth, int screenHeight)
 	//For now, gotta pass in vertex and index count for each model rendered (.h or hardcoded), and only hardcoded is functional.
 	
 	//Hard coded cube
-	//result = m_Model->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), cubePoints, cubeIndicies, 8, 36);
+	//result = m_Model->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), cubePoints, cubeIndicies, 8, 36, 5.f);
 	
 	//.h loaded code
-	result = m_Model->Initialize( *myDevice.GetAddressOf(), *myContext.GetAddressOf(), cubeobj_data , cubeobj_indicies, 788, 1692);
+	result = m_Model->Initialize( *myDevice.GetAddressOf(), *myContext.GetAddressOf(), cubeobj_data , cubeobj_indicies, 788, 1692, 20.f);
 
 	return true;
 }
@@ -226,65 +227,29 @@ bool Frame()
 
 	// Set primitive topology
 	myContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	
-	//Code commented out here is copy-pasted from my old project, and needs to be updated.
-	//------------------------------------------------------------------------------------
-	//Loading Cube
-	//LoadMesh("corvette.mesh", simpleMesh);
-	/*//Making Vertex Buffer
-	D3D11_BUFFER_DESC bd = {};
-	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.ByteWidth = sizeof(SimpleVertex) * simpleMesh.vertexList.size();
-	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bd.CPUAccessFlags = 0;
-	
-	D3D11_SUBRESOURCE_DATA InitData = {};
-	InitData.pSysMem = simpleMesh.vertexList.data();
-	myDevice->CreateBuffer(&bd, &InitData, &myVertexBuffer);
-	
-	// Set vertex buffer
-	UINT stride = sizeof(SimpleVertex);
-	UINT offset = 0;
-	myContext->IASetVertexBuffers(0, 1, &myVertexBuffer, &stride, &offset);
-	
-	////Create Index Buffer
-	UINT size = simpleMesh.indicesList.size();
-	meshSizes.push_back(size);
-	
-	ZeroMemory(&bd, sizeof(bd));
-	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.ByteWidth = sizeof(int) * size;
-	bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	bd.CPUAccessFlags = 0;
-	InitData.pSysMem = simpleMesh.indicesList.data();
-	myDevice->CreateBuffer(&bd, &InitData, &myIndexBuffer);
-	
-	// Set index buffer
-	myContext->IASetIndexBuffer(myIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-	
-	//---------
+
 	//Texturing
 	//---------
+
+	//Load Texture
+	//CreateDDSTextureFromFile(myDevice, L"SunsetSkybox.dds", nullptr, &skyboxSRV);
+
+	//// Create the sample state
+	//D3D11_SAMPLER_DESC sampDesc = {};
+	//sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	//sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	//sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	//sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	//sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	//sampDesc.MinLOD = 0;
+	//sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	//myDevice->CreateSamplerState(&sampDesc, &myLinearSampler);
+	//
+	//Loading Cube
+	//LoadMesh("corvette.mesh", simpleMesh);
 	
 	// Load corvette Texture
-	CreateDDSTextureFromFile(myDevice, L"vette_color.dds", nullptr, &mySRV);
-
-	//Load skybox Texture
-	CreateDDSTextureFromFile(myDevice, L"SunsetSkybox.dds", nullptr, &skyboxSRV);
-
-	// Create the sample state
-	D3D11_SAMPLER_DESC sampDesc = {};
-	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-	sampDesc.MinLOD = 0;
-	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
-	myDevice->CreateSamplerState(&sampDesc, &myLinearSampler);
-	
-	*/
-
+	//CreateDDSTextureFromFile(myDevice, L"vette_color.dds", nullptr, &mySRV);
 	//--------------------------------------------------------------------------
 
 	// Render the graphics scene.
@@ -336,10 +301,12 @@ bool Render()
 			// change the constant buffer data here per draw / model
 			con->UpdateSubresource(WVPconstantBuffer.Get(), 0, nullptr, &constantBufferData, 0, 0);
 			con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
-			m_Grid->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view);
+			
 			// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
-			m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view);
+			//m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view);
+			m_Grid->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view);
 			//tri.Render();
+			
 			swap->Present(1, 0);
 			// release incremented COM reference counts
 			if(swap)

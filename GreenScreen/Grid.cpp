@@ -9,8 +9,6 @@ bool Grid::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, 
 	 m_vertexCount = m * n;
 	 m_faceCount = (m - 1) * (n - 1) * 2;
 
-	
-
 	//Create The Vertices
 
 	float halfWidth = 0.5f * width;

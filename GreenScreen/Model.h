@@ -20,7 +20,7 @@ public:
 	Model(const Model&);
 	~Model();
 
-	bool Initialize(ID3D11Device*, ID3D11DeviceContext* ,const OBJ_VERT*, const unsigned int*, unsigned int, unsigned int);
+	bool Initialize(ID3D11Device*, ID3D11DeviceContext* ,const OBJ_VERT*, const unsigned int*, unsigned int, unsigned int, float);
 	void Shutdown();
 	void Render(ID3D11DeviceContext*, ID3D11VertexShader*, ID3D11PixelShader*, ID3D11InputLayout*, ID3D11RenderTargetView*);
 
@@ -36,5 +36,6 @@ private:
 	SimpleMesh simpleMesh;
 	ID3D11Buffer* m_vertexBuffer, * m_indexBuffer = nullptr;
 	unsigned int m_vertexCount, m_indexCount;
+	float m_scale;
 };
 
