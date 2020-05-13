@@ -1,6 +1,7 @@
 #pragma once
 
 #include <DirectXMath.h>
+#include <windows.h>
 
 using namespace DirectX;
 
@@ -22,6 +23,7 @@ public:
 	void GetViewMatrix(XMMATRIX&);
 	void GetWorldMatrix(XMMATRIX&);
 	void GetProjectionMatrix(XMMATRIX&);
+	bool CameraMove(XMMATRIX&);
 
 private:
 	float m_PosX, m_PosY, m_PosZ;
@@ -29,5 +31,6 @@ private:
 	XMMATRIX m_viewMatrix;
 	XMMATRIX m_worldMatrix;
 	XMMATRIX m_projectionMatrix;
+	POINT m_oldPos;
 };
 

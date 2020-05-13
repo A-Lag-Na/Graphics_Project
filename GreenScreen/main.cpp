@@ -227,13 +227,15 @@ bool Frame()
 
 	// Set primitive topology
 	myContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
+	//---------
 	//Texturing
 	//---------
+	
+	// Load corvette Texture
+	CreateDDSTextureFromFile(myDevice, L"vette_color.dds", nullptr, &mySRV);
 
-	//Load Texture
-	//CreateDDSTextureFromFile(myDevice, L"SunsetSkybox.dds", nullptr, &skyboxSRV);
-
+	//Load skybox Texture
+	CreateDDSTextureFromFile(myDevice, L"SunsetSkybox.dds", nullptr, &skyboxSRV);
 	//// Create the sample state
 	//D3D11_SAMPLER_DESC sampDesc = {};
 	//sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
@@ -264,7 +266,7 @@ bool Frame()
 
 bool Render()
 {
-	XMMATRIX viewMatrix, projectionMatrix, worldMatrix;
+	XMMATRIX viewMatrix, projectionMatrix, worldMatrix, tempView;
 	bool result;
 
 	// Initialize stuff here
@@ -280,7 +282,6 @@ bool Render()
 		m_Camera->GetViewMatrix(viewMatrix);
 		m_Camera->GetWorldMatrix(worldMatrix);
 		m_Camera->GetProjectionMatrix(projectionMatrix);
-
 
 		IDXGISwapChain* swap;
 		ID3D11DeviceContext* con;
@@ -306,7 +307,7 @@ bool Render()
 			//m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view);
 			m_Grid->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view);
 			//tri.Render();
-			
+
 			swap->Present(1, 0);
 			// release incremented COM reference counts
 			if(swap)
