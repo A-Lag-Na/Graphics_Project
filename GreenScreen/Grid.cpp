@@ -6,6 +6,7 @@ bool Grid::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, 
 	D3D11_SUBRESOURCE_DATA vertexData, indexData;
 	HRESULT result;
 
+
 	 m_vertexCount = (m - 1) * (n - 1) * 8;
 	 m_indexCount = m_vertexCount;
 
@@ -19,11 +20,15 @@ bool Grid::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, 
 	
 	int index = 0;
 
+	
 	for (int i = 0; i < m - 1; ++i)
 	{
+	
 
+	
 		for (int j = 0; j < n - 1; ++j)
 		{
+			
 
 			 //LINE 1
 			float x = (float)i;
@@ -32,15 +37,20 @@ bool Grid::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, 
 			//Position UPLEFT
 			meshData.vertexList[index].Pos = XMFLOAT3(x, 0.0f, z);
 			//Normal
+			
 			meshData.vertexList[index].Normal = XMFLOAT3(0.0f, 1.0f, 0.0f);
 			//Texture
+			
 			meshData.vertexList[index].Tex.x = j * du;
 			meshData.vertexList[index].Tex.y = i * dv;
 
+	
 			meshData.indicesList[index] = index;
 
+	
 			index++;
 
+	
 			x = (float)(i + 1);
 			z = (float)(j + 1);
 
@@ -211,10 +221,46 @@ void Grid::Render(ID3D11DeviceContext* deviceContext, ID3D11VertexShader* vertex
 	// Set the index buffer to active in the input assembler so it can be rendered.
 	deviceContext->IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 	// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
+	
 	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
 	deviceContext->VSSetShader(vertexShader, nullptr, 0);
 	deviceContext->PSSetShader(pixelShader, nullptr, 0);
+	deviceContext->PSSetShaderResources(0, 0, nullptr);
 	//deviceContext->PSSetSamplers(0, 1, &myLinearSampler);
+
 
 	deviceContext->DrawIndexed(m_indexCount, 0, 0);
 }
+
+//Saving this here just in case we need it later for testing multiple draws or something.
+//Hardcoded cube
+//OBJ_VERT cubePoints[8] =
+//{
+//	{{ -0.5f, -0.5f,  1.5f}, { 0.0f, 0.0f, 1.0f}, { 0.0f, 0.0f, 1.0f}},
+//	{{  0.5f, -0.5f,  1.5f}, { 0.0f, 1.0f, 1.0f}, { 0.0f, 1.0f, 0.0f}},
+//	{{ -0.5f,  0.5f,  1.5f}, { 1.0f, 0.0f, 1.0f}, { 0.0f, 0.0f,-1.0f}},
+//	{{  0.5f,  0.5f,  1.5f}, { 1.0f, 1.0f, 1.0f}, { 0.0f,-1.0f, 0.0f}},
+//	{{ -0.5f,  0.5f, 0.5f}, { 0.0f, 1.0f, 1.0f}, { 1.0f, 0.0f, 0.0f}},
+//	{{  0.5f,  0.5f, 0.5f}, { 1.0f, 0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}},
+//	{{ -0.5f, -0.5f, 0.5f}, { 0.0f, 0.0f, 1.0f}, { 0.0f, 0.0f, 1.0f}},
+//	{{  0.5f, -0.5f, 0.5f}, { 0.0f, 1.0f, 1.0f}, { 0.0f, 1.0f, 0.0f}}
+//
+//};
+//unsigned int cubeIndicies[36]
+//{
+//	0, 1, 2,
+//	2, 1, 3,
+//	2, 3, 4,
+//	4, 3, 5,
+//	4, 5, 6,
+//	6, 5, 7,
+//	6, 7, 0,	
+//	0, 7, 1,
+//	1, 7, 3,
+//	3, 7, 5,
+//	6, 0, 4,
+//	4, 0, 2
+//};
+
+//Hard coded cube
+//result = m_Model->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), cubePoints, cubeIndicies, 8, 36, 5.f);

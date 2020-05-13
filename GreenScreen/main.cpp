@@ -20,10 +20,15 @@ using namespace GRAPHICS;
 //Added includes
 #include "Camera.h"
 #include "Model.h"
-#include "Grid.h"
 #include "DDSTextureLoader.h"
 #include "FBXLoader.h"
 #include "Structs.cpp"
+
+#include "../GreenScreen/LightManager.h"
+
+//Models & Rendering includes
+#include "Grid.h"
+#include "corvetteobj.h"
 
 const float SCREEN_DEPTH = 1000.0f;
 const float SCREEN_NEAR = 0.1f;
@@ -61,38 +66,6 @@ ID3D11SamplerState* myLinearSampler = nullptr;
 
 float clr[] = { 57 / 255.0f, 1.0f, 20 / 255.0f, 1 }; // start with a neon green
 
-//grid
-
-
-//cube
-OBJ_VERT cubePoints[8] =
-{
-	{{ -0.5f, -0.5f,  1.5f}, { 0.0f, 0.0f, 1.0f}, { 0.0f, 0.0f, 1.0f}},
-	{{  0.5f, -0.5f,  1.5f}, { 0.0f, 1.0f, 1.0f}, { 0.0f, 1.0f, 0.0f}},
-	{{ -0.5f,  0.5f,  1.5f}, { 1.0f, 0.0f, 1.0f}, { 0.0f, 0.0f,-1.0f}},
-	{{  0.5f,  0.5f,  1.5f}, { 1.0f, 1.0f, 1.0f}, { 0.0f,-1.0f, 0.0f}},
-	{{ -0.5f,  0.5f, 0.5f}, { 0.0f, 1.0f, 1.0f}, { 1.0f, 0.0f, 0.0f}},
-	{{  0.5f,  0.5f, 0.5f}, { 1.0f, 0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}},
-	{{ -0.5f, -0.5f, 0.5f}, { 0.0f, 0.0f, 1.0f}, { 0.0f, 0.0f, 1.0f}},
-	{{  0.5f, -0.5f, 0.5f}, { 0.0f, 1.0f, 1.0f}, { 0.0f, 1.0f, 0.0f}}
-
-};
-unsigned int cubeIndicies[36]
-{
-	0, 1, 2,
-	2, 1, 3,
-	2, 3, 4,
-	4, 3, 5,
-	4, 5, 6,
-	6, 5, 7,
-	6, 7, 0,	
-	0, 7, 1,
-	1, 7, 3,
-	3, 7, 5,
-	6, 0, 4,
-	4, 0, 2
-};
-
 bool Initialize(int, int);
 void Shutdown();
 bool Frame();
@@ -101,8 +74,6 @@ bool Render();
 // lets pop a window and use D3D11 to clear to a green screen
 int main()
 {
-	
-
 	if (+win.Create(0, 0, 800, 600, GWindowStyle::WINDOWEDBORDERED))
 	{
 		msgs.Create(win, [&]() 
@@ -117,7 +88,6 @@ int main()
 			
 			Frame();
 		}
-		
 	}
 	return 0; // that's all folks
 }
@@ -167,13 +137,8 @@ bool Initialize(int screenWidth, int screenHeight)
 	}
 
 	// Initialize the model object.
-	//For now, gotta pass in vertex and index count for each model rendered (.h or hardcoded), and only hardcoded is functional.
-	
-	//Hard coded cube
-	//result = m_Model->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), cubePoints, cubeIndicies, 8, 36, 5.f);
-	
-	//.h loaded code
-	result = m_Model->Initialize( *myDevice.GetAddressOf(), *myContext.GetAddressOf(), cubeobj_data , cubeobj_indicies, 788, 1692, 40.f);
+	//For now, gotta pass in vertex and index count for each model rendered (.h or hardcoded)
+	result = m_Model->Initialize( *myDevice.GetAddressOf(), *myContext.GetAddressOf(), corvetteobj_data , corvetteobj_indicies, 3453, 8112, 40.f);
 
 	return true;
 }
@@ -194,7 +159,6 @@ void Shutdown()
 		delete m_Model;
 		m_Model = 0;
 	}
-
 }
 
 bool Frame()
@@ -204,8 +168,9 @@ bool Frame()
 	Initialize(800, 800);
 
 	//I'm unsure if this code is supposed to go here or at the top of Render().
-//I have to initialize it after d3d11.Create() is called.
-//-------------------------------------------------------------------------
+
+	//I have to initialize it after d3d11.Create() is called.
+	//-------------------------------------------------------------------------
 	d3d11.GetSwapchain((void**)&mySwapChain);
 
 	// Create the vertex shader
@@ -228,33 +193,24 @@ bool Frame()
 
 	// Set primitive topology
 	myContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	//---------
+
+
 	//Texturing
 	//---------
-	
-	
 	// Load corvette Texture
-	//CreateDDSTextureFromFile(myDevice, L"vette_color.dds", nullptr, &mySRV);
 
+	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../vette_color.dds", nullptr, &mySRV);
 
-
-	//CreateDDSTextureFromFile(myDevice, L"SunsetSkybox.dds", nullptr, &skyboxSRV);
-	//// Create the sample state
-	//D3D11_SAMPLER_DESC sampDesc = {};
-	//sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	//sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	//sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	//sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	//sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-	//sampDesc.MinLOD = 0;
-	//sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
-	//myDevice->CreateSamplerState(&sampDesc, &myLinearSampler);
-	//
-	//Loading Cube
-	//LoadMesh("corvette.mesh", simpleMesh);
-	
-	// Load corvette Texture
-	//CreateDDSTextureFromFile(myDevice, L"vette_color.dds", nullptr, &mySRV);
+	// Create the sample state
+	D3D11_SAMPLER_DESC sampDesc = {};
+	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	sampDesc.MinLOD = 0;
+	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	myDevice->CreateSamplerState(&sampDesc, &myLinearSampler);
 	//--------------------------------------------------------------------------
 
 	// Render the graphics scene.
@@ -273,8 +229,6 @@ bool Render()
 	bool result;
 
 	// Initialize stuff here
-
-	//Triangle tri(win, d3d11);
 
 	// Render Loop here
 	while (+win.ProcessWindowEvents())
@@ -318,8 +272,8 @@ bool Render()
 			con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
 			
 			// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
+			// To disable texturing, call Model->Render without the SRV or sampler parameters (untested).
 			m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, mySRV, myLinearSampler);
-
 			ZeroMemory(&constantBufferData, sizeof(WVP));
 			constantBufferData.w = XMMatrixIdentity();
 			constantBufferData.v = viewMatrix;
