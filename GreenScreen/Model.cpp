@@ -53,10 +53,10 @@ void Model::Shutdown()
 	return;
 }
 
-void Model::Render(ID3D11DeviceContext* deviceContext, ID3D11VertexShader* vertexShader, ID3D11PixelShader* pixelShader, ID3D11InputLayout* inputLayout, ID3D11RenderTargetView* view)
+void Model::Render(ID3D11DeviceContext* deviceContext, ID3D11VertexShader* vertexShader, ID3D11PixelShader* pixelShader, ID3D11InputLayout* inputLayout, ID3D11RenderTargetView* view, ID3D11ShaderResourceView* SRV = nullptr, ID3D11SamplerState* sampler = nullptr)
 {
 	// Put the vertex and index buffers on the graphics pipeline to prepare them for drawing.
-	RenderBuffers(deviceContext, vertexShader, pixelShader, inputLayout, view);
+	RenderBuffers(deviceContext, vertexShader, pixelShader, inputLayout, view, SRV, sampler);
 
 	return;
 }
@@ -156,7 +156,7 @@ void Model::ShutdownBuffers()
 	return;
 }
 
-void Model::RenderBuffers(ID3D11DeviceContext* deviceContext, ID3D11VertexShader* vertexShader, ID3D11PixelShader* pixelShader, ID3D11InputLayout* inputLayout, ID3D11RenderTargetView* view)
+void Model::RenderBuffers(ID3D11DeviceContext* deviceContext, ID3D11VertexShader* vertexShader, ID3D11PixelShader* pixelShader, ID3D11InputLayout* inputLayout, ID3D11RenderTargetView* view, ID3D11ShaderResourceView* SRV = nullptr, ID3D11SamplerState* sampler = nullptr)
 {
 	// Set vertex buffer stride and offset.
 	unsigned int stride = sizeof(SimpleVertex);
@@ -174,7 +174,9 @@ void Model::RenderBuffers(ID3D11DeviceContext* deviceContext, ID3D11VertexShader
 	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	deviceContext->VSSetShader(vertexShader, nullptr, 0);
 	deviceContext->PSSetShader(pixelShader, nullptr, 0);
-	//deviceContext->PSSetSamplers(0, 1, &myLinearSampler);
+
+	deviceContext->PSSetShaderResources(0, 1, &SRV);
+	deviceContext->PSSetSamplers(0, 1, &sampler);
 	
 	deviceContext->DrawIndexed(m_indexCount, 0, 0);
 }

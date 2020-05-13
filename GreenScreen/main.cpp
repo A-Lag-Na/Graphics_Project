@@ -51,11 +51,12 @@ Microsoft::WRL::ComPtr<ID3D11PixelShader>	pixelShader;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	vertexBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	indexBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	WVPconstantBuffer;
+
 WVP constantBufferData;
+ID3D11ShaderResourceView* mySRV = nullptr;
+//ID3D11ShaderResourceView* skyboxSRV = nullptr;
+ID3D11SamplerState* myLinearSampler = nullptr;
 
-
-
-//SimpleMesh sMesh;
 //---------------------------------------------
 
 float clr[] = { 57 / 255.0f, 1.0f, 20 / 255.0f, 1 }; // start with a neon green
@@ -231,27 +232,19 @@ bool Frame()
 	//Texturing
 	//---------
 	
-	//// Load corvette Texture
-	//CreateDDSTextureFromFile(myDevice, L"vette_color.dds", nullptr, &mySRV);
-
-	////Load skybox Texture
-	//CreateDDSTextureFromFile(myDevice, L"SunsetSkybox.dds", nullptr, &skyboxSRV);
-	//// Create the sample state
-	//D3D11_SAMPLER_DESC sampDesc = {};
-	//sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	//sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	//sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	//sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	//sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-	//sampDesc.MinLOD = 0;
-	//sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
-	//myDevice->CreateSamplerState(&sampDesc, &myLinearSampler);
-	//
-	//Loading Cube
-	//LoadMesh("corvette.mesh", simpleMesh);
-	
 	// Load corvette Texture
-	//CreateDDSTextureFromFile(myDevice, L"vette_color.dds", nullptr, &mySRV);
+	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../vette_color.dds", nullptr, &mySRV);
+
+	//Create sampler for shader
+	D3D11_SAMPLER_DESC sampDesc = {};
+	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	sampDesc.MinLOD = 0;
+	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	myDevice->CreateSamplerState(&sampDesc, &myLinearSampler);
 	//--------------------------------------------------------------------------
 
 	// Render the graphics scene.
@@ -268,9 +261,6 @@ bool Render()
 {
 	XMMATRIX viewMatrix, projectionMatrix, worldMatrix, tempView;
 	bool result;
-
-	// Initialize stuff here
-	//Triangle tri(win, d3d11);
 
 	// Render Loop here
 	while (+win.ProcessWindowEvents())
@@ -304,9 +294,8 @@ bool Render()
 			con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
 			
 			// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
-			m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view);
+			m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, mySRV, myLinearSampler);
 			//m_Grid->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view);
-			//tri.Render();
 
 			swap->Present(1, 0);
 			// release incremented COM reference counts
