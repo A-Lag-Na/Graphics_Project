@@ -174,7 +174,7 @@ void Model::RenderBuffers(ID3D11DeviceContext* deviceContext, ID3D11VertexShader
 	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	deviceContext->VSSetShader(vertexShader, nullptr, 0);
 	deviceContext->PSSetShader(pixelShader, nullptr, 0);
-	deviceContext->PSSetSamplers(0, 1, &myLinearSampler);
+	//deviceContext->PSSetSamplers(0, 1, &myLinearSampler);
 	
 	deviceContext->DrawIndexed(m_indexCount, 0, 0);
 }

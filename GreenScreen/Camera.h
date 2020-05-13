@@ -19,7 +19,7 @@ public:
 	XMVECTOR GetRotation();
 
 	bool Initialize(int screenWidth, int screenHeight, float SCREEN_NEAR, float  SCREEN_DEPTH);
-	void Render();
+	void Render(XMMATRIX&);
 	void GetViewMatrix(XMMATRIX&);
 	void GetWorldMatrix(XMMATRIX&);
 	void GetProjectionMatrix(XMMATRIX&);

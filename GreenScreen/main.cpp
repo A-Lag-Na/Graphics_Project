@@ -172,7 +172,7 @@ bool Initialize(int screenWidth, int screenHeight)
 	//result = m_Model->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), cubePoints, cubeIndicies, 8, 36, 5.f);
 	
 	//.h loaded code
-	result = m_Model->Initialize( *myDevice.GetAddressOf(), *myContext.GetAddressOf(), cubeobj_data , cubeobj_indicies, 788, 1692, 20.f);
+	result = m_Model->Initialize( *myDevice.GetAddressOf(), *myContext.GetAddressOf(), cubeobj_data , cubeobj_indicies, 788, 1692, 40.f);
 
 	return true;
 }
@@ -231,11 +231,11 @@ bool Frame()
 	//Texturing
 	//---------
 	
-	// Load corvette Texture
-	CreateDDSTextureFromFile(myDevice, L"vette_color.dds", nullptr, &mySRV);
+	//// Load corvette Texture
+	//CreateDDSTextureFromFile(myDevice, L"vette_color.dds", nullptr, &mySRV);
 
-	//Load skybox Texture
-	CreateDDSTextureFromFile(myDevice, L"SunsetSkybox.dds", nullptr, &skyboxSRV);
+	////Load skybox Texture
+	//CreateDDSTextureFromFile(myDevice, L"SunsetSkybox.dds", nullptr, &skyboxSRV);
 	//// Create the sample state
 	//D3D11_SAMPLER_DESC sampDesc = {};
 	//sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
@@ -270,13 +270,13 @@ bool Render()
 	bool result;
 
 	// Initialize stuff here
-	Triangle tri(win, d3d11);
+	//Triangle tri(win, d3d11);
 
 	// Render Loop here
 	while (+win.ProcessWindowEvents())
 	{
 		// Generate the view matrix based on the camera's position.
-		m_Camera->Render();
+		m_Camera->Render(viewMatrix);
 
 		//Get the view matrix from the camera
 		m_Camera->GetViewMatrix(viewMatrix);
@@ -304,8 +304,8 @@ bool Render()
 			con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
 			
 			// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
-			//m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view);
-			m_Grid->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view);
+			m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view);
+			//m_Grid->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view);
 			//tri.Render();
 
 			swap->Present(1, 0);
