@@ -24,6 +24,8 @@ using namespace GRAPHICS;
 #include "FBXLoader.h"
 #include "Structs.cpp"
 
+#include "../GreenScreen/LightManager.h"
+
 //Models & Rendering includes
 #include "Grid.h"
 #include "corvetteobj.h"
