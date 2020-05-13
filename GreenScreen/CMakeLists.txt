@@ -29,10 +29,11 @@ add_executable (GreenScreen
 	FBXLoader.h
 	DDSTextureLoader.h
 	DDSTextureLoader.cpp
-        Model.h
+    Model.h
 	Model.cpp
 	islandmodel.h
 	cubeobj.h
+	corvetteobj.h
 	Grid.h
 	Grid.cpp
 	Structs.cpp

@@ -28,6 +28,27 @@ Model::~Model()
 	simpleMesh.indicesList.~vector();
 }
 
+void Model::Shutdown()
+{
+	// Release the vertex and index buffers.
+	ShutdownBuffers();
+
+	return;
+}
+
+void Model::ShutdownBuffers()
+{
+	if (m_vertexBuffer) m_vertexBuffer->Release();
+	if (m_indexBuffer)  m_indexBuffer->Release();
+
+	return;
+}
+
+int Model::GetIndexCount()
+{
+	return m_indexCount;
+}
+
 //Higher scaling factor == smaller model
 bool Model::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext,const OBJ_VERT* modelData, const unsigned int* indicesData, unsigned int vertCount, unsigned int indexCount, float scalingFactor)
 {
@@ -43,27 +64,6 @@ bool Model::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext,
 		return false;
 	}
 	return true;
-}
-
-void Model::Shutdown()
-{
-	// Release the vertex and index buffers.
-	ShutdownBuffers();
-
-	return;
-}
-
-void Model::Render(ID3D11DeviceContext* deviceContext, ID3D11VertexShader* vertexShader, ID3D11PixelShader* pixelShader, ID3D11InputLayout* inputLayout, ID3D11RenderTargetView* view, ID3D11ShaderResourceView* SRV = nullptr, ID3D11SamplerState* sampler = nullptr)
-{
-	// Put the vertex and index buffers on the graphics pipeline to prepare them for drawing.
-	RenderBuffers(deviceContext, vertexShader, pixelShader, inputLayout, view, SRV, sampler);
-
-	return;
-}
-
-int Model::GetIndexCount()
-{
-	return m_indexCount;
 }
 
 bool Model::InitializeBuffers(ID3D11Device* device, ID3D11DeviceContext* deviceContext, const OBJ_VERT *modelData, const unsigned int *indicesData)
@@ -148,10 +148,10 @@ bool Model::InitializeBuffers(ID3D11Device* device, ID3D11DeviceContext* deviceC
 	return true;
 }
 
-void Model::ShutdownBuffers()
+void Model::Render(ID3D11DeviceContext* deviceContext, ID3D11VertexShader* vertexShader, ID3D11PixelShader* pixelShader, ID3D11InputLayout* inputLayout, ID3D11RenderTargetView* view, ID3D11ShaderResourceView* SRV = nullptr, ID3D11SamplerState* sampler = nullptr)
 {
-	if (m_vertexBuffer) m_vertexBuffer->Release();
-	if (m_indexBuffer)  m_indexBuffer->Release();
+	// Put the vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	RenderBuffers(deviceContext, vertexShader, pixelShader, inputLayout, view, SRV, sampler);
 
 	return;
 }
