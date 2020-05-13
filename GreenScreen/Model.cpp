@@ -175,8 +175,15 @@ void Model::RenderBuffers(ID3D11DeviceContext* deviceContext, ID3D11VertexShader
 	deviceContext->VSSetShader(vertexShader, nullptr, 0);
 	deviceContext->PSSetShader(pixelShader, nullptr, 0);
 
-	deviceContext->PSSetShaderResources(0, 1, &SRV);
-	deviceContext->PSSetSamplers(0, 1, &sampler);
-	
+	if (SRV)
+	{
+		//This contains the texture being loaded in.
+		deviceContext->PSSetShaderResources(0, 1, &SRV);
+	}
+	if (sampler)
+	{
+		//The sampler reads from the SRV to get the texture data.
+		deviceContext->PSSetSamplers(0, 1, &sampler);
+	}
 	deviceContext->DrawIndexed(m_indexCount, 0, 0);
 }
