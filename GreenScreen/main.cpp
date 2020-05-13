@@ -299,7 +299,7 @@ bool Frame()
 
 bool Render()
 {
-	XMMATRIX viewMatrix, projectionMatrix, worldMatrix;
+	XMMATRIX viewMatrix, projectionMatrix, worldMatrix, tempView;
 	bool result;
 
 	// Initialize stuff here
@@ -316,7 +316,7 @@ bool Render()
 		m_Camera->GetWorldMatrix(worldMatrix);
 		m_Camera->GetProjectionMatrix(projectionMatrix);
 
-
+		
 		IDXGISwapChain* swap;
 		ID3D11DeviceContext* con;
 		ID3D11RenderTargetView* view;
@@ -340,6 +340,8 @@ bool Render()
 			// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
 			m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view);
 			//tri.Render();
+
+
 			swap->Present(1, 0);
 			// release incremented COM reference counts
 			if(swap)
