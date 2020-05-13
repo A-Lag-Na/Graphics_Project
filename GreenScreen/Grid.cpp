@@ -7,7 +7,7 @@ bool Grid::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, 
 	HRESULT result;
 
 	 m_vertexCount = m * n;
-	 m_faceCount = (m - 1) * (n - 1) * 2;
+	 m_indexCount = (m - 1) * (n - 1) * 2;
 
 	//Create The Vertices
 
@@ -20,37 +20,38 @@ bool Grid::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, 
 
 	meshData.vertexList.resize(m_vertexCount);
 
-	for (unsigned int i = 0; i < m; ++i)
+	for (int i = 0; i < m; ++i)
 	{
 		float z = halfDepth - i * dz;
 
-		for (unsigned int j = 0; j < n; ++j)
+		for (int j = 0; j < n; ++j)
 		{
 			float x = -halfWidth + j * dx;
 			//Position
-			meshData.vertexList[i * n + j].Pos = XMFLOAT3(x, 0.0f, z);
+			meshData.vertexList[(i * n) + j].Pos = XMFLOAT3(x, 0.0f, z);
 			//Normal
-			meshData.vertexList[i * n + j].Normal = XMFLOAT3(0.0f, 1.0f, 0.0f);
+			meshData.vertexList[(i * n) + j].Normal = XMFLOAT3(0.0f, 1.0f, 0.0f);
 			//Texture
-			meshData.vertexList[i * n + j].Tex.x = j * du;
-			meshData.vertexList[i * n + j].Tex.y = i * dv;
+			meshData.vertexList[(i * n) + j].Tex.x = j * du;
+			meshData.vertexList[(i * n) + j].Tex.y = i * dv;
 		}
 	}
 
-	meshData.indicesList.resize(m_faceCount * 3); // 3 indices per face
+	meshData.indicesList.resize(m_indexCount * 3); // 3 indices per face
 
 	// Iterate over each quad and compute indices.
-	UINT k = 0;
-	for (UINT i = 0; i < m - 1; ++i)
+	int k = 0;
+
+	for (int i = 0; i < m - 1; ++i)
 	{
-		for (UINT j = 0; j < n - 1; ++j)
+		for (int j = 0; j < n - 1; ++j)
 		{
-			meshData.indicesList[k] = i * n + j;
-			meshData.indicesList[k + 1] = i * n + j + 1;
-			meshData.indicesList[k + 2] = (i + 1) * n + j;
-			meshData.indicesList[k + 3] = (i + 1) * n + j;
-			meshData.indicesList[k + 4] = i * n + j + 1;
-			meshData.indicesList[k + 5] = (i + 1) * n + j + 1;
+			meshData.indicesList[k] = (i * n) + j;
+			meshData.indicesList[k + 1] = ((i * n) + j) + 1;
+			meshData.indicesList[k + 2] = ((i + 1) * n) + j;
+			meshData.indicesList[k + 3] = ((i + 1) * n) + j;
+			meshData.indicesList[k + 4] = ((i * n) + j) + 1;
+			meshData.indicesList[k + 5] = (((i + 1) * n) + j) + 1;
 			k += 6; // next quad
 
 		}
@@ -79,7 +80,7 @@ bool Grid::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, 
 
 	// Set up the description of the static index buffer.
 	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	indexBufferDesc.ByteWidth = sizeof(unsigned int) * m_faceCount;
+	indexBufferDesc.ByteWidth = sizeof(unsigned int) * m_indexCount;
 	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	indexBufferDesc.CPUAccessFlags = 0;
 	indexBufferDesc.MiscFlags = 0;
@@ -108,8 +109,6 @@ void Grid::Render(ID3D11DeviceContext* deviceContext, ID3D11VertexShader* vertex
 	unsigned int offset = 0;
 
 	// setup the pipeline
-	ID3D11RenderTargetView* const views[] = { view };
-	deviceContext->OMSetRenderTargets(ARRAYSIZE(views), views, nullptr);
 	deviceContext->IASetInputLayout(inputLayout);
 	// Set the vertex buffer to active in the input assembler so it can be rendered.
 	deviceContext->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
@@ -119,6 +118,7 @@ void Grid::Render(ID3D11DeviceContext* deviceContext, ID3D11VertexShader* vertex
 	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	deviceContext->VSSetShader(vertexShader, nullptr, 0);
 	deviceContext->PSSetShader(pixelShader, nullptr, 0);
+	//deviceContext->PSSetSamplers(0, 1, &myLinearSampler);
 
-	deviceContext->DrawIndexed(m_faceCount, 0, 0);
+	deviceContext->DrawIndexed(m_indexCount * 3, 0, 0);
 }

@@ -112,7 +112,7 @@ int main()
 			
 		});
 
-		if (+d3d11.Create(win, 0))
+		if (+d3d11.Create(win, GW::GRAPHICS::DEPTH_STENCIL_SUPPORT | GW::GRAPHICS::DEPTH_BUFFER_SUPPORT))
 		{
 			
 			Frame();
@@ -158,7 +158,7 @@ bool Initialize(int screenWidth, int screenHeight)
 		return false;
 	}
 	//Create Grid
-	result = m_Grid->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), 20, 20, 10, 10);
+	result = m_Grid->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), 1 , 1 , 10, 10);
 	// Create the model object.
 	m_Model = new Model;
 	if (!m_Model)
@@ -232,19 +232,29 @@ bool Frame()
 	//Texturing
 	//---------
 	
+	
 	// Load corvette Texture
-	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../vette_color.dds", nullptr, &mySRV);
+	//CreateDDSTextureFromFile(myDevice, L"vette_color.dds", nullptr, &mySRV);
 
-	//Create sampler for shader
-	D3D11_SAMPLER_DESC sampDesc = {};
-	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-	sampDesc.MinLOD = 0;
-	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
-	myDevice->CreateSamplerState(&sampDesc, &myLinearSampler);
+
+
+	//CreateDDSTextureFromFile(myDevice, L"SunsetSkybox.dds", nullptr, &skyboxSRV);
+	//// Create the sample state
+	//D3D11_SAMPLER_DESC sampDesc = {};
+	//sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	//sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	//sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	//sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	//sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	//sampDesc.MinLOD = 0;
+	//sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	//myDevice->CreateSamplerState(&sampDesc, &myLinearSampler);
+	//
+	//Loading Cube
+	//LoadMesh("corvette.mesh", simpleMesh);
+	
+	// Load corvette Texture
+	//CreateDDSTextureFromFile(myDevice, L"vette_color.dds", nullptr, &mySRV);
 	//--------------------------------------------------------------------------
 
 	// Render the graphics scene.
@@ -262,10 +272,15 @@ bool Render()
 	XMMATRIX viewMatrix, projectionMatrix, worldMatrix, tempView;
 	bool result;
 
+	// Initialize stuff here
+
+	//Triangle tri(win, d3d11);
+
 	// Render Loop here
 	while (+win.ProcessWindowEvents())
 	{
 		// Generate the view matrix based on the camera's position.
+		
 		m_Camera->Render(viewMatrix);
 
 		//Get the view matrix from the camera
@@ -276,18 +291,27 @@ bool Render()
 		IDXGISwapChain* swap;
 		ID3D11DeviceContext* con;
 		ID3D11RenderTargetView* view;
+		ID3D11DepthStencilView* dsview;
 
 	
 		if (+d3d11.GetImmediateContext((void**)&con) &&
 			+d3d11.GetRenderTargetView((void**)&view) &&
 			+d3d11.GetSwapchain((void**)&swap))
 		{
+			
+			+d3d11.GetDepthStencilView((void**)&dsview);
+			ID3D11RenderTargetView* const views[] = { view };
+			con->OMSetRenderTargets(ARRAYSIZE(views), views, dsview);
+
 		
 			con->ClearRenderTargetView(view, clr);
+			con->ClearDepthStencilView(dsview, D3D11_CLEAR_DEPTH, 1, 0);
+
 			ZeroMemory(&constantBufferData, sizeof(WVP));
 			constantBufferData.w = XMMatrixIdentity();
 			constantBufferData.v = viewMatrix;
 			constantBufferData.p = projectionMatrix;
+
 		
 			// change the constant buffer data here per draw / model
 			con->UpdateSubresource(WVPconstantBuffer.Get(), 0, nullptr, &constantBufferData, 0, 0);
@@ -295,7 +319,8 @@ bool Render()
 			
 			// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
 			m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, mySRV, myLinearSampler);
-			//m_Grid->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view);
+
+			m_Grid->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view);
 
 			swap->Present(1, 0);
 			// release incremented COM reference counts

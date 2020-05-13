@@ -32,5 +32,5 @@ float4 main(VS_OUT input) : SV_TARGET
 	//float3 wnorm = normalize(input.norm);
     //float4 outColor = saturate((dot(ldirection, wnorm))) * dlcol * baseColor;
     //return saturate(outColor + ambient);
-    return saturate(baseColor);
+    return float4(input.localpos, 1.0f);
 }
