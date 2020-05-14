@@ -93,6 +93,11 @@ bool Camera::Initialize(int screenWidth, int screenHeight , float SCREEN_NEAR, f
 
 	//Create the view matrix from the three updated vectors.
 	m_viewMatrix = XMMatrixLookAtLH(position, lookAt, up);
+	
+	// added by clark
+	m_viewMatrix = XMMatrixInverse(nullptr, m_viewMatrix);
+	
+	// not used, not really needed -clark
 	m_worldMatrix = XMMatrixInverse(nullptr, m_viewMatrix);
 
 	return true;
@@ -127,6 +132,7 @@ bool Camera::CameraMove(XMMATRIX& myCamera)
 	// W, forwards camera control
 
 	if (GetAsyncKeyState(0x57))
+	//if (GetAsyncKeyState('W'))
 	{
 		XMMATRIX temp = XMMatrixTranslation(0.f, 0.f, .05f);
 		myCamera = XMMatrixMultiply(temp, myCamera);
@@ -152,13 +158,13 @@ bool Camera::CameraMove(XMMATRIX& myCamera)
 	// Q, upwards camera control
 	if (GetAsyncKeyState(0x51))
 	{
-		XMMATRIX temp = XMMatrixTranslation(0, 0.05f, 0);
+		XMMATRIX temp = XMMatrixTranslation(0, -0.05f, 0);
 		myCamera = XMMatrixMultiply(temp, myCamera);
 	}
 	// E, downwards camera control
 	if (GetAsyncKeyState(0x45))
 	{
-		XMMATRIX temp = XMMatrixTranslation(0, -0.05f, 0);
+		XMMATRIX temp = XMMatrixTranslation(0, 0.05f, 0);
 		myCamera = XMMatrixMultiply(temp, myCamera);
 	}
 	// R, toggle overhead directional light
@@ -171,15 +177,20 @@ bool Camera::CameraMove(XMMATRIX& myCamera)
 		if (m_currPos.x != m_oldPos.x || m_currPos.y != m_oldPos.y);
 		{
 
-			int CameraW[4] = { w->_14, w->_24, w->_34, w->_44 };
+			//float CameraW[4] = { w->_14, w->_24, w->_34, w->_44 };
+			// changed by clark
+			float CameraW[4] = { w->_41, w->_42, w->_43, w->_44 };
 			float ydelta = m_currPos.y - m_oldPos.y;
-			myCamera = XMMatrixMultiply(myCamera, XMMatrixRotationX(0.01 * ydelta));
+			//myCamera = XMMatrixMultiply(myCamera, XMMatrixRotationX(0.01 * ydelta));
+			myCamera = XMMatrixMultiply(XMMatrixRotationX(0.01 * ydelta), myCamera);
 			float xdelta = m_currPos.x - m_oldPos.x;
 			myCamera = XMMatrixMultiply(myCamera, XMMatrixRotationY(0.01 * xdelta));
 			XMStoreFloat4x4(w, myCamera);
-			w->_14 = CameraW[0];
-			w->_24 = CameraW[1];
-			w->_34 = CameraW[2];
+			
+			// changed by clark
+			w->_41 = CameraW[0];
+			w->_42 = CameraW[1];
+			w->_43 = CameraW[2];
 			w->_44 = CameraW[3];
 			myCamera = XMLoadFloat4x4(w);
 		}

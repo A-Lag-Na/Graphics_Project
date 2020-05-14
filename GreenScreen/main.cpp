@@ -179,6 +179,7 @@ bool Frame()
 	Initialize(800, 800);
 
 	//I'm unsure if this code is supposed to go here or at the top of Render().
+
 	//I have to initialize it after d3d11.Create() is called.
 	//-------------------------------------------------------------------------
 	d3d11.GetSwapchain((void**)&mySwapChain);
@@ -204,9 +205,11 @@ bool Frame()
 	// Set primitive topology
 	myContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
+
 	//Texturing
 	//---------
 	// Load corvette Texture
+
 	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../vette_color.dds", nullptr, &mySRV);
 
 	// Create the sample state
@@ -276,6 +279,10 @@ bool Render()
 			ZeroMemory(&constantBufferData, sizeof(WVP));
 			constantBufferData.w = XMMatrixIdentity();
 			constantBufferData.v = viewMatrix;
+			
+			// added by clark
+			constantBufferData.v = XMMatrixInverse(NULL, viewMatrix);
+			
 			constantBufferData.p = projectionMatrix;
 
 			//ZeroMemory(&dirLightConstantBuffer, sizeof(Light));
@@ -291,8 +298,23 @@ bool Render()
 			
 			// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
 			// To disable texturing, call Model->Render without the SRV or sampler parameters (untested).
-			m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, mySRV.Get(), myLinearSampler.Get());
-			//m_Grid->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view);
+			m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, mySRV, myLinearSampler);
+			
+			ZeroMemory(&constantBufferData, sizeof(WVP));
+			constantBufferData.w = XMMatrixIdentity();
+			constantBufferData.v = viewMatrix;
+
+			// added by clark
+			constantBufferData.v = XMMatrixInverse(NULL, viewMatrix);
+
+			constantBufferData.p = projectionMatrix;
+
+
+			// change the constant buffer data here per draw / model
+			con->UpdateSubresource(WVPconstantBuffer.Get(), 0, nullptr, &constantBufferData, 0, 0);
+			con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
+
+			m_Grid->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view);
 
 			swap->Present(1, 0);
 			// release incremented COM reference counts
