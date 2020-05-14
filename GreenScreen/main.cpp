@@ -56,11 +56,13 @@ Microsoft::WRL::ComPtr<ID3D11PixelShader>	pixelShader;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	vertexBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	indexBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	WVPconstantBuffer;
+Microsoft::WRL::ComPtr<ID3D11Buffer>	dirLightConstantBuffer;
+
+Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> mySRV;
+Microsoft::WRL::ComPtr < ID3D11SamplerState> myLinearSampler;
 
 WVP constantBufferData;
-ID3D11ShaderResourceView* mySRV = nullptr;
-//ID3D11ShaderResourceView* skyboxSRV = nullptr;
-ID3D11SamplerState* myLinearSampler = nullptr;
+Light light;
 
 //---------------------------------------------
 
@@ -121,6 +123,15 @@ bool Initialize(int screenWidth, int screenHeight)
 	srd.pSysMem = &constantBufferData;
 
 	HRESULT hr = myDevice->CreateBuffer(&desc, &srd, WVPconstantBuffer.GetAddressOf());
+
+
+	//Directional light constant buffer
+	ZeroMemory(&desc, sizeof(desc));
+	int test = sizeof(Light);
+	desc = CD3D11_BUFFER_DESC(sizeof(Light), D3D11_BIND_CONSTANT_BUFFER);
+	ZeroMemory(&srd, sizeof(srd));
+	srd.pSysMem = &light;
+	hr = myDevice->CreateBuffer(&desc, &srd, dirLightConstantBuffer.GetAddressOf());
 
 	m_Grid = new Grid;
 	if (!m_Grid)
@@ -208,6 +219,10 @@ bool Frame()
 	sampDesc.MinLOD = 0;
 	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
 	myDevice->CreateSamplerState(&sampDesc, &myLinearSampler);
+	//----------
+
+	//Lighting
+	light = MakeLight(XMFLOAT4(1.f, 0.f, 0.f, 0.5f), XMFLOAT4(0.f, -1.f, 0.f, 0.f));
 	//--------------------------------------------------------------------------
 
 	// Render the graphics scene.
@@ -263,14 +278,20 @@ bool Render()
 			constantBufferData.v = viewMatrix;
 			constantBufferData.p = projectionMatrix;
 
+			//ZeroMemory(&dirLightConstantBuffer, sizeof(Light));
+			
 		
 			// change the constant buffer data here per draw / model
 			con->UpdateSubresource(WVPconstantBuffer.Get(), 0, nullptr, &constantBufferData, 0, 0);
 			con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
+
+			//
+			con->UpdateSubresource(dirLightConstantBuffer.Get(), 0, nullptr, &light, 0, 0);
+			con->PSSetConstantBuffers(0, 1, dirLightConstantBuffer.GetAddressOf());
 			
 			// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
 			// To disable texturing, call Model->Render without the SRV or sampler parameters (untested).
-			m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, mySRV, myLinearSampler);
+			m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, mySRV.Get(), myLinearSampler.Get());
 			m_Grid->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view);
 
 			swap->Present(1, 0);
