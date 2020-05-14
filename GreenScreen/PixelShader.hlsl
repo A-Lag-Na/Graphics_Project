@@ -1,8 +1,8 @@
 // Commented out lighting and texturing until those features are implemented.
-cbuffer dirLight : register (b1)
+cbuffer dirLight : register (b0)
 {
-	float4 dldir;
-	float4 dlcol;
+    float4 dlcol;
+    float4 dldir;
 }
 
 /*cbuffer ambLight : register(b2)
@@ -28,12 +28,13 @@ float4 main(VS_OUT input) : SV_TARGET
 	float4 baseColor = baseTexture.Sample(linfilter, input.tex); // get base color
     // float4 ambient = alcol * baseColor;
     //float4 lightColor = alcol + dlcol;
-    //lightColor = saturate(lightColor);
+    
     float4 lightColor = dlcol;
+    lightColor = saturate(lightColor);
 	float3 ldirection = -normalize(dldir);
 	float3 wnorm = normalize(input.norm);
     float4 outColor = saturate((dot(ldirection, wnorm))) * dlcol * baseColor;
-    return saturate(outColor);
+    return outColor;
     //return saturate(outColor + ambient);
     
     //Debugging, use .pos or .norm here

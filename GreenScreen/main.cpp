@@ -63,6 +63,7 @@ Microsoft::WRL::ComPtr < ID3D11SamplerState> myLinearSampler;
 
 WVP constantBufferData;
 Light light;
+bool lightSwitch = false;
 
 //---------------------------------------------
 
@@ -225,7 +226,7 @@ bool Frame()
 	//----------
 
 	//Lighting
-	light = MakeLight(XMFLOAT4(1.f, 0.f, 0.f, 0.5f), XMFLOAT4(0.f, -1.f, 0.f, 0.f));
+	light.vLightDir = XMFLOAT4(0.f, -1.f, 0.f, 0.f);
 	//--------------------------------------------------------------------------
 
 	// Render the graphics scene.
@@ -250,7 +251,7 @@ bool Render()
 	{
 		// Generate the view matrix based on the camera's position.
 		
-		m_Camera->Render(viewMatrix);
+		m_Camera->Render(viewMatrix, lightSwitch);
 
 		//Get the view matrix from the camera
 		m_Camera->GetViewMatrix(viewMatrix);
@@ -283,22 +284,27 @@ bool Render()
 			// added by clark
 			constantBufferData.v = XMMatrixInverse(NULL, viewMatrix);
 			
-			constantBufferData.p = projectionMatrix;
-
-			//ZeroMemory(&dirLightConstantBuffer, sizeof(Light));
-			
+			constantBufferData.p = projectionMatrix;			
 		
 			// change the constant buffer data here per draw / model
 			con->UpdateSubresource(WVPconstantBuffer.Get(), 0, nullptr, &constantBufferData, 0, 0);
 			con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
 
-			//
+			//Light constant buffer
+			if (lightSwitch)
+			{
+				light.vLightColor = XMFLOAT4(1.f, 0.f, 0.f, 0.6f);
+			}
+			else
+			{
+				light.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.6f);
+			}
 			con->UpdateSubresource(dirLightConstantBuffer.Get(), 0, nullptr, &light, 0, 0);
 			con->PSSetConstantBuffers(0, 1, dirLightConstantBuffer.GetAddressOf());
 			
 			// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
 			// To disable texturing, call Model->Render without the SRV or sampler parameters (untested).
-			m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, mySRV, myLinearSampler);
+			m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, mySRV.Get(), myLinearSampler.Get());
 			
 			ZeroMemory(&constantBufferData, sizeof(WVP));
 			constantBufferData.w = XMMatrixIdentity();
@@ -306,9 +312,7 @@ bool Render()
 
 			// added by clark
 			constantBufferData.v = XMMatrixInverse(NULL, viewMatrix);
-
 			constantBufferData.p = projectionMatrix;
-
 
 			// change the constant buffer data here per draw / model
 			con->UpdateSubresource(WVPconstantBuffer.Get(), 0, nullptr, &constantBufferData, 0, 0);

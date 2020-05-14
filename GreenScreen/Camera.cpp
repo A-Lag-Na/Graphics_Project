@@ -103,9 +103,9 @@ bool Camera::Initialize(int screenWidth, int screenHeight , float SCREEN_NEAR, f
 	return true;
 }
 
-void Camera::Render(XMMATRIX& viewMatrix)
+void Camera::Render(XMMATRIX& viewMatrix, bool& lightSwitch)
 {
-	CameraMove(m_viewMatrix);
+	CameraMove(m_viewMatrix, lightSwitch);
 }
 
 void Camera::GetViewMatrix(XMMATRIX& viewMatrix)
@@ -124,7 +124,7 @@ void Camera::GetProjectionMatrix(XMMATRIX& projectionMatrix)
 }
 
 
-bool Camera::CameraMove(XMMATRIX& myCamera)
+bool Camera::CameraMove(XMMATRIX& myCamera, bool& lightSwitch)
 {
 	XMFLOAT4X4* w = new XMFLOAT4X4;
 	XMStoreFloat4x4(w, myCamera);
@@ -167,8 +167,6 @@ bool Camera::CameraMove(XMMATRIX& myCamera)
 		XMMATRIX temp = XMMatrixTranslation(0, 0.05f, 0);
 		myCamera = XMMatrixMultiply(temp, myCamera);
 	}
-	// R, toggle overhead directional light
-	//lightSwitch = GetAsyncKeyState(0x52);
 	
 	GetCursorPos(&m_currPos);
 	
@@ -197,6 +195,7 @@ bool Camera::CameraMove(XMMATRIX& myCamera)
 	}
 	m_oldPos = m_currPos;
 	w = nullptr;
-	//return lightSwitch;
-	return true;
+	// R, toggle overhead directional light color
+	lightSwitch = GetAsyncKeyState(0x52);
+	return lightSwitch;
 }
