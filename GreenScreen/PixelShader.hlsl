@@ -33,7 +33,7 @@ float4 main(VS_OUT input) : SV_TARGET
 	float3 ldirection = -normalize(dldir);
 	float3 wnorm = normalize(input.norm);
     float4 outColor = saturate((dot(ldirection, wnorm))) * dlcol * baseColor;
-    return outColor;
+    return saturate(outColor);
     //return saturate(outColor + ambient);
     
     //Debugging, use .pos or .norm here
