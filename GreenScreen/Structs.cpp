@@ -22,8 +22,9 @@ struct SimpleVertex
 
 struct Light
 {
-    XMFLOAT4 vLightDir;
+    //4th digit is unused. Needs to be a multiple of 16 bytes for constant buffer reasons.
     XMFLOAT4 vLightColor;
+    XMFLOAT4 vLightDir;
 };
 
 

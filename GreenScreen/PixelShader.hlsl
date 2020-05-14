@@ -1,11 +1,11 @@
-/* Commented out lighting and texturing until those features are implemented.
-cbuffer dirLight : register (b1)
+// Commented out lighting and texturing until those features are implemented.
+cbuffer dirLight : register (b0)
 {
-	float4 dldir;
-	float4 dlcol;
+    float4 dlcol;
+    float4 dldir;
 }
 
-cbuffer ambLight : register(b2)
+/*cbuffer ambLight : register(b2)
 {
     float4 aldir;
     float4 alcol;
@@ -24,14 +24,20 @@ struct VS_OUT
 
 float4 main(VS_OUT input) : SV_TARGET
 {
+    //Commented out code is for ambient lighting + directional lighting
 	float4 baseColor = baseTexture.Sample(linfilter, input.tex); // get base color
-   // float4 ambient = alcol * baseColor;
-   //float4 lightColor = alcol + dlcol;
-    //lightColor = saturate(lightColor);
-	//float3 ldirection = -normalize(dldir);
-	//float3 wnorm = normalize(input.norm);
-    //float4 outColor = saturate((dot(ldirection, wnorm))) * dlcol * baseColor;
+    // float4 ambient = alcol * baseColor;
+    //float4 lightColor = alcol + dlcol;
+    
+    float4 lightColor = dlcol;
+    lightColor = saturate(lightColor);
+	float3 ldirection = -normalize(dldir);
+	float3 wnorm = normalize(input.norm);
+    float4 outColor = saturate((dot(ldirection, wnorm))) * dlcol * baseColor;
+    return outColor;
     //return saturate(outColor + ambient);
-   // return float4(input.localpos, 1.0f);
-    return baseColor;
+    
+    //Debugging, use .pos or .norm here
+    //return float4(input.localpos, 1.0f);
+    //return baseColor;
 }

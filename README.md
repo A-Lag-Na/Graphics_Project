@@ -1,3 +1,11 @@
+Camera Controls:
+WASD for horizontal, forwards/backwards movement.
+QE for vertical movement.
+Hold R to toggle light color.
+
+Grid is hard-coded. Corvette is rendered.
+
+
 # GTemplates
 
 Convenient template projects for developers using Gateware.

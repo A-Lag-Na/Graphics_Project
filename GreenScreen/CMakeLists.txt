@@ -37,8 +37,6 @@ add_executable (GreenScreen
 	Grid.h
 	Grid.cpp
 	Structs.cpp
-	LightManager.h
-	LightManager.cpp
 	${VERTEX_SHADERS}
 	${PIXEL_SHADERS}
 )
