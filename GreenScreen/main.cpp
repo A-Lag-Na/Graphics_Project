@@ -264,6 +264,10 @@ bool Render()
 			ZeroMemory(&constantBufferData, sizeof(WVP));
 			constantBufferData.w = XMMatrixIdentity();
 			constantBufferData.v = viewMatrix;
+			
+			// added by clark
+			constantBufferData.v = XMMatrixInverse(NULL, viewMatrix);
+			
 			constantBufferData.p = projectionMatrix;
 
 		
@@ -278,6 +282,10 @@ bool Render()
 			ZeroMemory(&constantBufferData, sizeof(WVP));
 			constantBufferData.w = XMMatrixIdentity();
 			constantBufferData.v = viewMatrix;
+
+			// added by clark
+			constantBufferData.v = XMMatrixInverse(NULL, viewMatrix);
+
 			constantBufferData.p = projectionMatrix;
 
 
