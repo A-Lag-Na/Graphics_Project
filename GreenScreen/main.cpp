@@ -293,7 +293,7 @@ bool Render()
 			con->UpdateSubresource(WVPconstantBuffer.Get(), 0, nullptr, &constantBufferData, 0, 0);
 			con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
 
-			m_Grid->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view);
+			m_Grid->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, mySRV, myLinearSampler);
 
 			swap->Present(1, 0);
 			// release incremented COM reference counts

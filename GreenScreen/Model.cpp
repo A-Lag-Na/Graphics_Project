@@ -163,8 +163,6 @@ void Model::RenderBuffers(ID3D11DeviceContext* deviceContext, ID3D11VertexShader
 	unsigned int offset = 0;
 
 	// setup the pipeline
-	//ID3D11RenderTargetView* const views[] = { view };
-	//deviceContext->OMSetRenderTargets(ARRAYSIZE(views), views, nullptr);
 	deviceContext->IASetInputLayout(inputLayout);
 	// Set the vertex buffer to active in the input assembler so it can be rendered.
 	deviceContext->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);

@@ -11,7 +11,10 @@ bool Grid::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, 
 	 m_indexCount = m_vertexCount;
 
 	//Create The Vertices
-
+	float halfWidth = 0.5f * width;
+	float halfDepth = 0.5f * depth;
+	float dx = width / (n - 1);
+	float dz = depth / (m - 1);
 	float du = 1.0f / (n - 1);
 	float dv = 1.0f / (m - 1);
 
@@ -24,23 +27,18 @@ bool Grid::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, 
 	for (int i = 0; i < m - 1; ++i)
 	{
 	
-
-	
 		for (int j = 0; j < n - 1; ++j)
 		{
-			
-
+	
 			 //LINE 1
-			float x = (float)i;
-			float z = (float)(j + 1);
+			float x = (float)-halfWidth + j * dx;
+		    float z = (float)halfDepth - (i + 1)* dz;
 
 			//Position UPLEFT
 			meshData.vertexList[index].Pos = XMFLOAT3(x, 0.0f, z);
 			//Normal
-			
 			meshData.vertexList[index].Normal = XMFLOAT3(0.0f, 1.0f, 0.0f);
 			//Texture
-			
 			meshData.vertexList[index].Tex.x = j * du;
 			meshData.vertexList[index].Tex.y = i * dv;
 
@@ -51,8 +49,8 @@ bool Grid::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, 
 			index++;
 
 	
-			x = (float)(i + 1);
-			z = (float)(j + 1);
+			x = (float)-halfWidth + (j + 1) * dx;
+			z = (float) halfDepth - (i + 1) * dz;
 
 			//Position UPRIGHT
 			meshData.vertexList[index].Pos = XMFLOAT3(x, 0.0f, z);
@@ -67,8 +65,8 @@ bool Grid::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, 
 			index++;
 
 			//LINE 2
-			x = (float)(i + 1);
-			z = (float)(j + 1);
+			x = (float)-halfWidth + (j + 1) * dx;
+			z = (float)halfDepth - (i + 1) * dz;
 
 			//Position UPRIGHT
 			meshData.vertexList[index].Pos = XMFLOAT3(x, 0.0f, z);
@@ -82,8 +80,8 @@ bool Grid::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, 
 
 			index++;
 
-			x = (float)(i + 1);
-			z = (float)(j);
+			x = (float)-halfWidth + (j + 1) * dx;
+			z = (float)halfDepth - i * dz;
 
 			//Position BOTRIGHT
 			meshData.vertexList[index].Pos = XMFLOAT3(x, 0.0f, z);
@@ -98,8 +96,8 @@ bool Grid::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, 
 			index++;
 
 			//LINE 3
-			x = (float)(i + 1);
-			z = (float)(j);
+			x = (float)-halfWidth + (j + 1) * dx;
+			z = (float)halfDepth - i * dz;
 
 			//Position BOTRIGHT
 			meshData.vertexList[index].Pos = XMFLOAT3(x, 0.0f, z);
@@ -113,8 +111,8 @@ bool Grid::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, 
 
 			index++;
 
-			x = (float)(i);
-			z = (float)(j);
+			x = (float)-halfWidth + j * dx;
+			z = (float)halfDepth - i * dz;
 
 			//Position BOTLEFT
 			meshData.vertexList[index].Pos = XMFLOAT3(x, 0.0f, z);
@@ -129,8 +127,8 @@ bool Grid::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, 
 			index++;
 
 			//LINE 4
-			x = (float)(i);
-			z = (float)(j);
+			x = (float)-halfWidth + j * dx;;
+			z = (float)halfDepth - i * dz;
 
 			//Position BOTLEFT
 			meshData.vertexList[index].Pos = XMFLOAT3(x, 0.0f, z);
@@ -144,8 +142,8 @@ bool Grid::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, 
 
 			index++;
 
-			x = (float)(i);
-			z = (float)(j + 1);
+			x = (float)-halfWidth + j * dx;
+			z = (float)halfDepth - (i + 1) * dz;
 
 			//Position UPLEFT
 			meshData.vertexList[index].Pos = XMFLOAT3(x, 0.0f, z);
@@ -208,7 +206,7 @@ bool Grid::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, 
 	return true;
 }
 
-void Grid::Render(ID3D11DeviceContext* deviceContext, ID3D11VertexShader* vertexShader, ID3D11PixelShader* pixelShader, ID3D11InputLayout* inputLayout, ID3D11RenderTargetView* view)
+void Grid::Render(ID3D11DeviceContext* deviceContext, ID3D11VertexShader* vertexShader, ID3D11PixelShader* pixelShader, ID3D11InputLayout* inputLayout, ID3D11RenderTargetView* view, ID3D11ShaderResourceView* SRV = nullptr, ID3D11SamplerState* sampler = nullptr)
 {
 	// Set vertex buffer stride and offset.
 	unsigned int stride = sizeof(SimpleVertex);
@@ -228,6 +226,16 @@ void Grid::Render(ID3D11DeviceContext* deviceContext, ID3D11VertexShader* vertex
 	deviceContext->PSSetShaderResources(0, 0, nullptr);
 	//deviceContext->PSSetSamplers(0, 1, &myLinearSampler);
 
+	if (SRV)
+	{
+		//This contains the texture being loaded in.
+		deviceContext->PSSetShaderResources(0, 1, &SRV);
+	} 
+	if (sampler)
+	{
+		//The sampler reads from the SRV to get the texture data.
+		deviceContext->PSSetSamplers(0, 1, &sampler);
+	}
 
 	deviceContext->DrawIndexed(m_indexCount, 0, 0);
 }
