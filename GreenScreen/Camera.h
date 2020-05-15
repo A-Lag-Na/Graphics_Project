@@ -2,6 +2,7 @@
 
 #include <DirectXMath.h>
 #include <windows.h>
+#include "Structs.cpp"
 
 using namespace DirectX;
 
@@ -19,11 +20,12 @@ public:
 	XMVECTOR GetRotation();
 
 	bool Initialize(int screenWidth, int screenHeight, float SCREEN_NEAR, float  SCREEN_DEPTH);
-	void Render(XMMATRIX&, bool&);
+	void Render(XMMATRIX&, bool&, Light&, Light&);
 	void GetViewMatrix(XMMATRIX&);
 	void GetWorldMatrix(XMMATRIX&);
 	void GetProjectionMatrix(XMMATRIX&);
-	bool CameraMove(XMMATRIX&, bool&);
+	void CameraMove(XMMATRIX&);
+	void ControlLights(bool&, Light&, Light&);
 
 private:
 	float m_PosX, m_PosY, m_PosZ;

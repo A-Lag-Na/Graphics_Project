@@ -281,7 +281,7 @@ bool Render()
 	{
 		// Generate the view matrix based on the camera's position.
 		
-		m_Camera->Render(viewMatrix, lightSwitch);
+		m_Camera->Render(viewMatrix, lightSwitch, dirLight, pointLight);
 
 		//Get the view matrix from the camera
 		m_Camera->GetViewMatrix(viewMatrix);
@@ -334,11 +334,11 @@ bool Render()
 			con->UpdateSubresource(dirLightConstantBuffer.Get(), 0, nullptr, &dirLight, 0, 0);
 			con->PSSetConstantBuffers(0, 1, dirLightConstantBuffer.GetAddressOf());
 
-			//Update pointLight buffer light color. Currently unused, as pointlight color does not change.
+			//Update pointLight buffer light color. Currently unused, as pointlight does not change.
 			con->UpdateSubresource(pointLightConstantBuffer.Get(), 0, nullptr, &pointLight, 0, 0);
 			con->PSSetConstantBuffers(1, 1, pointLightConstantBuffer.GetAddressOf());
 
-			//Update ambLight buffer light color. Currently unused, as amblight color does not change.
+			//Update ambLight buffer light color. Currently unused, as amblight does not change.
 			con->UpdateSubresource(ambLightConstantBuffer.Get(), 0, nullptr, &ambLight, 0, 0);
 			con->PSSetConstantBuffers(2, 1, pointLightConstantBuffer.GetAddressOf());
 			//End constant buffers for model.
