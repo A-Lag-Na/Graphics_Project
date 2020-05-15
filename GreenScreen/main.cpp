@@ -256,7 +256,7 @@ bool Frame()
 
 	//Not actually a direction here, but instead a position of the point light.
 	pointLight.vLightDir = XMFLOAT4(0.f, -5.f, 0.f, 0.f);
-	pointLight.vLightColor = XMFLOAT4(0.f, 0.f, 1.f, 0.6f);
+	pointLight.vLightColor = XMFLOAT4(0.f, 0.f, 1.f, 0.3f);
 
 	//AmbLight has no direction or position
 	ambLight.vLightColor = XMFLOAT4(1.f, 0.f, 0.f, 0.2f);
@@ -324,11 +324,11 @@ bool Render()
 			//Light constant buffer
 			if (lightSwitch)
 			{
-				dirLight.vLightColor = XMFLOAT4(1.f, 0.f, 0.f, 0.6f);
+				dirLight.vLightColor = XMFLOAT4(1.f, 0.f, 0.f, 0.3f);
 			}
 			else
 			{
-				dirLight.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.6f);
+				dirLight.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.3f);
 			}
 			//Update dirLight buffer to use updated light color.
 			con->UpdateSubresource(dirLightConstantBuffer.Get(), 0, nullptr, &dirLight, 0, 0);

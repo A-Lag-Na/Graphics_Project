@@ -32,6 +32,11 @@ struct VS_OUT
 //outColor.xyz = lightRatio * pointcol * baseColor;
 //outColor.a = baseColor.a;
 //return outColor;
+
+//It's a surprise tool we'll use later
+//ATTENUATION = 1.0 – CLAMP( MAGNITUDE(
+//LIGHTPOS– SURFACEPOS) / LIGHTRADIUS ) 
+
 float4 calculatePointLight(float3 surfaceNormal, float4 surfacePosition, float4 baseColor)
 {
     float3 lightDir = normalize(pointpos - surfacePosition);
@@ -47,6 +52,10 @@ float4 calculatePointLight(float3 surfaceNormal, float4 surfacePosition, float4 
 //float3 wnorm = normalize(input.norm);
 //float4 outColor = saturate((dot(ldirection, wnorm))) * dlcol * baseColor;
 //return outColor;
+
+//It's a surprise tool we'll need later
+//ATTENUATION = 1.0 – CLAMP( ( INNERCONERATIO - SURFACERATIO ) / ( INNERCONERATIO – OUTERCONERATIO ) ) 
+
 float4 calculateDirLight(float3 surfaceNormal, float4 baseColor)
 {
     float4 lightColor = dlcol;
