@@ -1,7 +1,9 @@
 Camera Controls:
 WASD for horizontal, forwards/backwards movement.
 QE for vertical movement.
-Hold R to toggle light color.
+Hold R to toggle directional light color.
+T to move directional light.
+G to move point light.
 
 Grid is hard-coded. Corvette is rendered.
 
@@ -16,10 +18,10 @@ To compile a template on your platform:
 
 	Open the CMake GUI (or use cmd line if preferred)
 
-	Point it at the specific template's folder and 
+	Point it at the specific template's folder and
 	output to a build folder of your choice (ex: ./build)
 
-	Click "Configure" and select your preferred environment then 
+	Click "Configure" and select your preferred environment then
 	hit "Generate" and check your output folder for your solution
 
 The IDEs we typically test with:
@@ -30,8 +32,3 @@ The IDEs we typically test with:
 Certain templates require additional dependencies, so be sure to check
 the included README.md in each specific template to make sure you have them.
 A good rule of thumb is to just read the "Gateware/README.md" to get setup.
-
- 	
-
-	
-	 

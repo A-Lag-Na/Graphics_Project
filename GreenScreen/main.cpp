@@ -55,12 +55,17 @@ Microsoft::WRL::ComPtr<ID3D11Buffer>	vertexBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	indexBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	WVPconstantBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	dirLightConstantBuffer;
+Microsoft::WRL::ComPtr<ID3D11Buffer>	pointLightConstantBuffer;
+Microsoft::WRL::ComPtr<ID3D11Buffer>	ambLightConstantBuffer;
+
 
 Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> mySRV;
 Microsoft::WRL::ComPtr < ID3D11SamplerState> myLinearSampler;
 
 WVP constantBufferData;
-Light light;
+Light dirLight;
+Light pointLight;
+Light ambLight;
 bool lightSwitch = false;
 
 //---------------------------------------------
@@ -111,11 +116,12 @@ bool Initialize(int screenWidth, int screenHeight)
 
 	// Set the initial position of the camera.
 	m_Camera->Initialize(screenWidth, screenHeight, SCREEN_NEAR, SCREEN_DEPTH);
-	m_Camera->SetPosition(0.0f, 0.0f, -10.0f);
+	m_Camera->SetPosition(0.0f, 0.0f, -20.0f);
 	//-----------
 
 	// Constant Buffer Creation
 	//-----------
+	//World/View/Projection matrix constant buffer
 	CD3D11_BUFFER_DESC desc = CD3D11_BUFFER_DESC(sizeof(WVP), D3D11_BIND_CONSTANT_BUFFER);
 	D3D11_SUBRESOURCE_DATA srd;
 	ZeroMemory(&srd, sizeof(srd));
@@ -123,32 +129,51 @@ bool Initialize(int screenWidth, int screenHeight)
 
 	HRESULT hr = myDevice->CreateBuffer(&desc, &srd, WVPconstantBuffer.GetAddressOf());
 
-
 	//Directional light constant buffer
 	ZeroMemory(&desc, sizeof(desc));
-	int test = sizeof(Light);
 	desc = CD3D11_BUFFER_DESC(sizeof(Light), D3D11_BIND_CONSTANT_BUFFER);
 	ZeroMemory(&srd, sizeof(srd));
-	srd.pSysMem = &light;
+	srd.pSysMem = &dirLight;
 	hr = myDevice->CreateBuffer(&desc, &srd, dirLightConstantBuffer.GetAddressOf());
 
+	//Point light constant buffer
+	ZeroMemory(&desc, sizeof(desc));
+	desc = CD3D11_BUFFER_DESC(sizeof(Light), D3D11_BIND_CONSTANT_BUFFER);
+	ZeroMemory(&srd, sizeof(srd));
+	srd.pSysMem = &pointLight;
+	hr = myDevice->CreateBuffer(&desc, &srd, pointLightConstantBuffer.GetAddressOf());
+
+	//Ambient light constant buffer
+	ZeroMemory(&desc, sizeof(desc));
+	desc = CD3D11_BUFFER_DESC(sizeof(Light), D3D11_BIND_CONSTANT_BUFFER);
+	ZeroMemory(&srd, sizeof(srd));
+	srd.pSysMem = &ambLight;
+	hr = myDevice->CreateBuffer(&desc, &srd, ambLightConstantBuffer.GetAddressOf());
+
+	// End of constant buffers
+
+	//Initalize Geometry Renderers here
+
+	//Create Grid
 	m_Grid = new Grid;
 	if (!m_Grid)
 	{
 		return false;
 	}
-	//Create Grid
+	//Initalize Grid
 	result = m_Grid->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), 1 , 1 , 10, 10);
+
 	// Create the model object.
 	m_Model = new Model;
 	if (!m_Model)
 	{
 		return false;
 	}
-
 	// Initialize the model object.
 	//For now, gotta pass in vertex and index count for each model rendered (.h or hardcoded)
 	result = m_Model->Initialize( *myDevice.GetAddressOf(), *myContext.GetAddressOf(), corvetteobj_data , corvetteobj_indicies, 3453, 8112, 40.f);
+
+	//End geometry renderers.
 
 	return true;
 }
@@ -169,6 +194,8 @@ void Shutdown()
 		delete m_Model;
 		m_Model = 0;
 	}
+
+	//TODO: Release Grid object.
 }
 
 bool Frame()
@@ -224,7 +251,15 @@ bool Frame()
 	//----------
 
 	//Lighting
-	light.vLightDir = XMFLOAT4(0.f, -1.f, 0.f, 0.f);
+	//Direction light setting (direction is fixed, color is set through camera render function because of the R button functionality)
+	dirLight.vLightDir = XMFLOAT4(0.f, -1.f, 0.f, 0.f);
+
+	//Not actually a direction here, but instead a position of the point light.
+	pointLight.vLightDir = XMFLOAT4(0.f, -5.f, 0.f, 0.f);
+	pointLight.vLightColor = XMFLOAT4(0.f, 0.f, 1.f, 0.3f);
+
+	//AmbLight has no direction or position
+	ambLight.vLightColor = XMFLOAT4(1.f, 0.f, 0.f, 0.2f);
 	//--------------------------------------------------------------------------
 
 	// Render the graphics scene.
@@ -240,16 +275,13 @@ bool Frame()
 bool Render()
 {
 	XMMATRIX viewMatrix, projectionMatrix, worldMatrix, tempView;
-	bool result;
-
-	// Initialize stuff here
 
 	// Render Loop here
 	while (+win.ProcessWindowEvents())
 	{
 		// Generate the view matrix based on the camera's position.
 		
-		m_Camera->Render(viewMatrix, lightSwitch);
+		m_Camera->Render(viewMatrix, lightSwitch, dirLight, pointLight);
 
 		//Get the view matrix from the camera
 		m_Camera->GetViewMatrix(viewMatrix);
@@ -275,35 +307,49 @@ bool Render()
 			con->ClearRenderTargetView(view, clr);
 			con->ClearDepthStencilView(dsview, D3D11_CLEAR_DEPTH, 1, 0);
 
+			//Update and set constant buffers (This could be done more efficently by setting multiple PSconstantbuffers at once).
+			//----------------------------------
 			ZeroMemory(&constantBufferData, sizeof(WVP));
 			constantBufferData.w = XMMatrixIdentity();
 			constantBufferData.v = viewMatrix;
 			
 			// added by clark
 			constantBufferData.v = XMMatrixInverse(NULL, viewMatrix);
-			
 			constantBufferData.p = projectionMatrix;			
 		
-			// change the constant buffer data here per draw / model
+			// Update the constant buffer data here per draw / model
 			con->UpdateSubresource(WVPconstantBuffer.Get(), 0, nullptr, &constantBufferData, 0, 0);
 			con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
 
 			//Light constant buffer
 			if (lightSwitch)
 			{
-				light.vLightColor = XMFLOAT4(1.f, 0.f, 0.f, 0.6f);
+				dirLight.vLightColor = XMFLOAT4(1.f, 0.f, 0.f, 0.3f);
 			}
 			else
 			{
-				light.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.6f);
+				dirLight.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.3f);
 			}
-			con->UpdateSubresource(dirLightConstantBuffer.Get(), 0, nullptr, &light, 0, 0);
+			//Update dirLight buffer to use updated light color.
+			con->UpdateSubresource(dirLightConstantBuffer.Get(), 0, nullptr, &dirLight, 0, 0);
 			con->PSSetConstantBuffers(0, 1, dirLightConstantBuffer.GetAddressOf());
-			
+
+			//Update pointLight buffer light color. Currently unused, as pointlight does not change.
+			con->UpdateSubresource(pointLightConstantBuffer.Get(), 0, nullptr, &pointLight, 0, 0);
+			con->PSSetConstantBuffers(1, 1, pointLightConstantBuffer.GetAddressOf());
+
+			//Update ambLight buffer light color. Currently unused, as amblight does not change.
+			con->UpdateSubresource(ambLightConstantBuffer.Get(), 0, nullptr, &ambLight, 0, 0);
+			con->PSSetConstantBuffers(2, 1, pointLightConstantBuffer.GetAddressOf());
+			//End constant buffers for model.
+
 			// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
 			// To disable texturing, call Model->Render without the SRV or sampler parameters (untested).
 			m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, mySRV.Get(), myLinearSampler.Get());
 			
+
+			//Update and set constant buffers for grid
+			//----------------------------------------
 			ZeroMemory(&constantBufferData, sizeof(WVP));
 			constantBufferData.w = XMMatrixIdentity();
 			constantBufferData.v = viewMatrix;
@@ -315,6 +361,8 @@ bool Render()
 			// change the constant buffer data here per draw / model
 			con->UpdateSubresource(WVPconstantBuffer.Get(), 0, nullptr, &constantBufferData, 0, 0);
 			con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
+			
+			//End grid constant buffers
 
 			m_Grid->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, mySRV.Get(), myLinearSampler.Get());
 

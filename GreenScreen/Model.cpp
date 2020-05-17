@@ -86,7 +86,7 @@ bool Model::InitializeBuffers(ID3D11Device* device, ID3D11DeviceContext* deviceC
 		// I'm dividing these positions to make the mesh smaller (and further back from the camera on the z axis), otherwise it'd be clipped and not show up onscreen.
 		simpleMesh.vertexList[i].Pos.x = modelData[i].pos[0] / m_scale;
 		simpleMesh.vertexList[i].Pos.y = modelData[i].pos[1] / m_scale;
-		simpleMesh.vertexList[i].Pos.z = modelData[i].pos[2] / m_scale + 1 ;
+		simpleMesh.vertexList[i].Pos.z = modelData[i].pos[2] / m_scale;// +1;
 
 		simpleMesh.vertexList[i].Tex.x = modelData[i].uvw[0];
 		simpleMesh.vertexList[i].Tex.y = modelData[i].uvw[1];

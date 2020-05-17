@@ -1,8 +1,6 @@
 #pragma once
 #include "Camera.h"
 
-//I threw my (functional) camera code from my old project at the bottom of this file. Hope it can help.
-
 Camera::Camera()
 {
 	m_PosX = 0.0f;
@@ -47,6 +45,21 @@ XMVECTOR Camera::GetRotation()
 {
 	XMFLOAT3 temp = { m_RotX, m_RotY, m_RotZ };
 	return XMLoadFloat3(&temp);
+}
+
+void Camera::GetViewMatrix(XMMATRIX& viewMatrix)
+{
+	viewMatrix = m_viewMatrix;
+}
+
+void Camera::GetWorldMatrix(XMMATRIX& worldMatrix)
+{
+	worldMatrix = m_worldMatrix;
+}
+
+void Camera::GetProjectionMatrix(XMMATRIX& projectionMatrix)
+{
+	projectionMatrix = m_projectionMatrix;
 }
 
 bool Camera::Initialize(int screenWidth, int screenHeight , float SCREEN_NEAR, float  SCREEN_DEPTH)
@@ -103,28 +116,13 @@ bool Camera::Initialize(int screenWidth, int screenHeight , float SCREEN_NEAR, f
 	return true;
 }
 
-void Camera::Render(XMMATRIX& viewMatrix, bool& lightSwitch)
+void Camera::Render(XMMATRIX& viewMatrix, bool& lightSwitch, Light& dirLight, Light& pointLight)
 {
-	CameraMove(m_viewMatrix, lightSwitch);
+	CameraMove(m_viewMatrix);
+	ControlLights(lightSwitch, dirLight, pointLight);
 }
 
-void Camera::GetViewMatrix(XMMATRIX& viewMatrix)
-{
-	viewMatrix = m_viewMatrix;
-}
-
-void Camera::GetWorldMatrix(XMMATRIX& worldMatrix)
-{
-	worldMatrix = m_worldMatrix;
-}
-
-void Camera::GetProjectionMatrix(XMMATRIX& projectionMatrix)
-{
-	projectionMatrix = m_projectionMatrix;
-}
-
-
-bool Camera::CameraMove(XMMATRIX& myCamera, bool& lightSwitch)
+void Camera::CameraMove(XMMATRIX& myCamera)
 {
 	XMFLOAT4X4* w = new XMFLOAT4X4;
 	XMStoreFloat4x4(w, myCamera);
@@ -195,7 +193,20 @@ bool Camera::CameraMove(XMMATRIX& myCamera, bool& lightSwitch)
 	}
 	m_oldPos = m_currPos;
 	w = nullptr;
-	// R, toggle overhead directional light color
+}
+
+void Camera::ControlLights(bool& lightSwitch, Light& dirLight, Light& pointLight)
+{
+	//R, toggle light color
 	lightSwitch = GetAsyncKeyState(0x52);
-	return lightSwitch;
+	//T, change directional light direction
+	if (GetAsyncKeyState(0x54))
+	{
+		dirLight.vLightDir.y += 1.f;
+	}
+	//G, change point light position
+	if (GetAsyncKeyState(0x54))
+	{
+		pointLight.vLightDir.y += 1.f;
+	}
 }
