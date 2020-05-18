@@ -65,15 +65,19 @@ float4 calculateDirLight(float3 surfaceNormal, float4 baseColor)
     return outColor;
 }
 
+float4 calculateAmbLight(float4 baseColor)
+{
+    return alcol * baseColor;
+}
+
 float4 main(VS_OUT input) : SV_TARGET
 {
     //Forward declarations because I gotta for outColor and so I might as well clean up and forward declare all variables here. 
-    float4 baseColor, lightRatio, outColor, ambOutput, lightColor;
-    float3 lightDir;
+    float4 baseColor, outColor;
     //Get the base color from the texture file
 	baseColor = baseTexture.Sample(linfilter, input.tex);
     
-    outColor.xyz = saturate(calculateDirLight(input.norm, baseColor).xyz + calculatePointLight(input.norm, input.pos, baseColor).xyz) * baseColor.xyz;
+    outColor.xyz = saturate(calculateDirLight(input.norm, baseColor).xyz + calculatePointLight(input.norm, input.pos, baseColor).xyz + calculateAmbLight(baseColor).xyz) * baseColor.xyz;
     outColor.a = baseColor.a;
     return outColor;
     

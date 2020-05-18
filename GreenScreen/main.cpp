@@ -259,7 +259,7 @@ bool Frame()
 	pointLight.vLightColor = XMFLOAT4(0.f, 0.f, 1.f, 0.3f);
 
 	//AmbLight has no direction or position
-	ambLight.vLightColor = XMFLOAT4(1.f, 0.f, 0.f, 0.2f);
+	ambLight.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.2f);
 	//--------------------------------------------------------------------------
 
 	// Render the graphics scene.
