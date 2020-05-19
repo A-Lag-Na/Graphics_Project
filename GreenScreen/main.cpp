@@ -27,12 +27,15 @@ using namespace GRAPHICS;
 //Models & Rendering includes
 #include "Grid.h"
 #include "corvetteobj.h"
+#include "planeobj.h"
 
 const float SCREEN_DEPTH = 1000.0f;
 const float SCREEN_NEAR = 0.1f;
 
 Camera* m_Camera = 0;
 Model* m_Model = 0;
+Model* planeModel = 0;
+
 Grid* m_Grid = 0;
 GWindow win;
 GEventReceiver msgs;
@@ -185,6 +188,10 @@ bool Initialize(int screenWidth, int screenHeight)
 	//For now, gotta pass in vertex and index count for each model rendered (.h or hardcoded)
 	result = m_Model->Initialize( *myDevice.GetAddressOf(), *myContext.GetAddressOf(), corvetteobj_data , corvetteobj_indicies, 3453, 8112, 40.f);
 
+	//Create and initialize plane model
+	planeModel = new Model;
+	result = planeModel->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), planeObj_data, planeObj_indicies, 873, 2256, 1.f);
+
 	//End geometry renderers.
 
 	return true;
@@ -267,7 +274,7 @@ bool Frame()
 	dirLight.vLightDir = XMFLOAT4(0.3f, -1.f, 0.f, 0.f);
 
 	//Not actually a direction here, but instead a position of the point light.
-	pointLight.vLightDir = XMFLOAT4(0.f, -10.f, 0.f, 0.f);
+	pointLight.vLightDir = XMFLOAT4(0.f, -99.f, 0.f, 0.f);
 	pointLight.vLightColor = XMFLOAT4(0.f, 0.f, 1.f, 0.2f);
 
 	//AmbLight has no direction or position
@@ -341,7 +348,8 @@ bool Render()
 			//Light constant buffer
 			if (lightSwitch)
 			{
-				dirLight.vLightColor = XMFLOAT4(1.f, 0.f, 0.f, 0.2f);
+				//This will get caught in pixel shader and ignored
+				dirLight.vLightColor = XMFLOAT4(0.f, 0.f, 0.f, 0.0f);
 			}
 			else
 			{
@@ -367,6 +375,9 @@ bool Render()
 			// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
 			// To disable texturing, call Model->Render without the SRV or sampler parameters (untested).
 			m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, mySRV.Get(), myLinearSampler.Get());
+
+			//TODO: Update WVP and/or constant buffers for plane object as appropriate.
+			planeModel->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, nullptr, myLinearSampler.Get());
 			
 
 			//Update and set constant buffers for grid

@@ -151,8 +151,10 @@ bool Model::InitializeBuffers(ID3D11Device* device, ID3D11DeviceContext* deviceC
 void Model::Render(ID3D11DeviceContext* deviceContext, ID3D11VertexShader* vertexShader, ID3D11PixelShader* pixelShader, ID3D11InputLayout* inputLayout, ID3D11RenderTargetView* view, ID3D11ShaderResourceView* SRV = nullptr, ID3D11SamplerState* sampler = nullptr)
 {
 	// Put the vertex and index buffers on the graphics pipeline to prepare them for drawing.
-	RenderBuffers(deviceContext, vertexShader, pixelShader, inputLayout, view, SRV, sampler);
-
+	if (pixelShader)
+	{
+		RenderBuffers(deviceContext, vertexShader, pixelShader, inputLayout, view, SRV, sampler);
+	}
 	return;
 }
 
@@ -177,6 +179,10 @@ void Model::RenderBuffers(ID3D11DeviceContext* deviceContext, ID3D11VertexShader
 	{
 		//This contains the texture being loaded in.
 		deviceContext->PSSetShaderResources(0, 1, &SRV);
+	}
+	else
+	{
+		deviceContext->PSSetShaderResources(0, 0, nullptr);
 	}
 	if (sampler)
 	{

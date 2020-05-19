@@ -197,16 +197,30 @@ void Camera::CameraMove(XMMATRIX& myCamera)
 
 void Camera::ControlLights(bool& lightSwitch, Light& dirLight, Light& pointLight)
 {
-	//R, toggle light color
-	lightSwitch = GetAsyncKeyState(0x52);
+
+	//R, toggle light on/off
+	if (GetAsyncKeyState(0x52))
+	{
+		dirLight.vLightColor = XMFLOAT4(0.f, 0.f, 0.f, 0.f);
+	}
 	//T, change directional light direction
 	if (GetAsyncKeyState(0x54))
 	{
-		dirLight.vLightDir.y += 1.f;
+		dirLight.vLightDir.x -= 0.1f;
 	}
-	//G, change point light position
-	if (GetAsyncKeyState(0x54))
+	//F, disable point light
+	if (GetAsyncKeyState(0x46))
 	{
-		pointLight.vLightDir.y += 1.f;
+		pointLight.vLightColor = XMFLOAT4(0.f, 0.f, 0.f, 0.f);
+	}
+	//G, enable point light
+	if (GetAsyncKeyState(0x47))
+	{
+		pointLight.vLightColor = XMFLOAT4(0.f, 0.f, 1.f, 0.f);
+	}
+	//H, change point light position
+	if (GetAsyncKeyState(0x48))
+	{
+		pointLight.vLightDir.x += 1.f;
 	}
 }

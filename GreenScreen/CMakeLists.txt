@@ -34,6 +34,7 @@ add_executable (GreenScreen
 	islandmodel.h
 	cubeobj.h
 	corvetteobj.h
+	planeobj.h
 	Grid.h
 	Grid.cpp
 	Structs.cpp
