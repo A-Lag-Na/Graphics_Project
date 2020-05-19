@@ -1,7 +1,7 @@
 #pragma once
 #include <d3d11.h>
 #include <DirectXMath.h>
-#include "PixelShader.csh"
+#include "PixelShader.h"
 #include "VertexShader.h"
 #include "islandmodel.h"
 #include"cubeobj.h"

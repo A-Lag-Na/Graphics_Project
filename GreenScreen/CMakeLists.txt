@@ -51,7 +51,7 @@ set_source_files_properties( ${VERTEX_SHADERS} PROPERTIES
 )
 set_source_files_properties( ${PIXEL_SHADERS} PROPERTIES 
 	VS_SHADER_TYPE Pixel VS_SHADER_MODEL 5.0 VS_SHADER_ENTRYPOINT main 
-	VS_SHADER_OUTPUT_HEADER_FILE "%(RelativeDir)%(Filename).csh"
+	VS_SHADER_OUTPUT_HEADER_FILE "%(RelativeDir)%(Filename).h"
 	VS_SHADER_VARIABLE_NAME "%(Filename)"
 	VS_SHADER_ENABLE_DEBUG $<$<CONFIG:Debug>:true>
 )

@@ -70,7 +70,7 @@ float4 calculateDirLight(float3 surfaceNormal, float4 baseColor)
     float3 wnorm = normalize(surfaceNormal);
     float4 outColor = saturate((dot(ldirection, wnorm))) * dlcol;
     //return outColor;
-    return baseColor;
+    return outColor;
 }
 
 //Spotlight formula from slides
@@ -80,15 +80,15 @@ float4 calculateDirLight(float3 surfaceNormal, float4 baseColor)
 //LIGHTRATIO = CLAMP( DOT( LIGHTDIR, SURFACENORMAL ) )
 //RESULT = SPOTFACTOR * LIGHTRATIO * LIGHTCOLOR * SURFACECOLOR
 
-float4 calculateSpotLight(float3 surfaceNormal, float4 surfacePosition)
-{
-    float3 lightDir = normalize(spotpos - surfacePosition);
-    float4 surfaceRatio = saturate(-lightDir, coneDir);
-    float4 spotFactor = (surfaceRatio > coneRatio) ? 1 : 0;
-    float4 lightRatio = saturate(dot(lightDir, surfaceNormal));
-    float4 outColor = spotFactor * lightRatio * spotcol;
-    return outColor;
-}
+//float4 calculateSpotLight(float3 surfaceNormal, float4 surfacePosition)
+//{
+//    float3 lightDir = normalize(spotpos - surfacePosition);
+//    float4 surfaceRatio = saturate(-lightDir, coneDir);
+//    float4 spotFactor = (surfaceRatio > coneRatio) ? 1 : 0;
+//    float4 lightRatio = saturate(dot(lightDir, surfaceNormal));
+//    float4 outColor = spotFactor * lightRatio * spotcol;
+//    return outColor;
+//}
 
 float4 calculateAmbLight(float4 baseColor)
 {

@@ -267,11 +267,11 @@ bool Frame()
 	dirLight.vLightDir = XMFLOAT4(0.3f, -1.f, 0.f, 0.f);
 
 	//Not actually a direction here, but instead a position of the point light.
-	pointLight.vLightDir = XMFLOAT4(0.f, -5.f, 0.f, 0.f);
-	pointLight.vLightColor = XMFLOAT4(0.f, 0.f, 1.f, 0.3f);
+	pointLight.vLightDir = XMFLOAT4(0.f, -10.f, 0.f, 0.f);
+	pointLight.vLightColor = XMFLOAT4(0.f, 0.f, 1.f, 0.2f);
 
 	//AmbLight has no direction or position
-	ambLight.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.6f);
+	ambLight.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.1f);
 
 	//Spotlight initialization
 	Light temp = spotLight.light;
@@ -341,11 +341,11 @@ bool Render()
 			//Light constant buffer
 			if (lightSwitch)
 			{
-				dirLight.vLightColor = XMFLOAT4(1.f, 0.f, 0.f, 0.3f);
+				dirLight.vLightColor = XMFLOAT4(1.f, 0.f, 0.f, 0.2f);
 			}
 			else
 			{
-				dirLight.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.3f);
+				dirLight.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.2f);
 			}
 			//Update dirLight buffer to use updated light color.
 			con->UpdateSubresource(dirLightConstantBuffer.Get(), 0, nullptr, &dirLight, 0, 0);
@@ -359,8 +359,9 @@ bool Render()
 			con->UpdateSubresource(ambLightConstantBuffer.Get(), 0, nullptr, &ambLight, 0, 0);
 			con->PSSetConstantBuffers(2, 1, pointLightConstantBuffer.GetAddressOf());
 
-			con->UpdateSubresource(spotLightConstantBuffer.Get(), 0, nullptr, &spotLight, 0, 0);
-			con->PSSetConstantBuffers(2, 1, spotLightConstantBuffer.GetAddressOf());
+			//
+			//con->UpdateSubresource(spotLightConstantBuffer.Get(), 0, nullptr, &spotLight, 0, 0);
+			//con->PSSetConstantBuffers(2, 1, spotLightConstantBuffer.GetAddressOf());
 			//End constant buffers for model.
 
 			// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
