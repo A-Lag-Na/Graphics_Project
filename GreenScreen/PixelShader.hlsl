@@ -14,6 +14,13 @@ cbuffer ambLight : register(b2)
     float4 alcol;
     float4 aldir;
 }
+//cbuffer spotLight : register(b3)
+//{
+//    float4 slcol;
+//    float4 sldir;
+//    float4 conedir;
+//    float4 coneratio;
+//}
 
 Texture2D baseTexture : register(t0);
 SamplerState linfilter : register(s0);
@@ -41,7 +48,7 @@ float4 calculatePointLight(float3 surfaceNormal, float4 surfacePosition, float4 
 {
     float3 lightDir = normalize(pointpos - surfacePosition);
     float4 lightRatio = saturate(dot(lightDir, surfaceNormal));
-    return lightRatio * pointcol * baseColor;
+    return saturate(lightRatio * pointcol);
 }
 
 
@@ -61,29 +68,41 @@ float4 calculateDirLight(float3 surfaceNormal, float4 baseColor)
     float4 lightColor = dlcol;
     float3 ldirection = -normalize(dldir);
     float3 wnorm = normalize(surfaceNormal);
-    float4 outColor = saturate((dot(ldirection, wnorm))) * dlcol * baseColor;
+    float4 outColor = saturate((dot(ldirection, wnorm))) * dlcol;
+    //return outColor;
+    return baseColor;
+}
+
+//Spotlight formula from slides
+//LIGHTDIR = NORMALIZE(LIGHTPOS– SURFACEPOS) )
+//SURFACERATIO = CLAMP( DOT( -LIGHTDIR, CONEDIR ) )
+//SPOTFACTOR = ( SURFACERATIO > CONERATIO ) ? 1 : 0
+//LIGHTRATIO = CLAMP( DOT( LIGHTDIR, SURFACENORMAL ) )
+//RESULT = SPOTFACTOR * LIGHTRATIO * LIGHTCOLOR * SURFACECOLOR
+
+float4 calculateSpotLight(float3 surfaceNormal, float4 surfacePosition)
+{
+    float3 lightDir = normalize(spotpos - surfacePosition);
+    float4 surfaceRatio = saturate(-lightDir, coneDir);
+    float4 spotFactor = (surfaceRatio > coneRatio) ? 1 : 0;
+    float4 lightRatio = saturate(dot(lightDir, surfaceNormal));
+    float4 outColor = spotFactor * lightRatio * spotcol;
     return outColor;
 }
 
 float4 calculateAmbLight(float4 baseColor)
 {
-    return alcol * baseColor;
+    return alcol;
 }
 
 float4 main(VS_OUT input) : SV_TARGET
 {
-    //Forward declarations because I gotta for outColor and so I might as well clean up and forward declare all variables here. 
     float4 baseColor, outColor;
     //Get the base color from the texture file
 	baseColor = baseTexture.Sample(linfilter, input.tex);
-    
     outColor.xyz = saturate(calculateDirLight(input.norm, baseColor).xyz + calculatePointLight(input.norm, input.pos, baseColor).xyz + calculateAmbLight(baseColor).xyz) * baseColor.xyz;
     outColor.a = baseColor.a;
     return outColor;
-    
-    //Ambient lighting code
-    //ambOutput = alcol * baseColor;
-    //lightColor = alcol + dlcol;
     
     //If ambient lighting, return this instead
     //return saturate(outColor + ambOutput);

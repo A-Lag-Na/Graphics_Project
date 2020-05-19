@@ -54,18 +54,23 @@ Microsoft::WRL::ComPtr<ID3D11PixelShader>	pixelShader;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	vertexBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	indexBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	WVPconstantBuffer;
+
 Microsoft::WRL::ComPtr<ID3D11Buffer>	dirLightConstantBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	pointLightConstantBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	ambLightConstantBuffer;
+Microsoft::WRL::ComPtr<ID3D11Buffer>	spotLightConstantBuffer;
 
 
 Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> mySRV;
 Microsoft::WRL::ComPtr < ID3D11SamplerState> myLinearSampler;
 
 WVP constantBufferData;
+
 Light dirLight;
 Light pointLight;
 Light ambLight;
+Spotlight spotLight;
+
 bool lightSwitch = false;
 
 //---------------------------------------------
@@ -149,6 +154,13 @@ bool Initialize(int screenWidth, int screenHeight)
 	ZeroMemory(&srd, sizeof(srd));
 	srd.pSysMem = &ambLight;
 	hr = myDevice->CreateBuffer(&desc, &srd, ambLightConstantBuffer.GetAddressOf());
+
+	//Spotlight constant buffer
+	ZeroMemory(&desc, sizeof(desc));
+	desc = CD3D11_BUFFER_DESC(sizeof(Spotlight), D3D11_BIND_CONSTANT_BUFFER);
+	ZeroMemory(&srd, sizeof(srd));
+	srd.pSysMem = &spotLight;
+	hr = myDevice->CreateBuffer(&desc, &srd, spotLightConstantBuffer.GetAddressOf());
 
 	// End of constant buffers
 
@@ -252,14 +264,19 @@ bool Frame()
 
 	//Lighting
 	//Direction light setting (direction is fixed, color is set through camera render function because of the R button functionality)
-	dirLight.vLightDir = XMFLOAT4(0.f, -1.f, 0.f, 0.f);
+	dirLight.vLightDir = XMFLOAT4(0.3f, -1.f, 0.f, 0.f);
 
 	//Not actually a direction here, but instead a position of the point light.
 	pointLight.vLightDir = XMFLOAT4(0.f, -5.f, 0.f, 0.f);
 	pointLight.vLightColor = XMFLOAT4(0.f, 0.f, 1.f, 0.3f);
 
 	//AmbLight has no direction or position
-	ambLight.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.2f);
+	ambLight.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.6f);
+
+	//Spotlight initialization
+	Light temp = spotLight.light;
+	temp.vLightColor = XMFLOAT4(1.f, 1.f, 0.f, 0.4f);
+	temp.vLightDir = XMFLOAT4(0.f, 0.f, 1.f, 0.4f);
 	//--------------------------------------------------------------------------
 
 	// Render the graphics scene.
@@ -341,6 +358,9 @@ bool Render()
 			//Update ambLight buffer light color. Currently unused, as amblight does not change.
 			con->UpdateSubresource(ambLightConstantBuffer.Get(), 0, nullptr, &ambLight, 0, 0);
 			con->PSSetConstantBuffers(2, 1, pointLightConstantBuffer.GetAddressOf());
+
+			con->UpdateSubresource(spotLightConstantBuffer.Get(), 0, nullptr, &spotLight, 0, 0);
+			con->PSSetConstantBuffers(2, 1, spotLightConstantBuffer.GetAddressOf());
 			//End constant buffers for model.
 
 			// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.

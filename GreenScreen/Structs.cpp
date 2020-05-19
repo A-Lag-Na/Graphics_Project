@@ -27,6 +27,13 @@ struct Light
     XMFLOAT4 vLightDir;
 };
 
+struct Spotlight
+{
+    Light light;
+    XMFLOAT4 coneDir;
+    XMFLOAT4 coneRatio;
+};
+
 
 struct SimpleMesh
 {
