@@ -372,15 +372,15 @@ bool Render()
 			con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
 
 			//Light constant buffer
-			if (lightSwitch)
-			{
-				//This will get caught in pixel shader and ignored
-				dirLight.vLightColor = XMFLOAT4(0.f, 0.f, 0.f, 0.0f);
-			}
-			else
-			{
-				dirLight.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.2f);
-			}
+			//if (lightSwitch)
+			//{
+			//	//This will get caught in pixel shader and ignored
+			//	dirLight.vLightColor = XMFLOAT4(0.f, 0.f, 0.f, 0.0f);
+			//}
+			//else
+			//{
+			//	dirLight.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.2f);
+			//}
 			//Update dirLight buffer to use updated light color.
 			con->UpdateSubresource(dirLightConstantBuffer.Get(), 0, nullptr, &dirLight, 0, 0);
 			con->PSSetConstantBuffers(0, 1, dirLightConstantBuffer.GetAddressOf());
