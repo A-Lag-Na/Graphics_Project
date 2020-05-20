@@ -28,12 +28,15 @@ using namespace GRAPHICS;
 //Models & Rendering includes
 #include "Grid.h"
 #include "corvetteobj.h"
+#include "planeobj.h"
 
 const float SCREEN_DEPTH = 1000.0f;
 const float SCREEN_NEAR = 0.1f;
 
 Camera* m_Camera = 0;
 Model* m_Model = 0;
+Model* planeModel = 0;
+
 Grid* m_Grid = 0;
 ModelLoading* m_ModelLoader = 0;
 GWindow win;
@@ -56,18 +59,23 @@ Microsoft::WRL::ComPtr<ID3D11PixelShader>	pixelShader;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	vertexBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	indexBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	WVPconstantBuffer;
+
 Microsoft::WRL::ComPtr<ID3D11Buffer>	dirLightConstantBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	pointLightConstantBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	ambLightConstantBuffer;
+Microsoft::WRL::ComPtr<ID3D11Buffer>	spotLightConstantBuffer;
 
 
 Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> mySRV;
 Microsoft::WRL::ComPtr < ID3D11SamplerState> myLinearSampler;
 
 WVP constantBufferData;
+
 Light dirLight;
 Light pointLight;
 Light ambLight;
+Spotlight spotLight;
+
 bool lightSwitch = false;
 
 //---------------------------------------------
@@ -156,6 +164,13 @@ bool Initialize(int screenWidth, int screenHeight)
 	srd.pSysMem = &ambLight;
 	hr = myDevice->CreateBuffer(&desc, &srd, ambLightConstantBuffer.GetAddressOf());
 
+	//Spotlight constant buffer
+	ZeroMemory(&desc, sizeof(desc));
+	desc = CD3D11_BUFFER_DESC(sizeof(Spotlight), D3D11_BIND_CONSTANT_BUFFER);
+	ZeroMemory(&srd, sizeof(srd));
+	srd.pSysMem = &spotLight;
+	hr = myDevice->CreateBuffer(&desc, &srd, spotLightConstantBuffer.GetAddressOf());
+
 	// End of constant buffers
 
 	//Initalize Geometry Renderers here
@@ -185,6 +200,10 @@ bool Initialize(int screenWidth, int screenHeight)
 	//For now, gotta pass in vertex and index count for each model rendered (.h or hardcoded)
 	result = m_Model->Initialize( *myDevice.GetAddressOf(), *myContext.GetAddressOf(), corvetteobj_data , corvetteobj_indicies, 3453, 8112, 40.f);
 	result = m_ModelLoader->LoadModelBuffers("../cubeobj.obj", *myDevice.GetAddressOf(), *myContext.GetAddressOf());
+	//Create and initialize plane model
+	planeModel = new Model;
+	result = planeModel->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), planeObj_data, planeObj_indicies, 873, 2256, 1.f);
+
 	//End geometry renderers.
 
 	return true;
@@ -276,14 +295,19 @@ bool Frame()
 
 	//Lighting
 	//Direction light setting (direction is fixed, color is set through camera render function because of the R button functionality)
-	dirLight.vLightDir = XMFLOAT4(0.f, -1.f, 0.f, 0.f);
+	dirLight.vLightDir = XMFLOAT4(0.3f, -1.f, 0.f, 0.f);
 
 	//Not actually a direction here, but instead a position of the point light.
-	pointLight.vLightDir = XMFLOAT4(0.f, -5.f, 0.f, 0.f);
-	pointLight.vLightColor = XMFLOAT4(0.f, 0.f, 1.f, 0.3f);
+	pointLight.vLightDir = XMFLOAT4(0.f, -99.f, 0.f, 0.f);
+	pointLight.vLightColor = XMFLOAT4(0.f, 0.f, 1.f, 0.2f);
 
 	//AmbLight has no direction or position
-	ambLight.vLightColor = XMFLOAT4(1.f, 0.f, 0.f, 0.2f);
+	ambLight.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.1f);
+
+	//Spotlight initialization
+	Light temp = spotLight.light;
+	temp.vLightColor = XMFLOAT4(1.f, 1.f, 0.f, 0.4f);
+	temp.vLightDir = XMFLOAT4(0.f, 0.f, 1.f, 0.4f);
 	//--------------------------------------------------------------------------
 
 	
@@ -350,11 +374,12 @@ bool Render()
 			//Light constant buffer
 			if (lightSwitch)
 			{
-				dirLight.vLightColor = XMFLOAT4(1.f, 0.f, 0.f, 0.3f);
+				//This will get caught in pixel shader and ignored
+				dirLight.vLightColor = XMFLOAT4(0.f, 0.f, 0.f, 0.0f);
 			}
 			else
 			{
-				dirLight.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.3f);
+				dirLight.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.2f);
 			}
 			//Update dirLight buffer to use updated light color.
 			con->UpdateSubresource(dirLightConstantBuffer.Get(), 0, nullptr, &dirLight, 0, 0);
@@ -367,11 +392,18 @@ bool Render()
 			//Update ambLight buffer light color. Currently unused, as amblight does not change.
 			con->UpdateSubresource(ambLightConstantBuffer.Get(), 0, nullptr, &ambLight, 0, 0);
 			con->PSSetConstantBuffers(2, 1, pointLightConstantBuffer.GetAddressOf());
+
+			//
+			//con->UpdateSubresource(spotLightConstantBuffer.Get(), 0, nullptr, &spotLight, 0, 0);
+			//con->PSSetConstantBuffers(2, 1, spotLightConstantBuffer.GetAddressOf());
 			//End constant buffers for model.
 
 			// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
 			// To disable texturing, call Model->Render without the SRV or sampler parameters (untested).
 			m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, mySRV.Get(), myLinearSampler.Get());
+
+			//TODO: Update WVP and/or constant buffers for plane object as appropriate.
+			planeModel->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, nullptr, myLinearSampler.Get());
 			
 
 			//Update and set constant buffers for grid
