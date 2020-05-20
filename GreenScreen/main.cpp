@@ -22,10 +22,12 @@ using namespace GRAPHICS;
 #include "Model.h"
 #include "DDSTextureLoader.h"
 #include "FBXLoader.h"
+#include "ModelLoading.h"
 #include "Structs.cpp"
 
 //Models & Rendering includes
 #include "Grid.h"
+#include "SkySphere.h"
 #include "corvetteobj.h"
 #include "planeobj.h"
 
@@ -37,6 +39,8 @@ Model* m_Model = 0;
 Model* planeModel = 0;
 
 Grid* m_Grid = 0;
+SkySphere* m_SkySphere = 0;
+ModelLoading* m_ModelLoader = 0;
 GWindow win;
 GEventReceiver msgs;
 GDirectX11Surface d3d11;
@@ -88,6 +92,8 @@ bool Render();
 // lets pop a window and use D3D11 to clear to a green screen
 int main()
 {
+	
+
 	if (+win.Create(0, 0, 800, 600, GWindowStyle::WINDOWEDBORDERED))
 	{
 		msgs.Create(win, [&]() 
@@ -103,6 +109,7 @@ int main()
 			Frame();
 		}
 	}
+
 	return 0; // that's all folks
 }
 
@@ -184,10 +191,28 @@ bool Initialize(int screenWidth, int screenHeight)
 	{
 		return false;
 	}
+
+	m_ModelLoader = new ModelLoading;
+	if (!m_ModelLoader)
+	{
+		return false;
+	}
+
+	//Skysphere stuff
+	//only run ModelLoader if you need new one
+	//result = m_ModelLoader->LoadModel("../Skysphere.obj");
+
+	m_SkySphere = new SkySphere;
+	if (!m_SkySphere)
+	{
+		return false;
+	}
+
+	result = m_SkySphere->Initialize(*myDevice.GetAddressOf(), "../skyModel.txt");
+
 	// Initialize the model object.
 	//For now, gotta pass in vertex and index count for each model rendered (.h or hardcoded)
 	result = m_Model->Initialize( *myDevice.GetAddressOf(), *myContext.GetAddressOf(), corvetteobj_data , corvetteobj_indicies, 3453, 8112, 40.f);
-
 	//Create and initialize plane model
 	planeModel = new Model;
 	result = planeModel->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), planeObj_data, planeObj_indicies, 873, 2256, 1.f);
@@ -214,7 +239,26 @@ void Shutdown()
 		m_Model = 0;
 	}
 
-	//TODO: Release Grid object.
+
+	if (m_ModelLoader)
+	{
+		delete m_ModelLoader;
+		m_ModelLoader = nullptr;
+	}
+
+	//Release Grid object.
+	if (m_Grid)
+	{
+		delete m_Grid;
+		m_Grid = nullptr;
+	}
+
+	if (m_SkySphere)
+	{
+		m_SkySphere->Shutdown();
+		delete m_SkySphere;
+		m_SkySphere = nullptr;
+	}
 }
 
 bool Frame()
@@ -285,6 +329,8 @@ bool Frame()
 	temp.vLightColor = XMFLOAT4(1.f, 1.f, 0.f, 0.4f);
 	temp.vLightDir = XMFLOAT4(0.f, 0.f, 1.f, 0.4f);
 	//--------------------------------------------------------------------------
+
+	
 
 	// Render the graphics scene.
 	result = Render();
@@ -377,7 +423,7 @@ bool Render()
 			m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, mySRV.Get(), myLinearSampler.Get());
 
 			//TODO: Update WVP and/or constant buffers for plane object as appropriate.
-			planeModel->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, nullptr, myLinearSampler.Get());
+			//planeModel->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, nullptr, myLinearSampler.Get());
 			
 
 			//Update and set constant buffers for grid
@@ -397,6 +443,22 @@ bool Render()
 			//End grid constant buffers
 
 			m_Grid->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, mySRV.Get(), myLinearSampler.Get());
+
+			//Update and set constant buffers for grid
+			//----------------------------------------
+			ZeroMemory(&constantBufferData, sizeof(WVP));
+			constantBufferData.w = XMMatrixIdentity();
+			constantBufferData.v = viewMatrix;
+
+			// added by clark
+			constantBufferData.v = XMMatrixInverse(NULL, viewMatrix);
+			constantBufferData.p = projectionMatrix;
+
+			// change the constant buffer data here per draw / model
+			con->UpdateSubresource(WVPconstantBuffer.Get(), 0, nullptr, &constantBufferData, 0, 0);
+			con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
+
+			m_SkySphere->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, mySRV.Get(), myLinearSampler.Get());
 
 			swap->Present(1, 0);
 			// release incremented COM reference counts

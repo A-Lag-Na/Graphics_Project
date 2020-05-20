@@ -38,6 +38,10 @@ add_executable (GreenScreen
 	Grid.h
 	Grid.cpp
 	Structs.cpp
+	ModelLoading.h
+	ModelLoading.cpp
+	SkySphere.h
+	SkySphere.cpp
 	${VERTEX_SHADERS}
 	${PIXEL_SHADERS}
 )
