@@ -19,7 +19,12 @@ struct SimpleVertex
     XMFLOAT2 Tex;
 };
 
-
+struct SimpleIndex
+{
+    int vIndex1, vIndex2, vIndex3;
+    int tIndex1, tIndex2, tIndex3;
+    int nIndex1, nIndex2, nIndex3;
+};
 struct Light
 {
     //4th digit is unused. Needs to be a multiple of 16 bytes for constant buffer reasons.

@@ -37,6 +37,8 @@ add_executable (GreenScreen
 	Grid.h
 	Grid.cpp
 	Structs.cpp
+	ModelLoading.h
+	ModelLoading.cpp
 	${VERTEX_SHADERS}
 	${PIXEL_SHADERS}
 )

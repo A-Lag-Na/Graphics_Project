@@ -22,6 +22,7 @@ using namespace GRAPHICS;
 #include "Model.h"
 #include "DDSTextureLoader.h"
 #include "FBXLoader.h"
+#include "ModelLoading.h"
 #include "Structs.cpp"
 
 //Models & Rendering includes
@@ -34,6 +35,7 @@ const float SCREEN_NEAR = 0.1f;
 Camera* m_Camera = 0;
 Model* m_Model = 0;
 Grid* m_Grid = 0;
+ModelLoading* m_ModelLoader = 0;
 GWindow win;
 GEventReceiver msgs;
 GDirectX11Surface d3d11;
@@ -80,6 +82,9 @@ bool Render();
 // lets pop a window and use D3D11 to clear to a green screen
 int main()
 {
+	
+	
+
 	if (+win.Create(0, 0, 800, 600, GWindowStyle::WINDOWEDBORDERED))
 	{
 		msgs.Create(win, [&]() 
@@ -95,6 +100,7 @@ int main()
 			Frame();
 		}
 	}
+
 	return 0; // that's all folks
 }
 
@@ -169,10 +175,16 @@ bool Initialize(int screenWidth, int screenHeight)
 	{
 		return false;
 	}
+	m_ModelLoader = new ModelLoading;
+	if (!m_ModelLoader)
+	{
+		return false;
+	}
+
 	// Initialize the model object.
 	//For now, gotta pass in vertex and index count for each model rendered (.h or hardcoded)
 	result = m_Model->Initialize( *myDevice.GetAddressOf(), *myContext.GetAddressOf(), corvetteobj_data , corvetteobj_indicies, 3453, 8112, 40.f);
-
+	result = m_ModelLoader->LoadModelBuffers("../cubeobj.obj", *myDevice.GetAddressOf(), *myContext.GetAddressOf());
 	//End geometry renderers.
 
 	return true;
@@ -195,7 +207,19 @@ void Shutdown()
 		m_Model = 0;
 	}
 
-	//TODO: Release Grid object.
+
+	if (m_ModelLoader)
+	{
+		delete m_ModelLoader;
+		m_ModelLoader = nullptr;
+	}
+
+	//Release Grid object.
+	if (m_Grid)
+	{
+		delete m_Grid;
+		m_Grid = nullptr;
+	}
 }
 
 bool Frame()
@@ -261,6 +285,8 @@ bool Frame()
 	//AmbLight has no direction or position
 	ambLight.vLightColor = XMFLOAT4(1.f, 0.f, 0.f, 0.2f);
 	//--------------------------------------------------------------------------
+
+	
 
 	// Render the graphics scene.
 	result = Render();
@@ -365,6 +391,22 @@ bool Render()
 			//End grid constant buffers
 
 			m_Grid->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, mySRV.Get(), myLinearSampler.Get());
+
+			//Update and set constant buffers for grid
+			//----------------------------------------
+			ZeroMemory(&constantBufferData, sizeof(WVP));
+			constantBufferData.w = XMMatrixIdentity();
+			constantBufferData.v = viewMatrix;
+
+			// added by clark
+			constantBufferData.v = XMMatrixInverse(NULL, viewMatrix);
+			constantBufferData.p = projectionMatrix;
+
+			// change the constant buffer data here per draw / model
+			con->UpdateSubresource(WVPconstantBuffer.Get(), 0, nullptr, &constantBufferData, 0, 0);
+			con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
+
+			m_ModelLoader->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, mySRV.Get(), myLinearSampler.Get());
 
 			swap->Present(1, 0);
 			// release incremented COM reference counts
