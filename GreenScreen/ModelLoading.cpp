@@ -1,210 +1,305 @@
 #include "ModelLoading.h"
-
-
-
-bool ModelLoading::LoadOBJ(char* filename, vector <XMFLOAT3>& out_vertices, vector <XMFLOAT2>& out_uvs, vector <XMFLOAT3>& out_normals)
+bool ModelLoading :: GetModelFilename(char* filename)
 {
-	vector<unsigned int> vertexIndices, uvIndices, normalIndices;
-	vector<XMFLOAT3> temp_vertices, temp_normals;
-	vector<XMFLOAT2> temp_uvs;
-
-	FILE* file = fopen(filename, "r");
-
-	// Read in the vertices, texture coordinates, and normals into the data structures.
-	// Important: Also convert to left hand coordinate system since Maya uses right hand coordinate system.
+	bool done;
+	ifstream fin;
 
 
-	while (1)
-	{
-		char lineHeader[128];
+	// Loop until we have a file name.
+	
+		fin.open(filename);
 
-		// read the first word of the line
-		int res = fscanf(file, "%s", lineHeader);
-		if (res == EOF)
-			break; // EOF = End Of File. Quit the loop.
-
-
-			// Read in the vertices.
-		if (strcmp(lineHeader, "v") == 0)
+		if (fin.good())
 		{
-			XMFLOAT3 temp_vert;
-
-			fscanf(file, "%f %f %f\n", &temp_vert.x, &temp_vert.y, &temp_vert.z);
-
-			// Invert the Z vertex to change to left hand system.
-			//temp_vert.z = temp_vert.z * -1.0f;
-
-			temp_vertices.push_back(temp_vert);
-
+			// If the file exists and there are no problems then exit since we have the file name.
+			done = true;
+			fin.close();
 		}
-
-		// Read in the texture uv coordinates.
-		else if (strcmp(lineHeader, "vt") == 0)
+		else
 		{
-			XMFLOAT2 temp_uv;
-
-			fscanf(file, "%f %f\n", &temp_uv.x, &temp_uv.y);
-
-			// Invert the V texture coordinates to left hand system.
-			//temp_uv.y = 1.0f - temp_uv.y;
-
-			temp_uvs.push_back(temp_uv);
+			// If the file does not exist or there was an issue opening it then notify the user and repeat the process.
+			fin.clear();
+			cout << endl;
+			cout << "File " << filename << " could not be opened." << endl << endl;
+			done = false;
 		}
-
-		// Read in the normals.
-		else if (strcmp(lineHeader, "vn") == 0)
-		{
-			XMFLOAT3 temp_nrm;
-
-			fscanf(file, "%f %f %f\n", &temp_nrm.x, &temp_nrm.y, &temp_nrm.z);
-
-			// Invert the Z normal to change to left hand system.
-			//temp_nrm.z = temp_nrm.z * -1.0f;
-
-			temp_normals.push_back(temp_nrm);
-		}
-
-
-
-		// Read in the faces.
-		else if (strcmp(lineHeader, "f") == 0)
-		{
-			std::string vertex1, vertex2, vertex3;
-			unsigned int vertexIndex[3], uvIndex[3], normalIndex[3];
-			int matches = fscanf(file, "%d/%d/%d %d/%d/%d %d/%d/%d\n", &vertexIndex[0], &uvIndex[0], &normalIndex[0], &vertexIndex[1], &uvIndex[1], &normalIndex[1], &vertexIndex[2], &uvIndex[2], &normalIndex[2]);
-			if (matches != 9)
-			{
-				printf("File can't be read by our simple parser : ( Try exporting with other options\n");
-				return false;
-			}
-			vertexIndices.push_back(vertexIndex[0]);
-			vertexIndices.push_back(vertexIndex[1]);
-			vertexIndices.push_back(vertexIndex[2]);
-			uvIndices.push_back(uvIndex[0]);
-			uvIndices.push_back(uvIndex[1]);
-			uvIndices.push_back(uvIndex[2]);
-			normalIndices.push_back(normalIndex[0]);
-			normalIndices.push_back(normalIndex[1]);
-			normalIndices.push_back(normalIndex[2]);
-		}
-
-	}
-
-	// For each vertex of each triangle
-	for (unsigned int i = 0; i < vertexIndices.size(); i++)
-	{
-		unsigned int vertexIndex = vertexIndices[i];
-		XMFLOAT3 vertex = temp_vertices[vertexIndex - 1];
-		out_vertices.push_back(vertex);
-	}
-
-	for (unsigned int i = 0; i < uvIndices.size(); i++)
-	{
-		unsigned int uvIndex = uvIndices[i];
-		XMFLOAT2 uv = temp_uvs[uvIndex - 1];
-		out_uvs.push_back(uv);
-	}
-	for (unsigned int i = 0; i < vertexIndices.size(); i++)
-	{
-		unsigned int normalIndex = normalIndices[i];
-		XMFLOAT3 normal = temp_normals[normalIndex - 1];
-		out_normals.push_back(normal);
-	}
-
-	return true;
+	
+	return done;
 }
 
 
-bool ModelLoading::LoadModelBuffers(char* filename,ID3D11Device* device, ID3D11DeviceContext* deviceContext)
+bool  ModelLoading:: ReadFileCounts(char* filename, int& vertexCount, int& textureCount, int& normalCount, int& faceCount)
 {
-	// Read our .obj file
-	std::vector< XMFLOAT3 > vertices;
-	std::vector< XMFLOAT2 > uvs;
-	std::vector< XMFLOAT3 > normals; // Won't be used at the moment.
-	bool res = LoadOBJ(filename, vertices, uvs, normals);
-
-	//This is me changing the code to use SimpleMesh (A struct with 2 vectors, vertexList and indicesList) to make the code more readable, IMO, and help debug.
-	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
-	D3D11_SUBRESOURCE_DATA vertexData, indexData;
-	HRESULT result;
-
-	// Set the size of simpleMesh.vertexList.
-	// Variables here for index count and vertex count are replaced with the size of the vectors in vertex/indices lists.
-	m_vertexCount = vertices.size();
-
-	simpleMesh.vertexList.resize(m_vertexCount);
+	ifstream fin;
+	char input;
 
 
-	// Load the vertex array with data.
-	for (int i = 0; i < m_vertexCount; i++)
-	{
-		// I'm dividing these positions to make the mesh smaller (and further back from the camera on the z axis), otherwise it'd be clipped and not show up onscreen.
-		simpleMesh.vertexList[i].Pos.x = vertices[i].x/ m_scale;
-		simpleMesh.vertexList[i].Pos.y = vertices[i].y / m_scale;
-		simpleMesh.vertexList[i].Pos.z = vertices[i].z / m_scale;// +1;
+	// Initialize the counts.
+	vertexCount = 0;
+	textureCount = 0;
+	normalCount = 0;
+	faceCount = 0;
 
-		simpleMesh.vertexList[i].Tex.x = uvs[i].x;
-		simpleMesh.vertexList[i].Tex.y = uvs[i].y;
+	// Open the file.
+	fin.open(filename);
 
-		simpleMesh.vertexList[i].Normal.x = normals[i].x;
-		simpleMesh.vertexList[i].Normal.y = normals[i].y;
-		simpleMesh.vertexList[i].Normal.z = normals[i].z;
-
-	};
-
-
-	// Set up the description of the static vertex buffer.
-	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	vertexBufferDesc.ByteWidth = sizeof(SimpleVertex) * m_vertexCount;
-	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vertexBufferDesc.CPUAccessFlags = 0;
-	vertexBufferDesc.MiscFlags = 0;
-	vertexBufferDesc.StructureByteStride = 0;
-
-	// Give the subresource structure a pointer to the vertex data.
-	vertexData.pSysMem = simpleMesh.vertexList.data();
-	vertexData.SysMemPitch = 0;
-	vertexData.SysMemSlicePitch = 0;
-
-	// Now create the vertex buffer.
-	//Edited following line to use new vertexbuffer*
-	result = device->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer);
-	if (FAILED(result))
+	// Check if it was successful in opening the file.
+	if (fin.fail() == true)
 	{
 		return false;
 	}
 
+	// Read from the file and continue to read until the end of the file is reached.
+	fin.get(input);
+
+	while (!fin.eof())
+	{
+		// If the line starts with 'v' then count either the vertex, the texture coordinates, or the normal vector.
+		if (input == 'v')
+		{
+			fin.get(input);
+			if (input == ' ') { vertexCount++; }
+			if (input == 't') { textureCount++; }
+			if (input == 'n') { normalCount++; }
+		}
+
+		// If the line starts with 'f' then increment the face count.
+		if (input == 'f')
+		{
+			fin.get(input);
+			if (input == ' ') { faceCount++; }
+		}
+
+		// Otherwise read in the remainder of the line.
+		while (input != '\n')
+		{
+			fin.get(input);
+		}
+
+		// Start reading the beginning of the next line.
+		fin.get(input);
+	}
+
+	// Close the file.
+	fin.close();
 
 	return true;
 }
 
-void ModelLoading::Render(ID3D11DeviceContext* deviceContext, ID3D11VertexShader* vertexShader, ID3D11PixelShader* pixelShader, ID3D11InputLayout* inputLayout, ID3D11RenderTargetView* view, ID3D11ShaderResourceView* SRV = nullptr, ID3D11SamplerState* sampler = nullptr)
+
+bool ModelLoading::LoadDataStructures(char* filename, int vertexCount, int textureCount, int normalCount, int faceCount)
 {
-	// Set vertex buffer stride and offset.
-	unsigned int stride = sizeof(SimpleVertex);
-	unsigned int offset = 0;
+	XMFLOAT3* vertices, * normals;
+	XMFLOAT2* texcoords;
+	SimpleIndex* faces;
+	ifstream fin;
+	int vertexIndex, texcoordIndex, normalIndex, faceIndex, vIndex, tIndex, nIndex;
+	char input, input2;
+	ofstream fout;
 
-	// setup the pipeline
-	deviceContext->IASetInputLayout(inputLayout);
-	// Set the vertex buffer to active in the input assembler so it can be rendered.
-	deviceContext->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
-	// Set the index buffer to active in the input assembler so it can be rendered.
-	deviceContext->IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
-	// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
-	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	deviceContext->VSSetShader(vertexShader, nullptr, 0);
-	deviceContext->PSSetShader(pixelShader, nullptr, 0);
 
-	if (SRV)
+	// Initialize the four data structures.
+	vertices = new XMFLOAT3[vertexCount];
+	if (!vertices)
 	{
-		//This contains the texture being loaded in.
-		deviceContext->PSSetShaderResources(0, 1, &SRV);
+		return false;
 	}
-	if (sampler)
+
+	texcoords = new XMFLOAT2[textureCount];
+	if (!texcoords)
 	{
-		//The sampler reads from the SRV to get the texture data.
-		deviceContext->PSSetSamplers(0, 1, &sampler);
+		return false;
 	}
-	deviceContext->Draw(m_vertexCount, 0);
+
+	normals = new XMFLOAT3[normalCount];
+	if (!normals)
+	{
+		return false;
+	}
+
+	faces = new SimpleIndex[faceCount];
+	if (!faces)
+	{
+		return false;
+	}
+
+	// Initialize the indexes.
+	vertexIndex = 0;
+	texcoordIndex = 0;
+	normalIndex = 0;
+	faceIndex = 0;
+
+	// Open the file.
+	fin.open(filename);
+
+	// Check if it was successful in opening the file.
+	if (fin.fail() == true)
+	{
+		return false;
+	}
+
+	// Read in the vertices, texture coordinates, and normals into the data structures.
+	// Important: Also convert to left hand coordinate system since Maya uses right hand coordinate system.
+	fin.get(input);
+
+	while (!fin.eof())
+	{
+		if (input == 'v')
+		{
+			fin.get(input);
+
+			// Read in the vertices.
+			if (input == ' ')
+			{
+				fin >> vertices[vertexIndex].x >> vertices[vertexIndex].y >> vertices[vertexIndex].z;
+
+				// Invert the Z vertex to change to left hand system.
+				vertices[vertexIndex].z = vertices[vertexIndex].z * -1.0f;
+				vertexIndex++;
+			}
+
+			// Read in the texture uv coordinates.
+			if (input == 't')
+			{
+				fin >> texcoords[texcoordIndex].x >> texcoords[texcoordIndex].y;
+
+				// Invert the V texture coordinates to left hand system.
+				texcoords[texcoordIndex].y = 1.0f - texcoords[texcoordIndex].y;
+				texcoordIndex++;
+			}
+
+			// Read in the normals.
+			if (input == 'n')
+			{
+				fin >> normals[normalIndex].x >> normals[normalIndex].y >> normals[normalIndex].z;
+
+				// Invert the Z normal to change to left hand system.
+				normals[normalIndex].z = normals[normalIndex].z * -1.0f;
+				normalIndex++;
+			}
+		}
+
+		// Read in the faces.
+		if (input == 'f')
+		{
+			fin.get(input);
+			if (input == ' ')
+			{
+				// Read the face data in backwards to convert it to a left hand system from right hand system.
+				fin >> faces[faceIndex].vIndex3 >> input2 >> faces[faceIndex].tIndex3 >> input2 >> faces[faceIndex].nIndex3
+					>> faces[faceIndex].vIndex2 >> input2 >> faces[faceIndex].tIndex2 >> input2 >> faces[faceIndex].nIndex2
+					>> faces[faceIndex].vIndex1 >> input2 >> faces[faceIndex].tIndex1 >> input2 >> faces[faceIndex].nIndex1;
+				faceIndex++;
+			}
+		}
+
+		// Read in the remainder of the line.
+		while (input != '\n')
+		{
+			fin.get(input);
+		}
+
+		// Start reading the beginning of the next line.
+		fin.get(input);
+	}
+
+	// Close the file.
+	fin.close();
+
+	// Open the output file.
+	fout.open("../model.txt");
+
+	// Write out the file header that our model format uses.
+	fout << "Vertex Count: " << (faceCount * 3) << endl;
+	fout << endl;
+	fout << "Data:" << endl;
+	fout << endl;
+
+	// Now loop through all the faces and output the three vertices for each face.
+	for (int i = 0; i < faceIndex; i++)
+	{
+		vIndex = faces[i].vIndex1 - 1;
+		tIndex = faces[i].tIndex1 - 1;
+		nIndex = faces[i].nIndex1 - 1;
+
+		fout << vertices[vIndex].x << ' ' << vertices[vIndex].y << ' ' << vertices[vIndex].z << ' '
+			<< texcoords[tIndex].x << ' ' << texcoords[tIndex].y << ' '
+			<< normals[nIndex].x << ' ' << normals[nIndex].y << ' ' << normals[nIndex].z << endl;
+
+		vIndex = faces[i].vIndex2 - 1;
+		tIndex = faces[i].tIndex2 - 1;
+		nIndex = faces[i].nIndex2 - 1;
+
+		fout << vertices[vIndex].x << ' ' << vertices[vIndex].y << ' ' << vertices[vIndex].z << ' '
+			<< texcoords[tIndex].x << ' ' << texcoords[tIndex].y << ' '
+			<< normals[nIndex].x << ' ' << normals[nIndex].y << ' ' << normals[nIndex].z << endl;
+
+		vIndex = faces[i].vIndex3 - 1;
+		tIndex = faces[i].tIndex3 - 1;
+		nIndex = faces[i].nIndex3 - 1;
+
+		fout << vertices[vIndex].x << ' ' << vertices[vIndex].y << ' ' << vertices[vIndex].z << ' '
+			<< texcoords[tIndex].x << ' ' << texcoords[tIndex].y << ' '
+			<< normals[nIndex].x << ' ' << normals[nIndex].y << ' ' << normals[nIndex].z << endl;
+	}
+
+	// Close the output file.
+	fout.close();
+
+	// Release the four data structures.
+	if (vertices)
+	{
+		delete[] vertices;
+		vertices = 0;
+	}
+	if (texcoords)
+	{
+		delete[] texcoords;
+		texcoords = 0;
+	}
+	if (normals)
+	{
+		delete[] normals;
+		normals = 0;
+	}
+	if (faces)
+	{
+		delete[] faces;
+		faces = 0;
+	}
+
+	return true;
+}
+
+bool ModelLoading::LoadModel(char filename[256])
+{
+	// Read in the name of the model file.
+	GetModelFilename(filename);
+
+	// Read in the number of vertices, tex coords, normals, and faces so that the data structures can be initialized with the exact sizes needed.
+	result = ReadFileCounts(filename, vertexCount, textureCount, normalCount, faceCount);
+	if (!result)
+	{
+		return false;
+	}
+
+	// Display the counts to the screen for information purposes.
+	cout << endl;
+	cout << "Vertices: " << vertexCount << endl;
+	cout << "UVs:      " << textureCount << endl;
+	cout << "Normals:  " << normalCount << endl;
+	cout << "Faces:    " << faceCount << endl;
+
+	// Now read the data from the file into the data structures and then output it in our model format.
+	result = LoadDataStructures(filename, vertexCount, textureCount, normalCount, faceCount);
+	if (!result)
+	{
+		return false;
+	}
+
+	// Notify the user the model has been converted.
+	cout << "\nFile has been converted." << endl;
+
+	return true;
 }
 

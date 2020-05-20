@@ -27,6 +27,7 @@ using namespace GRAPHICS;
 
 //Models & Rendering includes
 #include "Grid.h"
+#include "SkySphere.h"
 #include "corvetteobj.h"
 #include "planeobj.h"
 
@@ -38,6 +39,7 @@ Model* m_Model = 0;
 Model* planeModel = 0;
 
 Grid* m_Grid = 0;
+SkySphere* m_SkySphere = 0;
 ModelLoading* m_ModelLoader = 0;
 GWindow win;
 GEventReceiver msgs;
@@ -90,7 +92,6 @@ bool Render();
 // lets pop a window and use D3D11 to clear to a green screen
 int main()
 {
-	
 	
 
 	if (+win.Create(0, 0, 800, 600, GWindowStyle::WINDOWEDBORDERED))
@@ -190,16 +191,28 @@ bool Initialize(int screenWidth, int screenHeight)
 	{
 		return false;
 	}
+
 	m_ModelLoader = new ModelLoading;
 	if (!m_ModelLoader)
 	{
 		return false;
 	}
 
+	//Skysphere stuff
+	//only run ModelLoader if you need new one
+	//result = m_ModelLoader->LoadModel("../Skysphere.obj");
+
+	m_SkySphere = new SkySphere;
+	if (!m_SkySphere)
+	{
+		return false;
+	}
+
+	result = m_SkySphere->Initialize(*myDevice.GetAddressOf(), "../skyModel.txt");
+
 	// Initialize the model object.
 	//For now, gotta pass in vertex and index count for each model rendered (.h or hardcoded)
 	result = m_Model->Initialize( *myDevice.GetAddressOf(), *myContext.GetAddressOf(), corvetteobj_data , corvetteobj_indicies, 3453, 8112, 40.f);
-	result = m_ModelLoader->LoadModelBuffers("../cubeobj.obj", *myDevice.GetAddressOf(), *myContext.GetAddressOf());
 	//Create and initialize plane model
 	planeModel = new Model;
 	result = planeModel->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), planeObj_data, planeObj_indicies, 873, 2256, 1.f);
@@ -238,6 +251,13 @@ void Shutdown()
 	{
 		delete m_Grid;
 		m_Grid = nullptr;
+	}
+
+	if (m_SkySphere)
+	{
+		m_SkySphere->Shutdown();
+		delete m_SkySphere;
+		m_SkySphere = nullptr;
 	}
 }
 
@@ -403,7 +423,7 @@ bool Render()
 			m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, mySRV.Get(), myLinearSampler.Get());
 
 			//TODO: Update WVP and/or constant buffers for plane object as appropriate.
-			planeModel->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, nullptr, myLinearSampler.Get());
+			//planeModel->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, nullptr, myLinearSampler.Get());
 			
 
 			//Update and set constant buffers for grid
@@ -438,7 +458,7 @@ bool Render()
 			con->UpdateSubresource(WVPconstantBuffer.Get(), 0, nullptr, &constantBufferData, 0, 0);
 			con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
 
-			//m_ModelLoader->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, mySRV.Get(), myLinearSampler.Get());
+			m_SkySphere->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, mySRV.Get(), myLinearSampler.Get());
 
 			swap->Present(1, 0);
 			// release incremented COM reference counts
