@@ -36,7 +36,8 @@ const float SCREEN_NEAR = 0.1f;
 
 Camera* m_Camera = 0;
 Model* m_Model = 0;
-Model* planeModel = 0;
+//Model* planeModel = 0;
+Model* islandModel = 0;
 
 Grid* m_Grid = 0;
 SkySphere* m_SkySphere = 0;
@@ -68,7 +69,8 @@ Microsoft::WRL::ComPtr<ID3D11Buffer>	ambLightConstantBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	spotLightConstantBuffer;
 
 
-Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> mySRV;
+Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> corvetteSRV;
+Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> placeholderSRV;
 Microsoft::WRL::ComPtr < ID3D11SamplerState> myLinearSampler;
 
 WVP constantBufferData;
@@ -213,9 +215,13 @@ bool Initialize(int screenWidth, int screenHeight)
 	// Initialize the model object.
 	//For now, gotta pass in vertex and index count for each model rendered (.h or hardcoded)
 	result = m_Model->Initialize( *myDevice.GetAddressOf(), *myContext.GetAddressOf(), corvetteobj_data , corvetteobj_indicies, 3453, 8112, 40.f);
+	
 	//Create and initialize plane model
-	planeModel = new Model;
-	result = planeModel->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), planeObj_data, planeObj_indicies, 873, 2256, 1.f);
+	//planeModel = new Model;
+	//result = planeModel->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), planeObj_data, planeObj_indicies, 873, 2256, 1.f);
+
+	//Create and initialize island model
+
 
 	//End geometry renderers.
 
@@ -299,7 +305,8 @@ bool Frame()
 	//---------
 	// Load corvette Texture
 
-	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../vette_color.dds", nullptr, &mySRV);
+	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../vette_color.dds", nullptr, &corvetteSRV);
+	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../placeholderTexture.dds", nullptr, &placeholderSRV);
 
 	// Create the sample state
 	D3D11_SAMPLER_DESC sampDesc = {};
@@ -392,15 +399,15 @@ bool Render()
 			con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
 
 			//Light constant buffer
-			//if (lightSwitch)
-			//{
-			//	//This will get caught in pixel shader and ignored
-			//	dirLight.vLightColor = XMFLOAT4(0.f, 0.f, 0.f, 0.0f);
-			//}
-			//else
-			//{
-			//	dirLight.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.2f);
-			//}
+			if (lightSwitch)
+			{
+				//This will get caught in pixel shader and ignored
+				dirLight.vLightColor = XMFLOAT4(0.f, 0.f, 0.f, 0.0f);
+			}
+			else
+			{
+				dirLight.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.2f);
+			}
 			//Update dirLight buffer to use updated light color.
 			con->UpdateSubresource(dirLightConstantBuffer.Get(), 0, nullptr, &dirLight, 0, 0);
 			con->PSSetConstantBuffers(0, 1, dirLightConstantBuffer.GetAddressOf());
@@ -413,14 +420,14 @@ bool Render()
 			con->UpdateSubresource(ambLightConstantBuffer.Get(), 0, nullptr, &ambLight, 0, 0);
 			con->PSSetConstantBuffers(2, 1, pointLightConstantBuffer.GetAddressOf());
 
-			//
+			//Update Spotlight buffer
 			//con->UpdateSubresource(spotLightConstantBuffer.Get(), 0, nullptr, &spotLight, 0, 0);
 			//con->PSSetConstantBuffers(2, 1, spotLightConstantBuffer.GetAddressOf());
 			//End constant buffers for model.
 
 			// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
 			// To disable texturing, call Model->Render without the SRV or sampler parameters (untested).
-			m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, mySRV.Get(), myLinearSampler.Get());
+			m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
 
 			//TODO: Update WVP and/or constant buffers for plane object as appropriate.
 			//planeModel->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, nullptr, myLinearSampler.Get());
@@ -442,7 +449,7 @@ bool Render()
 			
 			//End grid constant buffers
 
-			m_Grid->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, mySRV.Get(), myLinearSampler.Get());
+			m_Grid->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, nullptr, myLinearSampler.Get());
 
 			//Update and set constant buffers for grid
 			//----------------------------------------
@@ -458,7 +465,8 @@ bool Render()
 			con->UpdateSubresource(WVPconstantBuffer.Get(), 0, nullptr, &constantBufferData, 0, 0);
 			con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
 
-			m_SkySphere->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, mySRV.Get(), myLinearSampler.Get());
+			ambLight.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.5f);
+			m_SkySphere->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
 
 			swap->Present(1, 0);
 			// release incremented COM reference counts

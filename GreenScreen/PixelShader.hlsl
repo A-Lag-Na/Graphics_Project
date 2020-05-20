@@ -120,9 +120,11 @@ float4 main(VS_OUT input) : SV_TARGET
     
     //Get the base color from the texture file
 	baseColor = baseTexture.Sample(linfilter, input.tex);
-    //if(baseColor.xyz == zero)
+    
+    //I think the commented out code below is non-functional right now
+    //if(baseColor.x == zero.x && baseColor.y == zero.y && baseColor.z == zero.z)
     //{
-    //    baseColor = float4(1.f, 1.f, 1.f, 1.f);
+    //    baseColor = float4(input.localpos, 1.f);
     //}
     
     float4 dlOut = calculateDirLight(dlCol, dlDir, input.norm);
