@@ -289,12 +289,11 @@ bool Frame()
 
 	// Create the vertex shader
 	HRESULT hr = myDevice->CreateVertexShader(VertexShader, sizeof(VertexShader), nullptr, vertexShader.GetAddressOf());
-
-	hr = myDevice->CreateVertexShader(VertexShader, sizeof(VertexShader), nullptr, skyVertexShader.GetAddressOf());
-	// Create the pixel shader
 	hr = myDevice->CreatePixelShader(PixelShader, sizeof(PixelShader), nullptr, pixelShader.GetAddressOf());
 
-	hr = myDevice->CreatePixelShader(PixelShader, sizeof(PixelShader), nullptr, skyPixelShader.GetAddressOf());
+	// Create the pixel shader
+	hr = myDevice->CreateVertexShader(SkyboxVertexShader, sizeof(SkyboxVertexShader), nullptr, skyVertexShader.GetAddressOf());
+	hr = myDevice->CreatePixelShader(SkyboxPixelShader, sizeof(SkyboxPixelShader), nullptr, skyPixelShader.GetAddressOf());
 
 	// Define the input layout
 	D3D11_INPUT_ELEMENT_DESC layout[] =
@@ -317,7 +316,8 @@ bool Frame()
 	// Load corvette Texture
 
 	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../vette_color.dds", nullptr, &corvetteSRV);
-	//hr = CreateDDSTextureFromFile(myDevice.Get(), L"../SunsetSkybox.dds", nullptr, &sunsetSRV);
+
+	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../SunsetSkybox.dds", nullptr, &sunsetSRV);
 
 	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../placeholderTexture.dds", nullptr, &placeholderSRV);
 
