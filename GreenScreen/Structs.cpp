@@ -34,6 +34,12 @@ struct Light
     XMFLOAT4 vLightDir;
 };
 
+struct Gradient
+{
+    XMFLOAT4 apexColor;
+    XMFLOAT4 centerColor;
+};
+
 struct PointLight
 {
     Light light;

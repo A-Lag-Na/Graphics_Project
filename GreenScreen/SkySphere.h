@@ -2,6 +2,7 @@
 #include <d3d11.h>
 #include <DirectXMath.h>
 #include "Structs.cpp"
+#include "skyShader.h"
 #include <fstream>
 
 using namespace std;
@@ -19,8 +20,6 @@ public:
 	void Render(ID3D11DeviceContext*, ID3D11VertexShader*, ID3D11PixelShader*, ID3D11InputLayout*, ID3D11RenderTargetView*, ID3D11ShaderResourceView*, ID3D11SamplerState*);
 
 	int GetIndexCount();
-	XMFLOAT4  GetApexColor();
-	XMFLOAT4  GetCenterColor();
 
 private:
 	bool LoadSkyDomeModel(char*);
@@ -34,6 +33,7 @@ private:
 	SimpleVertex* m_model;
 	int m_vertexCount, m_indexCount;
 	ID3D11Buffer* m_vertexBuffer, * m_indexBuffer;
-	XMFLOAT4 m_apexColor, m_centerColor;
+	ID3D11Buffer* gradientConstantBuffer;
+	Gradient gradient;
 };
 
