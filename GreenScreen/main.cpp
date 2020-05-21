@@ -30,6 +30,7 @@ using namespace GRAPHICS;
 #include "SkySphere.h"
 #include "corvetteobj.h"
 #include "planeobj.h"
+#include "cubeobj.h"
 
 const float SCREEN_DEPTH = 1000.0f;
 const float SCREEN_NEAR = 0.1f;
@@ -38,6 +39,7 @@ Camera* m_Camera = 0;
 Model* m_Model = 0;
 //Model* planeModel = 0;
 Model* islandModel = 0;
+Model* pointCube = 0;
 
 Grid* m_Grid = 0;
 SkySphere* m_SkySphere = 0;
@@ -199,6 +201,9 @@ bool Initialize(int screenWidth, int screenHeight)
 	{
 		return false;
 	}
+	// Initialize the model object.
+	//For now, gotta pass in vertex and index count for each model rendered (.h or hardcoded)
+	result = m_Model->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), corvetteobj_data, corvetteobj_indicies, 3453, 8112, 40.f);
 
 	m_ModelLoader = new ModelLoading;
 	if (!m_ModelLoader)
@@ -217,10 +222,6 @@ bool Initialize(int screenWidth, int screenHeight)
 	}
 
 	result = m_SkySphere->Initialize(*myDevice.GetAddressOf(), "../skyCubeModel.txt");
-
-	// Initialize the model object.
-	//For now, gotta pass in vertex and index count for each model rendered (.h or hardcoded)
-	result = m_Model->Initialize( *myDevice.GetAddressOf(), *myContext.GetAddressOf(), corvetteobj_data , corvetteobj_indicies, 3453, 8112, 40.f);
 	
 	//Create and initialize plane model
 	//planeModel = new Model;
@@ -229,6 +230,10 @@ bool Initialize(int screenWidth, int screenHeight)
 	//Create and initialize island model
 	islandModel = new Model;
 	result = islandModel->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), islandmodel_data, islandmodel_indicies, 29546, 100860, 5000.f);
+
+	//Cube for showing the position of pointlight.
+	pointCube = new Model;
+	result = pointCube->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), cubeobj_data, cubeobj_indicies, 788, 1692, 1000.f);
 
 	//End geometry renderers.
 
@@ -315,9 +320,10 @@ bool Frame()
 	// Load corvette Texture
 
 	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../vette_color.dds", nullptr, &corvetteSRV);
-	//hr = CreateDDSTextureFromFile(myDevice.Get(), L"../SunsetSkybox.dds", nullptr, &sunsetSRV);
-
 	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../placeholderTexture.dds", nullptr, &placeholderSRV);
+
+	//sunsetSRV will show up black with default pixel shader.
+	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../SunsetSkybox.dds", nullptr, &sunsetSRV);
 
 	// Create the sample state
 	D3D11_SAMPLER_DESC sampDesc = {};
@@ -336,7 +342,7 @@ bool Frame()
 	dirLight.vLightDir = XMFLOAT4(0.3f, -1.f, 0.f, 0.f);
 
 	//Not actually a direction here, but instead a position of the point light.
-	pointLight.light.vLightDir = XMFLOAT4(0.f, -99.f, 0.f, 0.f);
+	pointLight.light.vLightDir = XMFLOAT4(0.f, -1.f, 0.f, 0.f);
 	pointLight.light.vLightColor = XMFLOAT4(0.f, 0.f, 1.f, 0.2f);
 	pointLight.radius = XMFLOAT4(0.3f, 0.f, 0.f, 0.f);
 
@@ -347,9 +353,7 @@ bool Frame()
 	Light temp = spotLight.light;
 	temp.vLightColor = XMFLOAT4(1.f, 1.f, 0.f, 0.4f);
 	temp.vLightDir = XMFLOAT4(0.f, 0.f, 1.f, 0.4f);
-	//--------------------------------------------------------------------------
-
-	
+	//--------------------------------------------------------------------------	
 
 	// Render the graphics scene.
 	result = Render();
@@ -424,7 +428,7 @@ bool Render()
 			con->UpdateSubresource(dirLightConstantBuffer.Get(), 0, nullptr, &dirLight, 0, 0);
 			con->PSSetConstantBuffers(0, 1, dirLightConstantBuffer.GetAddressOf());
 
-			//Update pointLight buffer light color. Currently unused, as pointlight does not change.
+			//Update pointLight buffer light color.
 			con->UpdateSubresource(pointLightConstantBuffer.Get(), 0, nullptr, &pointLight, 0, 0);
 			con->PSSetConstantBuffers(1, 1, pointLightConstantBuffer.GetAddressOf());
 
@@ -439,13 +443,42 @@ bool Render()
 			
 			//End constant buffers for model.
 
+			//Constant buffers for the cube that represents point light
+			//--------------------------------------------------
+			XMFLOAT4 temp = pointLight.light.vLightDir;
+			ZeroMemory(&constantBufferData, sizeof(WVP));
+			constantBufferData.w = XMMatrixTranslation(temp.x, temp.y, temp.z);
+			constantBufferData.v = viewMatrix;
+
+			// added by clark
+			constantBufferData.v = XMMatrixInverse(NULL, viewMatrix);
+			constantBufferData.p = projectionMatrix;
+
+			con->UpdateSubresource(WVPconstantBuffer.Get(), 0, nullptr, &constantBufferData, 0, 0);
+			con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
+			//-------------------------------------------------
+			pointCube->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, nullptr, myLinearSampler.Get());
+
+			//Update and set constant buffers for corvette
+			//----------------------------------------
+			ZeroMemory(&constantBufferData, sizeof(WVP));
+			constantBufferData.w = XMMatrixIdentity();
+			constantBufferData.v = viewMatrix;
+
+			// added by clark
+			constantBufferData.v = XMMatrixInverse(NULL, viewMatrix);
+			constantBufferData.p = projectionMatrix;
+
+			// change the constant buffer data here per draw / model
+			con->UpdateSubresource(WVPconstantBuffer.Get(), 0, nullptr, &constantBufferData, 0, 0);
+			con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
+
+			//-----------------------------------------
 			// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
-			// To disable texturing, call Model->Render without the SRV or sampler parameters (untested).
 			m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
 
 			//TODO: Update WVP and/or constant buffers for plane object as appropriate.
 			//planeModel->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, nullptr, myLinearSampler.Get());
-			
 
 			//Update and set constant buffers for grid
 			//----------------------------------------
@@ -468,7 +501,6 @@ bool Render()
 			//TODO: Update and set island buffers
 			//-----------------------------
 			ZeroMemory(&constantBufferData, sizeof(WVP));
-			//I'm almost definitely doing this maxtrix crap wrong.
 			constantBufferData.w = XMMatrixTranslation(0.f, -0.3f, 0.f);
 			constantBufferData.v = viewMatrix;
 
@@ -499,7 +531,6 @@ bool Render()
 			// change the constant buffer data here per draw / model
 			con->UpdateSubresource(WVPconstantBuffer.Get(), 0, nullptr, &constantBufferData, 0, 0);
 			con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
-			//Gradient 
 			
 			ambLight.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.5f);
 
