@@ -485,7 +485,7 @@ bool Render()
 			//Update and set constant buffers for Sphere
 			//----------------------------------------
 			ZeroMemory(&constantBufferData, sizeof(WVP));
-			constantBufferData.w = XMMatrixIdentity();
+			constantBufferData.w = XMMatrixTranslation(m_Camera->GetPosition().x, m_Camera->GetPosition().y, m_Camera->GetPosition().z);
 			constantBufferData.v = viewMatrix;
 
 			// added by clark

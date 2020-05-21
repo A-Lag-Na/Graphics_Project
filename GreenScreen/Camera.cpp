@@ -35,16 +35,14 @@ void Camera::SetRotation(float x, float y, float z)
 	m_RotZ = z;
 }
 
-XMVECTOR Camera::GetPosition()
-{
-	 XMFLOAT3 temp = { m_PosX, m_PosY, m_PosZ };
-	return XMLoadFloat3(&temp);
+XMFLOAT3 Camera::GetPosition()
+{ 
+	return { m_PosX, m_PosY, m_PosZ };
 }
 
-XMVECTOR Camera::GetRotation()
-{
-	XMFLOAT3 temp = { m_RotX, m_RotY, m_RotZ };
-	return XMLoadFloat3(&temp);
+XMFLOAT3 Camera::GetRotation()
+{	
+	return { m_RotX, m_RotY, m_RotZ };
 }
 
 void Camera::GetViewMatrix(XMMATRIX& viewMatrix)
