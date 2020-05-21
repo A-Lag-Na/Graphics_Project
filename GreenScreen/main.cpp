@@ -57,8 +57,9 @@ when we are rendering multiple objects we will have multiple vertex
 buffers, and will need more specific names for them.*/
 Microsoft::WRL::ComPtr<ID3D11InputLayout>	vertexFormat;
 Microsoft::WRL::ComPtr<ID3D11VertexShader>	vertexShader;
+Microsoft::WRL::ComPtr<ID3D11VertexShader>	skyVertexShader;
 Microsoft::WRL::ComPtr<ID3D11PixelShader>	pixelShader;
-Microsoft::WRL::ComPtr<ID3D11PixelShader>	skyShaderPointer;
+Microsoft::WRL::ComPtr<ID3D11PixelShader>	skyPixelShader;
 
 Microsoft::WRL::ComPtr<ID3D11Buffer>	vertexBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	indexBuffer;
@@ -289,10 +290,11 @@ bool Frame()
 	// Create the vertex shader
 	HRESULT hr = myDevice->CreateVertexShader(VertexShader, sizeof(VertexShader), nullptr, vertexShader.GetAddressOf());
 
+	hr = myDevice->CreateVertexShader(VertexShader, sizeof(VertexShader), nullptr, skyVertexShader.GetAddressOf());
 	// Create the pixel shader
 	hr = myDevice->CreatePixelShader(PixelShader, sizeof(PixelShader), nullptr, pixelShader.GetAddressOf());
 
-	hr = myDevice->CreatePixelShader(PixelShader, sizeof(PixelShader), nullptr, skyShaderPointer.GetAddressOf());
+	hr = myDevice->CreatePixelShader(PixelShader, sizeof(PixelShader), nullptr, skyPixelShader.GetAddressOf());
 
 	// Define the input layout
 	D3D11_INPUT_ELEMENT_DESC layout[] =
@@ -396,11 +398,32 @@ bool Render()
 			con->ClearRenderTargetView(view, clr);
 			con->ClearDepthStencilView(dsview, D3D11_CLEAR_DEPTH, 1, 0);
 
+			//Get camera position here
+
+			ZeroMemory(&constantBufferData, sizeof(WVP));
+			constantBufferData.w = XMMatrixTranslation(XMVectorGetX(viewMatrix.r[3]), XMVectorGetY(viewMatrix.r[3]), XMVectorGetZ(viewMatrix.r[3]));
+
+			// added by clark
+			constantBufferData.v = XMMatrixInverse(NULL, viewMatrix);
+			constantBufferData.p = projectionMatrix;
+
+			// change the constant buffer data here per draw / model
+			con->UpdateSubresource(WVPconstantBuffer.Get(), 0, nullptr, &constantBufferData, 0, 0);
+			con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
+			//Gradient 
+
+			ambLight.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.5f);
+
+			//Replace the pixel shader here in this render call with the skysphere shader.
+			m_SkySphere->Render(con, *skyVertexShader.GetAddressOf(), *skyPixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, sunsetSRV.Get(), myLinearSampler.Get());
+
+			con->ClearDepthStencilView(dsview, D3D11_CLEAR_DEPTH, 1, 0);
+
 			//Update and set constant buffers (This could be done more efficently by setting multiple PSconstantbuffers at once).
 			//----------------------------------
 			ZeroMemory(&constantBufferData, sizeof(WVP));
 			constantBufferData.w = XMMatrixIdentity();
-			constantBufferData.v = viewMatrix;
+			
 			
 			// added by clark
 			constantBufferData.v = XMMatrixInverse(NULL, viewMatrix);
@@ -451,7 +474,6 @@ bool Render()
 			//----------------------------------------
 			ZeroMemory(&constantBufferData, sizeof(WVP));
 			constantBufferData.w = XMMatrixIdentity();
-			constantBufferData.v = viewMatrix;
 
 			// added by clark
 			constantBufferData.v = XMMatrixInverse(NULL, viewMatrix);
@@ -470,7 +492,6 @@ bool Render()
 			ZeroMemory(&constantBufferData, sizeof(WVP));
 			//I'm almost definitely doing this maxtrix crap wrong.
 			constantBufferData.w = XMMatrixTranslation(0.f, -0.3f, 0.f);
-			constantBufferData.v = viewMatrix;
 
 			// added by clark
 			constantBufferData.v = XMMatrixInverse(NULL, viewMatrix);
@@ -486,25 +507,6 @@ bool Render()
 			//Update and set constant buffers for Sphere
 			//----------------------------------------
 
-			//Get camera position here
-
-			ZeroMemory(&constantBufferData, sizeof(WVP));
-			constantBufferData.w = XMMatrixIdentity(); //XMMatrixTranslate(camera's x y and z here).
-			constantBufferData.v = viewMatrix;
-
-			// added by clark
-			constantBufferData.v = XMMatrixInverse(NULL, viewMatrix);
-			constantBufferData.p = projectionMatrix;
-
-			// change the constant buffer data here per draw / model
-			con->UpdateSubresource(WVPconstantBuffer.Get(), 0, nullptr, &constantBufferData, 0, 0);
-			con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
-			//Gradient 
-			
-			ambLight.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.5f);
-
-			//Replace the pixel shader here in this render call with the skysphere shader.
-			m_SkySphere->Render(con, *vertexShader.GetAddressOf(), *skyShaderPointer.GetAddressOf(), *vertexFormat.GetAddressOf(), view, sunsetSRV.Get(), myLinearSampler.Get());
 
 			swap->Present(1, 0);
 			// release incremented COM reference counts

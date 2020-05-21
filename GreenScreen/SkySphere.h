@@ -2,7 +2,8 @@
 #include <d3d11.h>
 #include <DirectXMath.h>
 #include "Structs.cpp"
-#include "skyShader.h"
+#include "SkyboxPixelShader.h"
+#include "SkyboxVertexShader.h"
 #include <fstream>
 
 using namespace std;

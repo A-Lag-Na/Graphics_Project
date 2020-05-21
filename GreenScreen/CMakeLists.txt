@@ -13,11 +13,12 @@ ADD_DEFINITIONS(-D_UNICODE)
 set(VERTEX_SHADERS 
 	# add vertex shader (.hlsl) files here
 	VertexShader.hlsl
+	SkyboxVertexShader.hlsl
 )
 set(PIXEL_SHADERS 
 	# add pixel shader (.hlsl) files here
 	PixelShader.hlsl
-	skyShader.hlsl
+	SkyboxPixelShader.hlsl
 )
 
 # Add any new C/C++ source code here
