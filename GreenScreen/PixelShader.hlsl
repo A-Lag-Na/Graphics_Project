@@ -7,6 +7,7 @@ cbuffer pointLight : register(b1)
 {
     float4 _pointcol;
     float4 _pointpos;
+    float4 _pointrad;
 }
 cbuffer ambLight : register(b2)
 {
@@ -43,9 +44,6 @@ struct VS_OUT
 //float4 outColor = saturate((dot(ldirection, wnorm))) * dlcol * baseColor;
 //return outColor;
 
-//It's a surprise tool we'll need later
-//ATTENUATION = 1.0 – CLAMP( ( INNERCONERATIO - SURFACERATIO ) / ( INNERCONERATIO – OUTERCONERATIO ) ) 
-
 float4 calculateDirLight(float4 dlColor, float4 dlDir, float3 surfaceNormal)
 {
      float4 lightColor = dlColor;
@@ -67,11 +65,14 @@ float4 calculateDirLight(float4 dlColor, float4 dlDir, float3 surfaceNormal)
 //ATTENUATION = 1.0 – CLAMP( MAGNITUDE(
 //LIGHTPOS– SURFACEPOS) / LIGHTRADIUS ) 
 
-float4 calculatePointLight(float4 pointColor, float4 pointPos, float3 surfaceNormal, float4 surfacePosition)
+float4 calculatePointLight(float4 pointColor, float4 pointPos, float4 pointRad, float3 surfaceNormal, float4 surfacePosition)
 {
     float3 lightDir = normalize(pointPos - surfacePosition);
     float4 lightRatio = saturate(dot(lightDir, surfaceNormal));
-    return saturate(lightRatio * pointColor);
+    float4 outColor = saturate(lightRatio * pointColor);
+    float attenuation = 1.0f - saturate(abs(pointPos - surfacePosition) / pointRad.x);
+    outColor.xyz *= attenuation;
+    return outColor;
 }
 
 //Spotlight formula from slides
@@ -80,6 +81,9 @@ float4 calculatePointLight(float4 pointColor, float4 pointPos, float3 surfaceNor
 //SPOTFACTOR = ( SURFACERATIO > CONERATIO ) ? 1 : 0
 //LIGHTRATIO = CLAMP( DOT( LIGHTDIR, SURFACENORMAL ) )
 //RESULT = SPOTFACTOR * LIGHTRATIO * LIGHTCOLOR * SURFACECOLOR
+
+//It's a surprise tool we'll need later
+//ATTENUATION = 1.0 – CLAMP( ( INNERCONERATIO - SURFACERATIO ) / ( INNERCONERATIO – OUTERCONERATIO ) ) 
 
 //float4 calculateSpotLight(float3 surfaceNormal, float4 surfacePosition)
 //{
@@ -111,6 +115,7 @@ float4 main(VS_OUT input) : SV_TARGET
     float4 dlDir = _dldir;
     float4 pointColor = _pointcol;
     float4 pointPos = _pointpos;
+    float4 pointRad = _pointrad;
     float4 alColor = _alcol;
     //TODO: Change these to passed in spotlight values
     //float4 dlCol = _dlcol;
@@ -128,7 +133,7 @@ float4 main(VS_OUT input) : SV_TARGET
     //}
     
     float4 dlOut = calculateDirLight(dlCol, dlDir, input.norm);
-    float4 pointOut = calculatePointLight(pointColor, pointPos, input.norm, input.pos);
+    float4 pointOut = calculatePointLight(pointColor, pointPos, pointRad, input.norm, input.pos);
     float4 ambOut = calculateAmbLight(alColor);
     float4 outputs[3] = { dlOut, pointOut, ambOut };
     

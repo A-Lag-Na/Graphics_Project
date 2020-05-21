@@ -29,12 +29,22 @@ struct Light
 {
     //4th digit is unused. Needs to be a multiple of 16 bytes for constant buffer reasons.
     XMFLOAT4 vLightColor;
+
+    //Direction variable holds position for point light instead of direction, and is unused in ambient light.
     XMFLOAT4 vLightDir;
 };
 
-struct Spotlight
+struct PointLight
 {
     Light light;
+    //Using a float4 here for buffer creation byte size reasons.
+    XMFLOAT4 radius;
+};
+
+struct SpotLight
+{
+    Light light;
+    //Using float4s here for buffer creation byte size reasons.
     XMFLOAT4 coneDir;
     XMFLOAT4 coneRatio;
 };
