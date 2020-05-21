@@ -68,7 +68,7 @@ float4 calculateDirLight(float4 dlColor, float4 dlDir, float3 surfaceNormal)
 float4 calculatePointLight(float4 pointColor, float4 pointPos, float4 pointRad, float3 surfaceNormal, float4 surfacePosition)
 {
     float3 lightDir = normalize(pointPos - surfacePosition);
-    float4 lightRatio = saturate(dot(lightDir, surfaceNormal));
+    float lightRatio = saturate(dot(lightDir, surfaceNormal));
     float4 outColor = saturate(lightRatio * pointColor);
     float attenuation = 1.0f - saturate(length(pointPos - surfacePosition) / pointRad.x);
     outColor *= attenuation * attenuation;
