@@ -16,8 +16,8 @@ public:
 	void SetPosition(float, float, float);
 	void SetRotation(float, float, float);
 
-	XMVECTOR GetPosition();
-	XMVECTOR GetRotation();
+	XMFLOAT3 GetPosition();
+	XMFLOAT3 GetRotation();
 
 	bool Initialize(int screenWidth, int screenHeight, float SCREEN_NEAR, float  SCREEN_DEPTH);
 	void Render(XMMATRIX&, bool&, Light&, PointLight&);

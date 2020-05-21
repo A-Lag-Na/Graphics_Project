@@ -280,3 +280,4 @@ void SkySphere::RenderBuffers(ID3D11DeviceContext* deviceContext, ID3D11VertexSh
 
 	deviceContext->DrawIndexed(m_indexCount, 0, 0);
 }
+
