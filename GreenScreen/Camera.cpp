@@ -114,7 +114,7 @@ bool Camera::Initialize(int screenWidth, int screenHeight , float SCREEN_NEAR, f
 	return true;
 }
 
-void Camera::Render(XMMATRIX& viewMatrix, bool& lightSwitch, Light& dirLight, Light& pointLight)
+void Camera::Render(XMMATRIX& viewMatrix, bool& lightSwitch, Light& dirLight, PointLight& pointLight)
 {
 	CameraMove(m_viewMatrix);
 	ControlLights(lightSwitch, dirLight, pointLight);
@@ -193,7 +193,7 @@ void Camera::CameraMove(XMMATRIX& myCamera)
 	w = nullptr;
 }
 
-void Camera::ControlLights(bool& lightSwitch, Light& dirLight, Light& pointLight)
+void Camera::ControlLights(bool& lightSwitch, Light& dirLight, PointLight& pointLight)
 {
 
 	//R, dir light on/off
@@ -206,16 +206,16 @@ void Camera::ControlLights(bool& lightSwitch, Light& dirLight, Light& pointLight
 	//F, disable point light
 	if (GetAsyncKeyState(0x46))
 	{
-		pointLight.vLightColor = XMFLOAT4(0.f, 0.f, 0.f, 0.f);
+		pointLight.light.vLightColor = XMFLOAT4(0.f, 0.f, 0.f, 0.f);
 	}
 	//G, enable point light
 	if (GetAsyncKeyState(0x47))
 	{
-		pointLight.vLightColor = XMFLOAT4(0.f, 0.f, 1.f, 0.f);
+		pointLight.light.vLightColor = XMFLOAT4(0.f, 0.f, 1.f, 0.f);
 	}
 	//H, change point light position
 	if (GetAsyncKeyState(0x48))
 	{
-		pointLight.vLightDir.x += 1.f;
+		pointLight.light.vLightDir.x += 1.f;
 	}
 }

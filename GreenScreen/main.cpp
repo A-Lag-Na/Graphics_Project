@@ -79,9 +79,9 @@ Microsoft::WRL::ComPtr < ID3D11SamplerState> myLinearSampler;
 WVP constantBufferData;
 
 Light dirLight;
-Light pointLight;
+PointLight pointLight;
 Light ambLight;
-Spotlight spotLight;
+SpotLight spotLight;
 
 
 bool lightSwitch = false;
@@ -159,7 +159,7 @@ bool Initialize(int screenWidth, int screenHeight)
 
 	//Point light constant buffer
 	ZeroMemory(&desc, sizeof(desc));
-	desc = CD3D11_BUFFER_DESC(sizeof(Light), D3D11_BIND_CONSTANT_BUFFER);
+	desc = CD3D11_BUFFER_DESC(sizeof(PointLight), D3D11_BIND_CONSTANT_BUFFER);
 	ZeroMemory(&srd, sizeof(srd));
 	srd.pSysMem = &pointLight;
 	hr = myDevice->CreateBuffer(&desc, &srd, pointLightConstantBuffer.GetAddressOf());
@@ -173,7 +173,7 @@ bool Initialize(int screenWidth, int screenHeight)
 
 	//Spotlight constant buffer
 	ZeroMemory(&desc, sizeof(desc));
-	desc = CD3D11_BUFFER_DESC(sizeof(Spotlight), D3D11_BIND_CONSTANT_BUFFER);
+	desc = CD3D11_BUFFER_DESC(sizeof(SpotLight), D3D11_BIND_CONSTANT_BUFFER);
 	ZeroMemory(&srd, sizeof(srd));
 	srd.pSysMem = &spotLight;
 	hr = myDevice->CreateBuffer(&desc, &srd, spotLightConstantBuffer.GetAddressOf());
@@ -336,8 +336,9 @@ bool Frame()
 	dirLight.vLightDir = XMFLOAT4(0.3f, -1.f, 0.f, 0.f);
 
 	//Not actually a direction here, but instead a position of the point light.
-	pointLight.vLightDir = XMFLOAT4(0.f, -99.f, 0.f, 0.f);
-	pointLight.vLightColor = XMFLOAT4(0.f, 0.f, 1.f, 0.2f);
+	pointLight.light.vLightDir = XMFLOAT4(0.f, -99.f, 0.f, 0.f);
+	pointLight.light.vLightColor = XMFLOAT4(0.f, 0.f, 1.f, 0.2f);
+	pointLight.radius = XMFLOAT4(0.3f, 0.f, 0.f, 0.f);
 
 	//AmbLight has no direction or position
 	ambLight.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.1f);
@@ -484,8 +485,11 @@ bool Render()
 
 			//Update and set constant buffers for Sphere
 			//----------------------------------------
+
+			//Get camera position here
+
 			ZeroMemory(&constantBufferData, sizeof(WVP));
-			constantBufferData.w = XMMatrixTranslation(m_Camera->GetPosition().x, m_Camera->GetPosition().y, m_Camera->GetPosition().z);
+			constantBufferData.w = XMMatrixIdentity(); //XMMatrixTranslate(camera's x y and z here).
 			constantBufferData.v = viewMatrix;
 
 			// added by clark

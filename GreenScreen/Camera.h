@@ -20,12 +20,12 @@ public:
 	XMFLOAT3 GetRotation();
 
 	bool Initialize(int screenWidth, int screenHeight, float SCREEN_NEAR, float  SCREEN_DEPTH);
-	void Render(XMMATRIX&, bool&, Light&, Light&);
+	void Render(XMMATRIX&, bool&, Light&, PointLight&);
 	void GetViewMatrix(XMMATRIX&);
 	void GetWorldMatrix(XMMATRIX&);
 	void GetProjectionMatrix(XMMATRIX&);
 	void CameraMove(XMMATRIX&);
-	void ControlLights(bool&, Light&, Light&);
+	void ControlLights(bool&, Light&, PointLight&);
 
 private:
 	float m_PosX, m_PosY, m_PosZ;
