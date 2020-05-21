@@ -68,9 +68,10 @@ Microsoft::WRL::ComPtr<ID3D11Buffer>	pointLightConstantBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	ambLightConstantBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	spotLightConstantBuffer;
 
-
 Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> corvetteSRV;
 Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> placeholderSRV;
+Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> sunsetSRV;
+
 Microsoft::WRL::ComPtr < ID3D11SamplerState> myLinearSampler;
 
 WVP constantBufferData;
@@ -221,7 +222,8 @@ bool Initialize(int screenWidth, int screenHeight)
 	//result = planeModel->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), planeObj_data, planeObj_indicies, 873, 2256, 1.f);
 
 	//Create and initialize island model
-
+	islandModel = new Model;
+	result = islandModel->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), islandmodel_data, islandmodel_indicies, 29546, 100860, 5000.f);
 
 	//End geometry renderers.
 
@@ -306,6 +308,8 @@ bool Frame()
 	// Load corvette Texture
 
 	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../vette_color.dds", nullptr, &corvetteSRV);
+	//hr = CreateDDSTextureFromFile(myDevice.Get(), L"../SunsetSkybox.dds", nullptr, &sunsetSRV);
+
 	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../placeholderTexture.dds", nullptr, &placeholderSRV);
 
 	// Create the sample state
@@ -427,7 +431,7 @@ bool Render()
 
 			// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
 			// To disable texturing, call Model->Render without the SRV or sampler parameters (untested).
-			m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
+			m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
 
 			//TODO: Update WVP and/or constant buffers for plane object as appropriate.
 			//planeModel->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, nullptr, myLinearSampler.Get());
@@ -447,11 +451,29 @@ bool Render()
 			con->UpdateSubresource(WVPconstantBuffer.Get(), 0, nullptr, &constantBufferData, 0, 0);
 			con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
 			
-			//End grid constant buffers
+			//-----------------------------------------
 
 			m_Grid->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, nullptr, myLinearSampler.Get());
 
-			//Update and set constant buffers for grid
+			//TODO: Update and set island buffers
+			//-----------------------------
+			ZeroMemory(&constantBufferData, sizeof(WVP));
+			//I'm almost definitely doing this maxtrix crap wrong.
+			constantBufferData.w = XMMatrixTranslation(0.f, -0.3f, 0.f);
+			constantBufferData.v = viewMatrix;
+
+			// added by clark
+			constantBufferData.v = XMMatrixInverse(NULL, viewMatrix);
+			constantBufferData.p = projectionMatrix;
+
+			// change the constant buffer data here per draw / model
+			con->UpdateSubresource(WVPconstantBuffer.Get(), 0, nullptr, &constantBufferData, 0, 0);
+			con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
+
+			islandModel->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
+			//-----------------------------
+
+			//Update and set constant buffers for Sphere
 			//----------------------------------------
 			ZeroMemory(&constantBufferData, sizeof(WVP));
 			constantBufferData.w = XMMatrixIdentity();
@@ -466,7 +488,9 @@ bool Render()
 			con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
 
 			ambLight.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.5f);
-			m_SkySphere->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
+
+			//Replace the pixel shader here in this render call with the skysphere shader.
+			m_SkySphere->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, sunsetSRV.Get(), myLinearSampler.Get());
 
 			swap->Present(1, 0);
 			// release incremented COM reference counts
