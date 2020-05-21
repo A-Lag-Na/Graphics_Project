@@ -58,6 +58,7 @@ buffers, and will need more specific names for them.*/
 Microsoft::WRL::ComPtr<ID3D11InputLayout>	vertexFormat;
 Microsoft::WRL::ComPtr<ID3D11VertexShader>	vertexShader;
 Microsoft::WRL::ComPtr<ID3D11PixelShader>	pixelShader;
+Microsoft::WRL::ComPtr<ID3D11PixelShader>	skyShaderPointer;
 
 Microsoft::WRL::ComPtr<ID3D11Buffer>	vertexBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	indexBuffer;
@@ -67,6 +68,7 @@ Microsoft::WRL::ComPtr<ID3D11Buffer>	dirLightConstantBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	pointLightConstantBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	ambLightConstantBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	spotLightConstantBuffer;
+
 
 Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> corvetteSRV;
 Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> placeholderSRV;
@@ -80,6 +82,7 @@ Light dirLight;
 Light pointLight;
 Light ambLight;
 Spotlight spotLight;
+
 
 bool lightSwitch = false;
 
@@ -175,6 +178,8 @@ bool Initialize(int screenWidth, int screenHeight)
 	srd.pSysMem = &spotLight;
 	hr = myDevice->CreateBuffer(&desc, &srd, spotLightConstantBuffer.GetAddressOf());
 
+	
+
 	// End of constant buffers
 
 	//Initalize Geometry Renderers here
@@ -203,7 +208,7 @@ bool Initialize(int screenWidth, int screenHeight)
 
 	//Skysphere stuff
 	//only run ModelLoader if you need new one
-	//result = m_ModelLoader->LoadModel("../Skysphere.obj");
+	//result = m_ModelLoader->LoadModel("../SkyCube.obj");
 
 	m_SkySphere = new SkySphere;
 	if (!m_SkySphere)
@@ -211,7 +216,7 @@ bool Initialize(int screenWidth, int screenHeight)
 		return false;
 	}
 
-	result = m_SkySphere->Initialize(*myDevice.GetAddressOf(), "../skyModel.txt");
+	result = m_SkySphere->Initialize(*myDevice.GetAddressOf(), "../skyCubeModel.txt");
 
 	// Initialize the model object.
 	//For now, gotta pass in vertex and index count for each model rendered (.h or hardcoded)
@@ -286,6 +291,8 @@ bool Frame()
 
 	// Create the pixel shader
 	hr = myDevice->CreatePixelShader(PixelShader, sizeof(PixelShader), nullptr, pixelShader.GetAddressOf());
+
+	hr = myDevice->CreatePixelShader(PixelShader, sizeof(PixelShader), nullptr, skyShaderPointer.GetAddressOf());
 
 	// Define the input layout
 	D3D11_INPUT_ELEMENT_DESC layout[] =
@@ -427,6 +434,8 @@ bool Render()
 			//Update Spotlight buffer
 			//con->UpdateSubresource(spotLightConstantBuffer.Get(), 0, nullptr, &spotLight, 0, 0);
 			//con->PSSetConstantBuffers(2, 1, spotLightConstantBuffer.GetAddressOf());
+
+			
 			//End constant buffers for model.
 
 			// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
@@ -486,11 +495,12 @@ bool Render()
 			// change the constant buffer data here per draw / model
 			con->UpdateSubresource(WVPconstantBuffer.Get(), 0, nullptr, &constantBufferData, 0, 0);
 			con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
-
+			//Gradient 
+			
 			ambLight.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.5f);
 
 			//Replace the pixel shader here in this render call with the skysphere shader.
-			m_SkySphere->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, sunsetSRV.Get(), myLinearSampler.Get());
+			m_SkySphere->Render(con, *vertexShader.GetAddressOf(), *skyShaderPointer.GetAddressOf(), *vertexFormat.GetAddressOf(), view, sunsetSRV.Get(), myLinearSampler.Get());
 
 			swap->Present(1, 0);
 			// release incremented COM reference counts

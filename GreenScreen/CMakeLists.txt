@@ -17,6 +17,7 @@ set(VERTEX_SHADERS
 set(PIXEL_SHADERS 
 	# add pixel shader (.hlsl) files here
 	PixelShader.hlsl
+	skyShader.hlsl
 )
 
 # Add any new C/C++ source code here
@@ -29,7 +30,7 @@ add_executable (GreenScreen
 	FBXLoader.h
 	DDSTextureLoader.h
 	DDSTextureLoader.cpp
-    Model.h
+   	Model.h
 	Model.cpp
 	islandmodel.h
 	cubeobj.h

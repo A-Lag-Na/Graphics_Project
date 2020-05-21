@@ -28,6 +28,12 @@ bool SkySphere::Initialize(ID3D11Device* device, char filename[256])
 		return false;
 	}
 
+	// Set the color at the top of the sky dome.
+	gradient.apexColor = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+
+	// Set the color at the center of the sky dome.
+	gradient.centerColor = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+
 	// Load the sky dome into a vertex and index buffer for rendering.
 	result = InitializeBuffers(device);
 	if (!result)
@@ -35,11 +41,9 @@ bool SkySphere::Initialize(ID3D11Device* device, char filename[256])
 		return false;
 	}
 
-	// Set the color at the top of the sky dome.
-	m_apexColor = XMFLOAT4(0.0f, 0.15f, 0.66f, 1.0f);
 
-	// Set the color at the center of the sky dome.
-	m_centerColor = XMFLOAT4(0.81f, 0.38f, 0.66f, 1.0f);
+
+
 
 	return true;
 }
@@ -65,16 +69,6 @@ void SkySphere::Render(ID3D11DeviceContext* deviceContext, ID3D11VertexShader* v
 int SkySphere::GetIndexCount()
 {
 	return m_indexCount;
-}
-
-XMFLOAT4 SkySphere::GetApexColor()
-{
-	return m_apexColor;
-}
-
-XMFLOAT4 SkySphere::GetCenterColor()
-{
-	return m_centerColor;
 }
 
 bool SkySphere::LoadSkyDomeModel(char* filename)
@@ -151,7 +145,7 @@ void SkySphere::ReleaseSkyDomeModel()
 bool SkySphere::InitializeBuffers(ID3D11Device* device)
 {
 	SimpleVertex* vertices;
-	unsigned long* indices;
+	unsigned int* indices;
 	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
 	D3D11_SUBRESOURCE_DATA vertexData, indexData;
 	HRESULT result;
@@ -166,7 +160,7 @@ bool SkySphere::InitializeBuffers(ID3D11Device* device)
 	}
 
 	// Create the index array.
-	indices = new unsigned long[m_indexCount];
+	indices = new unsigned int[m_indexCount];
 	if (!indices)
 	{
 		return false;
@@ -201,7 +195,7 @@ bool SkySphere::InitializeBuffers(ID3D11Device* device)
 
 	// Set up the description of the index buffer.
 	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	indexBufferDesc.ByteWidth = sizeof(unsigned long) * m_indexCount;
+	indexBufferDesc.ByteWidth = sizeof(unsigned int) * m_indexCount;
 	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	indexBufferDesc.CPUAccessFlags = 0;
 	indexBufferDesc.MiscFlags = 0;
@@ -218,6 +212,15 @@ bool SkySphere::InitializeBuffers(ID3D11Device* device)
 	{
 		return false;
 	}
+
+	//Gradient constant buffer
+	CD3D11_BUFFER_DESC desc = CD3D11_BUFFER_DESC(sizeof(WVP), D3D11_BIND_CONSTANT_BUFFER);
+	D3D11_SUBRESOURCE_DATA srd;
+	ZeroMemory(&desc, sizeof(desc));
+	desc = CD3D11_BUFFER_DESC(sizeof(Gradient), D3D11_BIND_CONSTANT_BUFFER);
+	ZeroMemory(&srd, sizeof(srd));
+	srd.pSysMem = &gradient;
+	HRESULT hr = device->CreateBuffer(&desc, &srd, &gradientConstantBuffer);
 
 	// Release the arrays now that the vertex and index buffers have been created and loaded.
 	delete[] vertices;
@@ -264,6 +267,7 @@ void SkySphere::RenderBuffers(ID3D11DeviceContext* deviceContext, ID3D11VertexSh
 	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	deviceContext->VSSetShader(vertexShader, nullptr, 0);
 	deviceContext->PSSetShader(pixelShader, nullptr, 0);
+	deviceContext->PSSetConstantBuffers(2, 1, &gradientConstantBuffer);
 
 	if (SRV)
 	{
