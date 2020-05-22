@@ -213,9 +213,27 @@ void Camera::ControlLights(bool& lightSwitch, Light& dirLight, PointLight& point
 	{
 		pointLight.light.vLightColor = XMFLOAT4(0.f, 0.f, 1.f, 0.f);
 	}
-	//H, change point light position
-	if (GetAsyncKeyState(0x48))
-	{
-		pointLight.light.vLightDir.x += 1.f;
-	}
+
+	//Arrow keys to move point light
+	//Left arrow, -X direction
+	//if (GetAsyncKeyState(0x25))
+	//{
+	//	pointLight.light.vLightDir.x -= 0.1f;
+	//}
+	////Right arrow, +X direction
+	//if (GetAsyncKeyState(0x27))
+	//{
+	//	pointLight.light.vLightDir.x += 0.1f;
+	//}
+	////Up arrow, +Z direction (away from camera)
+	//if (GetAsyncKeyState(0x26))
+	//{
+	//	pointLight.light.vLightDir.y += 0.1f;
+	//}
+	////Down arrow, -Z direction (towards camera)
+	//if (GetAsyncKeyState(0x28))
+	//{
+	//	pointLight.light.vLightDir.y -= 0.1f;
+	//}
+
 }

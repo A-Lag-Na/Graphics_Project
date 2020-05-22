@@ -269,15 +269,9 @@ void SkySphere::RenderBuffers(ID3D11DeviceContext* deviceContext, ID3D11VertexSh
 	deviceContext->PSSetShader(pixelShader, nullptr, 0);
 	deviceContext->PSSetConstantBuffers(2, 1, &gradientConstantBuffer);
 
-	if (SRV)
-	{
-		//This contains the texture being loaded in.
-		deviceContext->PSSetShaderResources(0, 1, &SRV);
-	}
-	else
-	{
-		deviceContext->PSSetShaderResources(0, 0, nullptr);
-	}
+	//This contains the texture being loaded in.
+	deviceContext->PSSetShaderResources(0, 1, &SRV);
+
 	if (sampler)
 	{
 		//The sampler reads from the SRV to get the texture data.

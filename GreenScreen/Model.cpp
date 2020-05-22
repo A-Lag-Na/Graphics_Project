@@ -347,7 +347,7 @@ void Model::RenderBuffers(ID3D11DeviceContext* deviceContext, ID3D11VertexShader
 	deviceContext->VSSetShader(vertexShader, nullptr, 0);
 	deviceContext->PSSetShader(pixelShader, nullptr, 0);
 
-	if (SRV)
+	if (SRV != nullptr)
 	{
 		//This contains the texture being loaded in.
 		deviceContext->PSSetShaderResources(0, 1, &SRV);

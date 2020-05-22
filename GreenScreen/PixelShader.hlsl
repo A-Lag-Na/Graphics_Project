@@ -70,8 +70,8 @@ float4 calculatePointLight(float4 pointColor, float4 pointPos, float4 pointRad, 
     float3 lightDir = normalize(pointPos - surfacePosition);
     float4 lightRatio = saturate(dot(lightDir, surfaceNormal));
     float4 outColor = saturate(lightRatio * pointColor);
-    float attenuation = 1.0f - saturate(abs(pointPos - surfacePosition) / pointRad.x);
-    outColor.xyz *= attenuation;
+    float attenuation = 1.0f - saturate(length(pointPos - surfacePosition) / pointRad.x);
+    outColor *= attenuation * attenuation;
     return outColor;
 }
 
@@ -149,9 +149,6 @@ float4 main(VS_OUT input) : SV_TARGET
     outColor.xyz = saturate(outputs[0].xyz + outputs[1].xyz + outputs[2].xyz) * baseColor.xyz;
     outColor.a = baseColor.a;
     return outColor;
-    
-    //If ambient lighting, return this instead
-    //return saturate(outColor + ambOutput);
     
     //For debugging, use .pos or .norm here
     //return float4(input.localpos, 1.0f);
