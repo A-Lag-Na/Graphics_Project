@@ -211,7 +211,7 @@ void Camera::ControlLights(bool& lightSwitch, Light& dirLight, PointLight& point
 	//G, enable point light
 	if (GetAsyncKeyState(0x47))
 	{
-		pointLight.light.vLightColor = XMFLOAT4(0.f, 0.f, 1.f, 0.f);
+		pointLight.light.vLightColor = XMFLOAT4(1.f, 0.f, 0.f, 0.f);
 	}
 
 	//Arrow keys to move point light

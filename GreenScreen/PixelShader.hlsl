@@ -14,13 +14,13 @@ cbuffer ambLight : register(b2)
     float4 _alcol;
     float4 _aldir;
 }
-//cbuffer spotLight : register(b3)
-//{
-//    float4 _slcol;
-//    float4 _sldir;
-//    float4 _conedir;
-//    float4 _coneratio;
-//}
+cbuffer spotLight : register(b3)
+{
+    float4 _slcol;
+    float4 _sldir;
+    float4 _conedir;
+    float4 _coneratio;
+}
 
 Texture2D baseTexture : register(t0);
 SamplerState linfilter : register(s0);
@@ -68,10 +68,10 @@ float4 calculateDirLight(float4 dlColor, float4 dlDir, float3 surfaceNormal)
 
 float4 calculatePointLight(float4 pointColor, float4 pointPos, float4 pointRad, float3 surfaceNormal, float3 surfacePosition)
 {
-    float3 lightDir = normalize(pointPos - surfacePosition);
+    float3 lightDir = normalize(pointPos.xyz - surfacePosition);
     float lightRatio = saturate(dot(lightDir, surfaceNormal));
     float4 outColor = saturate(lightRatio * pointColor);
-    float temp = length(pointPos - surfacePosition) / pointRad.x; //saturate
+    float temp = length(pointPos.xyz - surfacePosition) / pointRad.x; //saturate
     float attenuation = 1.0f - temp;
     outColor *= (attenuation * attenuation);
     return outColor;
@@ -87,27 +87,21 @@ float4 calculatePointLight(float4 pointColor, float4 pointPos, float4 pointRad, 
 //It's a surprise tool we'll need later
 //ATTENUATION = 1.0 – CLAMP( ( INNERCONERATIO - SURFACERATIO ) / ( INNERCONERATIO – OUTERCONERATIO ) ) 
 
-//float4 calculateSpotLight(float3 surfaceNormal, float4 surfacePosition)
-//{
-//    if(spotpos && spotcol && conedir && coneratio)
-//    {
-//        float3 lightDir = normalize(spotpos - surfacePosition);
-//        float4 surfaceRatio = saturate(-lightDir, coneDir);
-//        float4 spotFactor = (surfaceRatio > coneRatio) ? 1 : 0;
-//        float4 lightRatio = saturate(dot(lightDir, surfaceNormal));
-//        float4 outColor = spotFactor * lightRatio * spotcol;
-//        return outColor;
-//    }
-//    else
-//    {
-//        return unlight;
-//    }
-//}
+float4 calculateSpotLight(float4 spotColor, float4 spotPos, float4 coneDir, float4 coneRatio, float3 surfaceNormal, float3 surfacePosition)
+{
+    float3 lightDir = normalize(spotPos.xyz - surfacePosition);
+    float4 surfaceRatio = saturate(dot(-lightDir, coneDir.xyz));
+    float4 spotFactor = (surfaceRatio > coneRatio.x) ? 1 : 0;
+    float4 lightRatio = saturate(dot(lightDir, surfaceNormal));
+    float4 outColor = spotFactor * lightRatio * spotColor;
+    //float attenuation = 1.0f - saturate((;
+    return outColor;
+}
 
-//float4 calculateAmbLight(float4 alColor)
-//{
-//    return alColor;
-//}
+float4 calculateAmbLight(float4 alColor)
+{
+    return unlight;
+}
 
 float4 main(VS_OUT input) : SV_TARGET
 {
@@ -119,11 +113,10 @@ float4 main(VS_OUT input) : SV_TARGET
     float4 pointPos = _pointpos;
     float4 pointRad = _pointrad;
     float4 alColor = _alcol;
-    //TODO: Change these to passed in spotlight values
-    //float4 dlCol = _dlcol;
-    //float4 dlCol = _dlcol;
-    //float4 dlCol = _dlcol;
-    //float4 dlCol = _dlcol;
+    float4 spotColor = _slcol;
+    float4 spotPos = _sldir;
+    float4 coneDir = _conedir;
+    float4 coneRatio = _coneratio;
     
     //Get the base color from the texture file
 	baseColor = baseTexture.Sample(linfilter, input.tex);
@@ -136,20 +129,21 @@ float4 main(VS_OUT input) : SV_TARGET
     
     float4 dlOut = calculateDirLight(dlCol, dlDir, input.norm);
     float4 pointOut = calculatePointLight(pointColor, pointPos, pointRad, input.norm, input.worldpos);
-    //float4 ambOut = calculateAmbLight(alColor);
-    //float4 outputs[3] = { dlOut, pointOut, float4(0.f, 0.f, 0.f, 0.f) };
+    float4 ambOut = calculateAmbLight(alColor);
+    float4 spotOut = calculateSpotLight(spotColor, spotPos, coneDir, coneRatio, input.norm, input.worldpos);
+    float4 outputs[4] = { dlOut, pointOut, ambOut,  spotOut};
     
     //This loop should "correct" black lights to have no impact on the overall color of the output.
-    //for (int i = 0; i < 3; i++)
-    //{
-    //    if (outputs[i].x == zero.x && outputs[i].y == zero.y && outputs[i].z == zero.z)
-    //    {
-    //        outputs[i] = unlight;
-    //    }
-    //}
+    for (int i = 0; i < 3; i++)
+    {
+        if (outputs[i].x == zero.x && outputs[i].y == zero.y && outputs[i].z == zero.z)
+        {
+            outputs[i] = unlight;
+        }
+    }
 
-    //outColor.xyz = saturate(outputs[0].xyz + outputs[1].xyz + outputs[2].xyz) * baseColor.xyz;
-    outColor.xyz = saturate(dlOut.xyz + pointOut.xyz + unlight.xyz) * baseColor.xyz;
+    outColor.xyz = saturate(outputs[0].xyz + outputs[1].xyz + outputs[2].xyz + outputs[3].xyz) * baseColor.xyz;
+    //outColor.xyz = saturate(dlOut.xyz + pointOut.xyz + unlight.xyz) * baseColor.xyz;
     outColor.a = baseColor.a;
     return outColor;
     

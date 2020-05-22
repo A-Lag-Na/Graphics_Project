@@ -350,15 +350,17 @@ bool Frame()
 	//Not actually a direction here, but instead a position of the point light.
 	pointLight.light.vLightDir = XMFLOAT4(0.4f, -0.23f, 0.f, 0.f);
 	pointLight.light.vLightColor = XMFLOAT4(1.f, 0.f, 0.f, 1.f);
-	pointLight.radius = XMFLOAT4(1.f, 0.f, 0.f, 0.f);
+	pointLight.radius = XMFLOAT4(1.2f, 0.f, 0.f, 0.f);
 
 	//AmbLight has no direction or position
 	ambLight.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.01f);
 
 	//Spotlight initialization
 	Light temp = spotLight.light;
-	temp.vLightColor = XMFLOAT4(1.f, 1.f, 0.f, 0.4f);
-	temp.vLightDir = XMFLOAT4(0.f, 0.f, 1.f, 0.4f);
+	temp.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.4f);
+	temp.vLightDir = XMFLOAT4(-1.f, 0.f, 0.f, 0.0f);
+	spotLight.coneDir = XMFLOAT4(1.f, 0.f, 0.f, 0.f);
+	spotLight.coneRatio = XMFLOAT4(1.0f, 0.f, 0.f, 0.f);
 	//--------------------------------------------------------------------------	
 
 	// Render the graphics scene.
@@ -370,6 +372,22 @@ bool Frame()
 
 	return true;
 }
+
+void clearWVP(ID3D11DeviceContext* con, XMMATRIX& viewMatrix, XMMATRIX& projectionMatrix, float xslide = 0, float yslide = 0, float zslide = 0)
+{
+	ZeroMemory(&constantBufferData, sizeof(WVP));
+	constantBufferData.w = XMMatrixTranslation(xslide, yslide, zslide);
+
+	// added by clark
+	constantBufferData.v = XMMatrixInverse(NULL, viewMatrix);
+	constantBufferData.p = projectionMatrix;
+
+	// change the constant buffer data here per draw / model
+	con->UpdateSubresource(WVPconstantBuffer.Get(), 0, nullptr, &constantBufferData, 0, 0);
+	con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
+	return;
+}
+
 
 bool Render()
 {
@@ -407,20 +425,7 @@ bool Render()
 			con->ClearDepthStencilView(dsview, D3D11_CLEAR_DEPTH, 1, 0);
 
 			//Get camera position here
-
-			ZeroMemory(&constantBufferData, sizeof(WVP));
-			constantBufferData.w = XMMatrixTranslation(XMVectorGetX(viewMatrix.r[3]), XMVectorGetY(viewMatrix.r[3]), XMVectorGetZ(viewMatrix.r[3]));
-
-			// added by clark
-			constantBufferData.v = XMMatrixInverse(NULL, viewMatrix);
-			constantBufferData.p = projectionMatrix;
-
-			// change the constant buffer data here per draw / model
-			con->UpdateSubresource(WVPconstantBuffer.Get(), 0, nullptr, &constantBufferData, 0, 0);
-			con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
-			//Gradient 
-
-			ambLight.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.5f);
+			clearWVP(con, viewMatrix, projectionMatrix, XMVectorGetX(viewMatrix.r[3]), XMVectorGetY(viewMatrix.r[3]), XMVectorGetZ(viewMatrix.r[3]));
 
 			//Replace the pixel shader here in this render call with the skysphere shader.
 			m_SkySphere->Render(con, *skyVertexShader.GetAddressOf(), *skyPixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, sunsetSRV.Get(), myLinearSampler.Get());
@@ -429,26 +434,17 @@ bool Render()
 
 			//Update and set constant buffers (This could be done more efficently by setting multiple PSconstantbuffers at once).
 			//----------------------------------
-			ZeroMemory(&constantBufferData, sizeof(WVP));
-			constantBufferData.w = XMMatrixIdentity();
-			
-			// added by clark
-			constantBufferData.v = XMMatrixInverse(NULL, viewMatrix);
-			constantBufferData.p = projectionMatrix;			
-		
-			// Update the constant buffer data here per draw / model
-			con->UpdateSubresource(WVPconstantBuffer.Get(), 0, nullptr, &constantBufferData, 0, 0);
-			con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
+			clearWVP(con, viewMatrix, projectionMatrix);
 
 			//Light constant buffer
 			if (lightSwitch)
 			{
-				//This will get caught in pixel shader and ignored
+				//This will get caught in pixel shader and ignored, thus "turning off" the light.
 				dirLight.vLightColor = XMFLOAT4(0.f, 0.f, 0.f, 0.0f);
 			}
 			else
 			{
-				dirLight.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.2f);
+				dirLight.vLightColor = XMFLOAT4(0.f, 0.f, 1.f, 0.2f);
 			}
 			//Update dirLight buffer to use updated light color.
 			con->UpdateSubresource(dirLightConstantBuffer.Get(), 0, nullptr, &dirLight, 0, 0);
@@ -463,85 +459,25 @@ bool Render()
 			con->PSSetConstantBuffers(2, 1, ambLightConstantBuffer.GetAddressOf());
 
 			//Update Spotlight buffer
-			//con->UpdateSubresource(spotLightConstantBuffer.Get(), 0, nullptr, &spotLight, 0, 0);
-			//con->PSSetConstantBuffers(2, 1, spotLightConstantBuffer.GetAddressOf());
+			con->UpdateSubresource(spotLightConstantBuffer.Get(), 0, nullptr, &spotLight, 0, 0);
+			con->PSSetConstantBuffers(3, 1, spotLightConstantBuffer.GetAddressOf());
+			//------------------------------
 
-			
-			//End constant buffers for model.
-
-			//Constant buffers for the cube that represents point light
+			//clearWVP clears and updates WVP buffers. Render renders models.
 			//--------------------------------------------------
 			XMFLOAT4 temp = pointLight.light.vLightDir;
-			ZeroMemory(&constantBufferData, sizeof(WVP));
-			constantBufferData.w = XMMatrixTranslation(temp.x, temp.y, temp.z);
-			constantBufferData.v = viewMatrix;
-
-			// added by clark
-			constantBufferData.v = XMMatrixInverse(NULL, viewMatrix);
-			constantBufferData.p = projectionMatrix;
-
-			con->UpdateSubresource(WVPconstantBuffer.Get(), 0, nullptr, &constantBufferData, 0, 0);
-			con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
-			//-------------------------------------------------
+			clearWVP(con, viewMatrix, projectionMatrix, temp.x, temp.y, temp.z);
 			pointCube->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
 
-			//Update and set constant buffers for corvette
-			//----------------------------------------
-			ZeroMemory(&constantBufferData, sizeof(WVP));
-			constantBufferData.w = XMMatrixIdentity();
-			constantBufferData.v = viewMatrix;
-
-			// added by clark
-			constantBufferData.v = XMMatrixInverse(NULL, viewMatrix);
-			constantBufferData.p = projectionMatrix;
-
-			// change the constant buffer data here per draw / model
-			con->UpdateSubresource(WVPconstantBuffer.Get(), 0, nullptr, &constantBufferData, 0, 0);
-			con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
-
-			//-----------------------------------------
-			// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
+			clearWVP(con, viewMatrix, projectionMatrix);
 			m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
 
-			//TODO: Update WVP and/or constant buffers for plane object as appropriate.
-			//planeModel->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, nullptr, myLinearSampler.Get());
-
-			//Update and set constant buffers for grid
-			//----------------------------------------
-			ZeroMemory(&constantBufferData, sizeof(WVP));
-			constantBufferData.w = XMMatrixIdentity();
-
-			// added by clark
-			constantBufferData.v = XMMatrixInverse(NULL, viewMatrix);
-			constantBufferData.p = projectionMatrix;
-
-			// change the constant buffer data here per draw / model
-			con->UpdateSubresource(WVPconstantBuffer.Get(), 0, nullptr, &constantBufferData, 0, 0);
-			con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
-			
-			//-----------------------------------------
-
+			clearWVP(con, viewMatrix, projectionMatrix);
 			m_Grid->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
 
-			//TODO: Update and set island buffers
-			//-----------------------------
-			ZeroMemory(&constantBufferData, sizeof(WVP));
-			constantBufferData.w = XMMatrixTranslation(0.f, -0.3f, 0.f);
-
-			// added by clark
-			constantBufferData.v = XMMatrixInverse(NULL, viewMatrix);
-			constantBufferData.p = projectionMatrix;
-
-			// change the constant buffer data here per draw / model
-			con->UpdateSubresource(WVPconstantBuffer.Get(), 0, nullptr, &constantBufferData, 0, 0);
-			con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
-
+			clearWVP(con, viewMatrix, projectionMatrix, 0.f, -0.3);
 			islandModel->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
 			//-----------------------------
-
-			//Update and set constant buffers for Sphere
-			//----------------------------------------
-
 
 			swap->Present(1, 0);
 			// release incremented COM reference counts
@@ -554,7 +490,6 @@ bool Render()
 		}
 	}
 
-	// Shutdown stuff here
 	Shutdown();
 
 	return true;
