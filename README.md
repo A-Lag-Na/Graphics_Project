@@ -1,11 +1,12 @@
 Camera Controls:
 WASD for horizontal, forwards/backwards movement.
 QE for vertical movement.
-Hold R to toggle directional light color.
-T to move directional light.
-G to move point light.
+Hold R to toggle directional light on/off.
+T to move directional light towards +X.
+Arrow Keys and Right Control, Right Shift to move Point Light (Represented by cube).
+FG to disable/renable point light.
 
-Grid is hard-coded. Corvette is rendered.
+Grid is hard-coded. Corvette is rendered from file using .obj loading.
 
 
 # GTemplates
