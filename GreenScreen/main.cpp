@@ -343,12 +343,12 @@ bool Frame()
 	dirLight.vLightDir = XMFLOAT4(0.3f, -1.f, 0.f, 0.f);
 
 	//Not actually a direction here, but instead a position of the point light.
-	pointLight.light.vLightDir = XMFLOAT4(0.f, -1.f, 0.f, 0.f);
-	pointLight.light.vLightColor = XMFLOAT4(0.f, 0.f, 1.f, 0.2f);
-	pointLight.radius = XMFLOAT4(0.3f, 0.f, 0.f, 0.f);
+	pointLight.light.vLightDir = XMFLOAT4(0.f, 1.f, 0.f, 0.f);
+	pointLight.light.vLightColor = XMFLOAT4(1.f, 0.f, 1.f, 1.f);
+	pointLight.radius = XMFLOAT4(1.f, 0.f, 0.f, 0.f);
 
 	//AmbLight has no direction or position
-	ambLight.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.1f);
+	ambLight.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.01f);
 
 	//Spotlight initialization
 	Light temp = spotLight.light;
@@ -455,7 +455,7 @@ bool Render()
 
 			//Update ambLight buffer light color. Currently unused, as amblight does not change.
 			con->UpdateSubresource(ambLightConstantBuffer.Get(), 0, nullptr, &ambLight, 0, 0);
-			con->PSSetConstantBuffers(2, 1, pointLightConstantBuffer.GetAddressOf());
+			con->PSSetConstantBuffers(2, 1, ambLightConstantBuffer.GetAddressOf());
 
 			//Update Spotlight buffer
 			//con->UpdateSubresource(spotLightConstantBuffer.Get(), 0, nullptr, &spotLight, 0, 0);
@@ -478,7 +478,7 @@ bool Render()
 			con->UpdateSubresource(WVPconstantBuffer.Get(), 0, nullptr, &constantBufferData, 0, 0);
 			con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
 			//-------------------------------------------------
-			pointCube->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, nullptr, myLinearSampler.Get());
+			pointCube->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
 
 			//Update and set constant buffers for corvette
 			//----------------------------------------
@@ -516,7 +516,7 @@ bool Render()
 			
 			//-----------------------------------------
 
-			m_Grid->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, nullptr, myLinearSampler.Get());
+			m_Grid->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
 
 			//TODO: Update and set island buffers
 			//-----------------------------

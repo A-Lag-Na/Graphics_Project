@@ -216,24 +216,24 @@ void Camera::ControlLights(bool& lightSwitch, Light& dirLight, PointLight& point
 
 	//Arrow keys to move point light
 	//Left arrow, -X direction
-	//if (GetAsyncKeyState(0x25))
-	//{
-	//	pointLight.light.vLightDir.x -= 0.1f;
-	//}
-	////Right arrow, +X direction
-	//if (GetAsyncKeyState(0x27))
-	//{
-	//	pointLight.light.vLightDir.x += 0.1f;
-	//}
-	////Up arrow, +Z direction (away from camera)
-	//if (GetAsyncKeyState(0x26))
-	//{
-	//	pointLight.light.vLightDir.y += 0.1f;
-	//}
-	////Down arrow, -Z direction (towards camera)
-	//if (GetAsyncKeyState(0x28))
-	//{
-	//	pointLight.light.vLightDir.y -= 0.1f;
-	//}
+	if (GetAsyncKeyState(0x25))
+	{
+		pointLight.light.vLightDir.x -= 0.01f;
+	}
+	//Right arrow, +X direction
+	if (GetAsyncKeyState(0x27))
+	{
+		pointLight.light.vLightDir.x += 0.01f;
+	}
+	//Up arrow, +Z direction (away from camera)
+	if (GetAsyncKeyState(0x26))
+	{
+		pointLight.light.vLightDir.y += 0.01f;
+	}
+	//Down arrow, -Z direction (towards camera)
+	if (GetAsyncKeyState(0x28))
+	{
+		pointLight.light.vLightDir.y -= 0.01f;
+	}
 
 }

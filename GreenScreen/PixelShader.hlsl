@@ -70,8 +70,9 @@ float4 calculatePointLight(float4 pointColor, float4 pointPos, float4 pointRad, 
     float3 lightDir = normalize(pointPos - surfacePosition);
     float lightRatio = saturate(dot(lightDir, surfaceNormal));
     float4 outColor = saturate(lightRatio * pointColor);
-    float attenuation = 1.0f - saturate(length(pointPos - surfacePosition) / pointRad.x);
-    outColor *= attenuation * attenuation;
+    float temp = length(pointPos - surfacePosition) / pointRad.x; //saturate
+    float attenuation = 1.0f - temp;
+    outColor *= (attenuation * attenuation);
     return outColor;
 }
 
@@ -102,10 +103,10 @@ float4 calculatePointLight(float4 pointColor, float4 pointPos, float4 pointRad, 
 //    }
 //}
 
-float4 calculateAmbLight(float4 alColor)
-{
-    return alColor;
-}
+//float4 calculateAmbLight(float4 alColor)
+//{
+//    return alColor;
+//}
 
 float4 main(VS_OUT input) : SV_TARGET
 {
@@ -134,19 +135,20 @@ float4 main(VS_OUT input) : SV_TARGET
     
     float4 dlOut = calculateDirLight(dlCol, dlDir, input.norm);
     float4 pointOut = calculatePointLight(pointColor, pointPos, pointRad, input.norm, input.pos);
-    float4 ambOut = calculateAmbLight(alColor);
-    float4 outputs[3] = { dlOut, pointOut, ambOut };
+    //float4 ambOut = calculateAmbLight(alColor);
+    //float4 outputs[3] = { dlOut, pointOut, float4(0.f, 0.f, 0.f, 0.f) };
     
     //This loop should "correct" black lights to have no impact on the overall color of the output.
-    for (int i = 0; i < 3; i++)
-    {
-        if (outputs[i].x == zero.x && outputs[i].y == zero.y && outputs[i].z == zero.z)
-        {
-            outputs[i] = unlight;
-        }
-    }
+    //for (int i = 0; i < 3; i++)
+    //{
+    //    if (outputs[i].x == zero.x && outputs[i].y == zero.y && outputs[i].z == zero.z)
+    //    {
+    //        outputs[i] = unlight;
+    //    }
+    //}
 
-    outColor.xyz = saturate(outputs[0].xyz + outputs[1].xyz + outputs[2].xyz) * baseColor.xyz;
+    //outColor.xyz = saturate(outputs[0].xyz + outputs[1].xyz + outputs[2].xyz) * baseColor.xyz;
+    outColor.xyz = saturate(dlOut.xyz + pointOut.xyz + unlight.xyz) * baseColor.xyz;
     outColor.a = baseColor.a;
     return outColor;
     
