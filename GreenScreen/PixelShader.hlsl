@@ -34,6 +34,7 @@ struct VS_OUT
     float4 pos : SV_POSITION;
     float3 norm : NORMAL;
     float2 tex : TEXCOORD;
+    float3 worldpos : WORLD_POSITION;
 };
 
 //Functional directional light only implementation
@@ -65,7 +66,7 @@ float4 calculateDirLight(float4 dlColor, float4 dlDir, float3 surfaceNormal)
 //ATTENUATION = 1.0 – CLAMP( MAGNITUDE(
 //LIGHTPOS– SURFACEPOS) / LIGHTRADIUS ) 
 
-float4 calculatePointLight(float4 pointColor, float4 pointPos, float4 pointRad, float3 surfaceNormal, float4 surfacePosition)
+float4 calculatePointLight(float4 pointColor, float4 pointPos, float4 pointRad, float3 surfaceNormal, float3 surfacePosition)
 {
     float3 lightDir = normalize(pointPos - surfacePosition);
     float lightRatio = saturate(dot(lightDir, surfaceNormal));
@@ -134,7 +135,7 @@ float4 main(VS_OUT input) : SV_TARGET
     //}
     
     float4 dlOut = calculateDirLight(dlCol, dlDir, input.norm);
-    float4 pointOut = calculatePointLight(pointColor, pointPos, pointRad, input.norm, input.pos);
+    float4 pointOut = calculatePointLight(pointColor, pointPos, pointRad, input.norm, input.worldpos);
     //float4 ambOut = calculateAmbLight(alColor);
     //float4 outputs[3] = { dlOut, pointOut, float4(0.f, 0.f, 0.f, 0.f) };
     

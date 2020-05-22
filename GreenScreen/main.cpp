@@ -348,8 +348,8 @@ bool Frame()
 	dirLight.vLightDir = XMFLOAT4(0.3f, -1.f, 0.f, 0.f);
 
 	//Not actually a direction here, but instead a position of the point light.
-	pointLight.light.vLightDir = XMFLOAT4(0.f, 1.f, 0.f, 0.f);
-	pointLight.light.vLightColor = XMFLOAT4(1.f, 0.f, 1.f, 1.f);
+	pointLight.light.vLightDir = XMFLOAT4(0.4f, -0.23f, 0.f, 0.f);
+	pointLight.light.vLightColor = XMFLOAT4(1.f, 0.f, 0.f, 1.f);
 	pointLight.radius = XMFLOAT4(1.f, 0.f, 0.f, 0.f);
 
 	//AmbLight has no direction or position
@@ -483,7 +483,7 @@ bool Render()
 			con->UpdateSubresource(WVPconstantBuffer.Get(), 0, nullptr, &constantBufferData, 0, 0);
 			con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
 			//-------------------------------------------------
-			pointCube->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
+			pointCube->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
 
 			//Update and set constant buffers for corvette
 			//----------------------------------------

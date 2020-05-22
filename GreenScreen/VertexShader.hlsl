@@ -17,9 +17,8 @@ struct VS_OUT
 	float4 pos : SV_POSITION;
     float3 norm : NORMAL;
 	float2 tex : TEXCOORD;
+    float3 worldpos : WORLD_POSITION;
 };
-
-//Commented out code is for lighting and/or texturing
 
 VS_OUT main(VS_IN input)
 {
@@ -27,6 +26,7 @@ VS_OUT main(VS_IN input)
     output.localpos = input.pos.xyz;
     output.pos = float4(input.pos, 1.0f);
     output.pos = mul(output.pos, w);
+    output.worldpos = output.pos;
     output.pos = mul(output.pos, v);
     output.pos = mul(output.pos, p);
     output.tex = input.tex;
