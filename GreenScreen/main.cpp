@@ -209,7 +209,7 @@ bool Initialize(int screenWidth, int screenHeight)
 
 	//Skysphere stuff
 	//only run ModelLoader if you need new one
-	//result = m_ModelLoader->LoadModel("../SkyCube.obj");
+	//result = m_ModelLoader->LoadModel("../corvetteobj.obj");
 
 	m_SkySphere = new SkySphere;
 	if (!m_SkySphere)
@@ -221,7 +221,7 @@ bool Initialize(int screenWidth, int screenHeight)
 
 	// Initialize the model object.
 	//For now, gotta pass in vertex and index count for each model rendered (.h or hardcoded)
-	result = m_Model->Initialize( *myDevice.GetAddressOf(), *myContext.GetAddressOf(), corvetteobj_data , corvetteobj_indicies, 3453, 8112, 40.f);
+	result = m_Model->Initialize( *myDevice.GetAddressOf(),"../corvetteModel.txt", 40.0f );
 	
 	//Create and initialize plane model
 	//planeModel = new Model;
