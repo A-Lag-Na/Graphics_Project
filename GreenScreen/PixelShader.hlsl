@@ -37,6 +37,14 @@ struct VS_OUT
     float3 worldpos : WORLD_POSITION;
 };
 
+//Specular code: "I fear no man, but that thing... it scares me"
+//VIEWDIR = NORMALIZE(
+//CAMWORLDPOS– SURFACEPOS) 
+//HALFVECTOR = NORMALIZE((-LIGHTDIR ) + VIEWDIR) 
+//INTENSITY = MAX( CLAMP( DOT( NORMAL, NORMALIZE(HALFVECTOR) ))SPECULARPOWER , 0 )
+//RESULT = LIGHTCOLOR * SPECULARINTENSITY * INTENSITY 
+
+
 //Functional directional light only implementation
 //float4 lightColor = dlcol;
 //lightColor = saturate(lightColor);
