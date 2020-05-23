@@ -40,6 +40,7 @@ Model* m_Model = 0;
 //Model* planeModel = 0;
 Model* islandModel = 0;
 Model* pointCube = 0;
+Model* spotCube = 0;
 
 Grid* m_Grid = 0;
 SkySphere* m_SkySphere = 0;
@@ -241,6 +242,10 @@ bool Initialize(int screenWidth, int screenHeight)
 	pointCube = new Model;
 	result = pointCube->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), cubeobj_data, cubeobj_indicies, 788, 1692, 1000.f);
 
+	//Cube for showing the position of pointlight.
+	spotCube = new Model;
+	result = pointCube->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), cubeobj_data, cubeobj_indicies, 788, 1692, 1000.f);
+
 	//End geometry renderers.
 
 	return true;
@@ -356,11 +361,10 @@ bool Frame()
 	ambLight.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.01f);
 
 	//Spotlight initialization
-	Light temp = spotLight.light;
-	temp.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.4f);
-	temp.vLightDir = XMFLOAT4(-1.f, 0.f, 0.f, 0.0f);
-	spotLight.coneDir = XMFLOAT4(1.f, 0.f, 0.f, 0.f);
-	spotLight.coneRatio = XMFLOAT4(1.0f, 0.f, 0.f, 0.f);
+	spotLight.light.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.1f);
+	spotLight.light.vLightDir = XMFLOAT4(-0.2f, -0.2f, 0.f, 0.0f);
+	spotLight.coneDir = XMFLOAT4(1.f, -1.f, 0.f, 0.f);
+	spotLight.coneRatio = XMFLOAT4(0.15f, 0.05f, 0.f, 0.f);
 	//--------------------------------------------------------------------------	
 
 	// Render the graphics scene.
@@ -446,15 +450,15 @@ bool Render()
 			{
 				dirLight.vLightColor = XMFLOAT4(0.f, 0.f, 1.f, 0.2f);
 			}
-			//Update dirLight buffer to use updated light color.
+			//Update dirLight buffer
 			con->UpdateSubresource(dirLightConstantBuffer.Get(), 0, nullptr, &dirLight, 0, 0);
 			con->PSSetConstantBuffers(0, 1, dirLightConstantBuffer.GetAddressOf());
 
-			//Update pointLight buffer light color.
+			//Update pointLight buffer
 			con->UpdateSubresource(pointLightConstantBuffer.Get(), 0, nullptr, &pointLight, 0, 0);
 			con->PSSetConstantBuffers(1, 1, pointLightConstantBuffer.GetAddressOf());
 
-			//Update ambLight buffer light color. Currently unused, as amblight does not change.
+			//Update ambLight buffer
 			con->UpdateSubresource(ambLightConstantBuffer.Get(), 0, nullptr, &ambLight, 0, 0);
 			con->PSSetConstantBuffers(2, 1, ambLightConstantBuffer.GetAddressOf());
 
@@ -466,6 +470,10 @@ bool Render()
 			//clearWVP clears and updates WVP buffers. Render renders models.
 			//--------------------------------------------------
 			XMFLOAT4 temp = pointLight.light.vLightDir;
+			clearWVP(con, viewMatrix, projectionMatrix, temp.x, temp.y, temp.z);
+			pointCube->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
+
+			temp = spotLight.light.vLightDir;
 			clearWVP(con, viewMatrix, projectionMatrix, temp.x, temp.y, temp.z);
 			pointCube->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
 

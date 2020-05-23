@@ -52,9 +52,9 @@ struct SpotLight
     Light light;
     //Using float4s here for buffer creation byte size reasons.
     XMFLOAT4 coneDir;
+    //coneRatio.x is outer cone, coneRatio.y is inner cone.
     XMFLOAT4 coneRatio;
 };
-
 
 struct SimpleMesh
 {

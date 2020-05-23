@@ -91,10 +91,14 @@ float4 calculateSpotLight(float4 spotColor, float4 spotPos, float4 coneDir, floa
 {
     float3 lightDir = normalize(spotPos.xyz - surfacePosition);
     float4 surfaceRatio = saturate(dot(-lightDir, coneDir.xyz));
-    float4 spotFactor = (surfaceRatio > coneRatio.x) ? 1 : 0;
-    float4 lightRatio = saturate(dot(lightDir, surfaceNormal));
+    //replace this with attenuation
+    float4 spotFactor = (surfaceRatio > coneRatio.y) ? 1 : 0;
+    float lightRatio = saturate(dot(lightDir, surfaceNormal));
+    //mult spot factor
     float4 outColor = spotFactor * lightRatio * spotColor;
-    //float attenuation = 1.0f - saturate((;
+    //coneRatio. y is inner cone, coneRatio.x is outer.
+    float attenuation = 1.0f - saturate((coneRatio.y - surfaceRatio) / (coneRatio.y - coneRatio.x));
+    outColor *= (attenuation * attenuation);
     return outColor;
 }
 
