@@ -35,6 +35,7 @@ struct VS_OUT
     float3 norm : NORMAL;
     float2 tex : TEXCOORD;
     float3 worldpos : WORLD_POSITION;
+    //float3 camerapos : CAMERA_POSITION;
 };
 
 //Specular code: "I fear no man, but that thing... it scares me"

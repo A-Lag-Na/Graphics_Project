@@ -10,6 +10,7 @@ struct VS_IN
 	float3 pos : POSITION;
 	float3 norm : NORMAL;
     float2 tex : TEXCOORD;
+    //float3 camerapos : CAMERA_POSITION;
 };
 struct VS_OUT
 {
@@ -18,6 +19,7 @@ struct VS_OUT
     float3 norm : NORMAL;
 	float2 tex : TEXCOORD;
     float3 worldpos : WORLD_POSITION;
+    //float3 camerapos : CAMERA_POSITION;
 };
 
 VS_OUT main(VS_IN input)
