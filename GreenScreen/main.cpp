@@ -351,13 +351,14 @@ bool Frame()
 	pointLight.radius = XMFLOAT4(1.2f, 0.f, 0.f, 0.f);
 
 	//AmbLight has no direction or position
-	ambLight.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.01f);
+	//ambLight.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.01f);
 
 	//Spotlight initialization
 	spotLight.light.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.1f);
 	spotLight.light.vLightDir = XMFLOAT4(-0.2f, -0.2f, 0.f, 0.0f);
 	spotLight.coneDir = XMFLOAT4(1.f, -1.f, 0.f, 0.f);
-	spotLight.coneRatio = XMFLOAT4(0.15f, 0.05f, 0.f, 0.f);
+	//Inner > outer, narrows as ratio approaches 1.
+	spotLight.coneRatio = XMFLOAT4(0.8f, 0.95f, 0.f, 0.f);
 	//--------------------------------------------------------------------------	
 
 	// Render the graphics scene.
