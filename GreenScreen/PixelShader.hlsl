@@ -35,16 +35,8 @@ struct VS_OUT
     float3 norm : NORMAL;
     float2 tex : TEXCOORD;
     float3 worldpos : WORLD_POSITION;
-    //float3 camerapos : CAMERA_POSITION;
+    float4 camerapos : CAMERA_POSITION;
 };
-
-//Specular code: "I fear no man, but that thing... it scares me"
-//VIEWDIR = NORMALIZE(
-//CAMWORLDPOS– SURFACEPOS) 
-//HALFVECTOR = NORMALIZE((-LIGHTDIR ) + VIEWDIR) 
-//INTENSITY = MAX( CLAMP( DOT( NORMAL, NORMALIZE(HALFVECTOR) ))SPECULARPOWER , 0 )
-//RESULT = LIGHTCOLOR * SPECULARINTENSITY * INTENSITY 
-
 
 //Functional directional light only implementation
 //float4 lightColor = dlcol;
@@ -60,7 +52,6 @@ float4 calculateDirLight(float4 dlColor, float4 dlDir, float3 surfaceNormal)
      float3 ldirection = -normalize(dlDir);
      float3 wnorm = normalize(surfaceNormal);
      float4 outColor = saturate((dot(ldirection, wnorm))) * dlColor;
-     //return outColor;
      return outColor;
 }
 
@@ -113,8 +104,14 @@ float4 calculateSpotLight(float4 spotColor, float4 spotPos, float4 coneDir, floa
 
 float4 calculateAmbLight(float4 alColor)
 {
-    return unlight;
+    return alColor;
 }
+
+//Specular code: "I fear no man, but that thing... it scares me"
+//VIEWDIR = NORMALIZE(CAMWORLDPOS– SURFACEPOS) 
+//HALFVECTOR = NORMALIZE((-LIGHTDIR ) + VIEWDIR) 
+//INTENSITY = MAX( CLAMP( DOT( NORMAL, NORMALIZE(HALFVECTOR) ))SPECULARPOWER , 0 )
+//RESULT = LIGHTCOLOR * SPECULARINTENSITY * INTENSITY 
 
 float4 main(VS_OUT input) : SV_TARGET
 {
@@ -130,6 +127,7 @@ float4 main(VS_OUT input) : SV_TARGET
     float4 spotPos = _sldir;
     float4 coneDir = _conedir;
     float4 coneRatio = _coneratio;
+    float4 cameraPos = input.camerapos;
     
     //Get the base color from the texture file
 	baseColor = baseTexture.Sample(linfilter, input.tex);
@@ -156,7 +154,7 @@ float4 main(VS_OUT input) : SV_TARGET
     }
 
     outColor.xyz = saturate(outputs[0].xyz + outputs[1].xyz + outputs[2].xyz + outputs[3].xyz) * baseColor.xyz;
-    //outColor.xyz = saturate(dlOut.xyz + pointOut.xyz + unlight.xyz) * baseColor.xyz;
+    //outColor.xyz *= calculateSpecular(cameraPos, input.worldPos, input.norm, 1.0f, 1.0f);
     outColor.a = baseColor.a;
     return outColor;
     

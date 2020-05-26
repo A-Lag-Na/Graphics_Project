@@ -4,13 +4,16 @@ cbuffer WVP : register(b0)
 {
     matrix w, v, p;
 }
+cbuffer camera : register(b1)
+{
+    float4 cameraPos;
+}
 
 struct VS_IN
 {
 	float3 pos : POSITION;
 	float3 norm : NORMAL;
     float2 tex : TEXCOORD;
-    //float3 camerapos : CAMERA_POSITION;
 };
 struct VS_OUT
 {
@@ -19,7 +22,7 @@ struct VS_OUT
     float3 norm : NORMAL;
 	float2 tex : TEXCOORD;
     float3 worldpos : WORLD_POSITION;
-    //float3 camerapos : CAMERA_POSITION;
+    float4 camerapos : CAMERA_POSITION;
 };
 
 VS_OUT main(VS_IN input)
@@ -33,5 +36,7 @@ VS_OUT main(VS_IN input)
     output.pos = mul(output.pos, p);
     output.tex = input.tex;
     output.norm = mul(float3(input.norm), (float3x3) w).xyz;
+    //Doing the math here cause XMVECTORs and XMMATRIXs are a pain
+    output.camerapos = mul(cameraPos, w);
 	return  output;
 }

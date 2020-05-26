@@ -66,7 +66,9 @@ Microsoft::WRL::ComPtr<ID3D11PixelShader>	skyPixelShader;
 
 Microsoft::WRL::ComPtr<ID3D11Buffer>	vertexBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	indexBuffer;
+
 Microsoft::WRL::ComPtr<ID3D11Buffer>	WVPconstantBuffer;
+Microsoft::WRL::ComPtr<ID3D11Buffer>	cameraConstantBuffer;
 
 Microsoft::WRL::ComPtr<ID3D11Buffer>	dirLightConstantBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	pointLightConstantBuffer;
@@ -81,6 +83,7 @@ Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> sunsetSRV;
 Microsoft::WRL::ComPtr < ID3D11SamplerState> myLinearSampler;
 
 WVP constantBufferData;
+XMFLOAT4 camerapos;
 
 Light dirLight;
 PointLight pointLight;
@@ -123,6 +126,16 @@ int main()
 	return 0; // that's all folks
 }
 
+template <typename T>
+HRESULT createConstBuffer(T data, ID3D11Buffer** bufferAddress)
+{
+	CD3D11_BUFFER_DESC desc = CD3D11_BUFFER_DESC(sizeof(T), D3D11_BIND_CONSTANT_BUFFER);
+	D3D11_SUBRESOURCE_DATA srd;
+	ZeroMemory(&srd, sizeof(srd));
+	srd.pSysMem = &data;
+	return myDevice->CreateBuffer(&desc, &srd, bufferAddress);
+}
+
 bool Initialize(int screenWidth, int screenHeight)
 {
 	bool result;
@@ -147,42 +160,23 @@ bool Initialize(int screenWidth, int screenHeight)
 	// Constant Buffer Creation
 	//-----------
 	//World/View/Projection matrix constant buffer
-	CD3D11_BUFFER_DESC desc = CD3D11_BUFFER_DESC(sizeof(WVP), D3D11_BIND_CONSTANT_BUFFER);
-	D3D11_SUBRESOURCE_DATA srd;
-	ZeroMemory(&srd, sizeof(srd));
-	srd.pSysMem = &constantBufferData;
-
-	HRESULT hr = myDevice->CreateBuffer(&desc, &srd, WVPconstantBuffer.GetAddressOf());
+	HRESULT hr;
+	hr = createConstBuffer<WVP>(constantBufferData, WVPconstantBuffer.GetAddressOf());
 
 	//Directional light constant buffer
-	ZeroMemory(&desc, sizeof(desc));
-	desc = CD3D11_BUFFER_DESC(sizeof(Light), D3D11_BIND_CONSTANT_BUFFER);
-	ZeroMemory(&srd, sizeof(srd));
-	srd.pSysMem = &dirLight;
-	hr = myDevice->CreateBuffer(&desc, &srd, dirLightConstantBuffer.GetAddressOf());
+	hr = createConstBuffer<Light>(dirLight, dirLightConstantBuffer.GetAddressOf());
 
 	//Point light constant buffer
-	ZeroMemory(&desc, sizeof(desc));
-	desc = CD3D11_BUFFER_DESC(sizeof(PointLight), D3D11_BIND_CONSTANT_BUFFER);
-	ZeroMemory(&srd, sizeof(srd));
-	srd.pSysMem = &pointLight;
-	hr = myDevice->CreateBuffer(&desc, &srd, pointLightConstantBuffer.GetAddressOf());
+	hr = createConstBuffer<PointLight>(pointLight, pointLightConstantBuffer.GetAddressOf());
 
 	//Ambient light constant buffer
-	ZeroMemory(&desc, sizeof(desc));
-	desc = CD3D11_BUFFER_DESC(sizeof(Light), D3D11_BIND_CONSTANT_BUFFER);
-	ZeroMemory(&srd, sizeof(srd));
-	srd.pSysMem = &ambLight;
-	hr = myDevice->CreateBuffer(&desc, &srd, ambLightConstantBuffer.GetAddressOf());
+	hr = createConstBuffer<Light>(ambLight, ambLightConstantBuffer.GetAddressOf());
 
 	//Spotlight constant buffer
-	ZeroMemory(&desc, sizeof(desc));
-	desc = CD3D11_BUFFER_DESC(sizeof(SpotLight), D3D11_BIND_CONSTANT_BUFFER);
-	ZeroMemory(&srd, sizeof(srd));
-	srd.pSysMem = &spotLight;
-	hr = myDevice->CreateBuffer(&desc, &srd, spotLightConstantBuffer.GetAddressOf());
+	hr = createConstBuffer<SpotLight>(spotLight, spotLightConstantBuffer.GetAddressOf());
 
-	
+	//Cameraposition constant buffer
+	hr = createConstBuffer<XMFLOAT4>(camerapos, cameraConstantBuffer.GetAddressOf());	
 
 	// End of constant buffers
 
@@ -325,7 +319,6 @@ bool Frame()
 	// Set primitive topology
 	myContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-
 	//Texturing
 	//---------
 	// Load corvette Texture
@@ -429,7 +422,15 @@ bool Render()
 			con->ClearDepthStencilView(dsview, D3D11_CLEAR_DEPTH, 1, 0);
 
 			//Get camera position here
-			clearWVP(con, viewMatrix, projectionMatrix, XMVectorGetX(viewMatrix.r[3]), XMVectorGetY(viewMatrix.r[3]), XMVectorGetZ(viewMatrix.r[3]));
+			float cameraX, cameraY, cameraZ, cameraW;
+			cameraX = XMVectorGetX(viewMatrix.r[3]);
+			cameraY = XMVectorGetY(viewMatrix.r[3]);
+			cameraZ = XMVectorGetZ(viewMatrix.r[3]);
+			cameraW = XMVectorGetW(viewMatrix.r[3]);
+			camerapos = XMFLOAT4(cameraX, cameraY, cameraZ, cameraW);
+
+			//Set SkySphere's world matrix to use camera xyz
+			clearWVP(con, viewMatrix, projectionMatrix, cameraX, cameraY, cameraZ);
 
 			//Replace the pixel shader here in this render call with the skysphere shader.
 			m_SkySphere->Render(con, *skyVertexShader.GetAddressOf(), *skyPixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, sunsetSRV.Get(), myLinearSampler.Get());
@@ -465,6 +466,10 @@ bool Render()
 			//Update Spotlight buffer
 			con->UpdateSubresource(spotLightConstantBuffer.Get(), 0, nullptr, &spotLight, 0, 0);
 			con->PSSetConstantBuffers(3, 1, spotLightConstantBuffer.GetAddressOf());
+
+			//Update CameraPos buffer
+			con->UpdateSubresource(cameraConstantBuffer.Get(), 0, nullptr, &camerapos, 0, 0);
+			con->VSSetConstantBuffers(1, 1, cameraConstantBuffer.GetAddressOf());
 			//------------------------------
 
 			//clearWVP clears and updates WVP buffers. Render renders models.
