@@ -35,16 +35,14 @@ struct VS_OUT
     float3 norm : NORMAL;
     float2 tex : TEXCOORD;
     float3 worldpos : WORLD_POSITION;
-    //float3 camerapos : CAMERA_POSITION;
+    float4 camerapos : CAMERA_POSITION;
 };
 
 //Specular code: "I fear no man, but that thing... it scares me"
-//VIEWDIR = NORMALIZE(
-//CAMWORLDPOS– SURFACEPOS) 
+//VIEWDIR = NORMALIZE(CAMWORLDPOS– SURFACEPOS) 
 //HALFVECTOR = NORMALIZE((-LIGHTDIR ) + VIEWDIR) 
 //INTENSITY = MAX( CLAMP( DOT( NORMAL, NORMALIZE(HALFVECTOR) ))SPECULARPOWER , 0 )
 //RESULT = LIGHTCOLOR * SPECULARINTENSITY * INTENSITY 
-
 
 //Functional directional light only implementation
 //float4 lightColor = dlcol;
@@ -60,7 +58,6 @@ float4 calculateDirLight(float4 dlColor, float4 dlDir, float3 surfaceNormal)
      float3 ldirection = -normalize(dlDir);
      float3 wnorm = normalize(surfaceNormal);
      float4 outColor = saturate((dot(ldirection, wnorm))) * dlColor;
-     //return outColor;
      return outColor;
 }
 
@@ -98,22 +95,24 @@ float4 calculatePointLight(float4 pointColor, float4 pointPos, float4 pointRad, 
 
 float4 calculateSpotLight(float4 spotColor, float4 spotPos, float4 coneDir, float4 coneRatio, float3 surfaceNormal, float3 surfacePosition)
 {
+    //points towards the light
     float3 lightDir = normalize(spotPos.xyz - surfacePosition);
-    float4 surfaceRatio = saturate(dot(-lightDir, coneDir.xyz));
+    float surfaceRatio = saturate(dot(-lightDir, normalize(coneDir.xyz)));
     //replace this with attenuation
-    float4 spotFactor = (surfaceRatio > coneRatio.y) ? 1 : 0;
-    float lightRatio = saturate(dot(lightDir, surfaceNormal));
+    //float spotFactor = (surfaceRatio > coneRatio.x) ? 1 : 0;
+    float lightRatio = saturate(dot(lightDir, normalize(surfaceNormal)));
     //mult spot factor
-    float4 outColor = spotFactor * lightRatio * spotColor;
+    float4 outColor = lightRatio * spotColor;
     //coneRatio. y is inner cone, coneRatio.x is outer.
-    float attenuation = 1.0f - saturate((coneRatio.y - surfaceRatio) / (coneRatio.y - coneRatio.x));
-    outColor *= (attenuation * attenuation);
+    float attenuation1 = 1.0f - length(spotPos.xyz - surfacePosition) / 2.0f;
+    float attenuation2 = 1.0f - saturate((coneRatio.y - surfaceRatio) / (coneRatio.y - coneRatio.x));
+    outColor *= (attenuation1 * attenuation2);
     return outColor;
 }
 
 float4 calculateAmbLight(float4 alColor)
 {
-    return unlight;
+    return alColor;
 }
 
 float4 main(VS_OUT input) : SV_TARGET
@@ -130,21 +129,18 @@ float4 main(VS_OUT input) : SV_TARGET
     float4 spotPos = _sldir;
     float4 coneDir = _conedir;
     float4 coneRatio = _coneratio;
+    float4 cameraPos = input.camerapos;
     
     //Get the base color from the texture file
 	baseColor = baseTexture.Sample(linfilter, input.tex);
-    
-    //I think the commented out code below is non-functional right now
-    //if(baseColor.x == zero.x && baseColor.y == zero.y && baseColor.z == zero.z)
-    //{
-    //    baseColor = float4(input.localpos, 1.f);
-    //}
     
     float4 dlOut = calculateDirLight(dlCol, dlDir, input.norm);
     float4 pointOut = calculatePointLight(pointColor, pointPos, pointRad, input.norm, input.worldpos);
     float4 ambOut = calculateAmbLight(alColor);
     float4 spotOut = calculateSpotLight(spotColor, spotPos, coneDir, coneRatio, input.norm, input.worldpos);
     float4 outputs[4] = { dlOut, pointOut, ambOut,  spotOut};
+    
+    //return float4(spotOut.xyz * baseColor.xyz, baseColor.a);
     
     //This loop should "correct" black lights to have no impact on the overall color of the output.
     for (int i = 0; i < 3; i++)
@@ -156,10 +152,6 @@ float4 main(VS_OUT input) : SV_TARGET
     }
 
     outColor.xyz = saturate(outputs[0].xyz + outputs[1].xyz + outputs[2].xyz + outputs[3].xyz) * baseColor.xyz;
-    //outColor.xyz = saturate(dlOut.xyz + pointOut.xyz + unlight.xyz) * baseColor.xyz;
     outColor.a = baseColor.a;
     return outColor;
-    
-    //For debugging, use .pos or .norm here
-    //return float4(input.localpos, 1.0f);
 }
