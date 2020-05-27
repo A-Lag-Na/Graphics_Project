@@ -72,7 +72,7 @@ float4 calculateDirLight(float4 dlColor, float4 dlDir, float3 surfaceNormal)
 //ATTENUATION = 1.0 – CLAMP( MAGNITUDE(
 //LIGHTPOS– SURFACEPOS) / LIGHTRADIUS ) 
 
-float4 calculatePointLight(float4 pointColor, float4 pointPos, float4 pointRad, float3 surfaceNormal, float3 surfacePosition)
+float4 calculatePointLight(float4 pointColor, float4 pointPos, float4 pointRad, float3 surfaceNormal, float3 surfacePosition, float3 cameraPos)
 {
     float3 lightDir = normalize(pointPos.xyz - surfacePosition);
     float lightRatio = saturate(dot(lightDir, surfaceNormal));
@@ -80,6 +80,13 @@ float4 calculatePointLight(float4 pointColor, float4 pointPos, float4 pointRad, 
     float temp = length(pointPos.xyz - surfacePosition) / pointRad.x; //saturate
     float attenuation = 1.0f - temp;
     outColor *= (attenuation * attenuation);
+    
+    float3 viewDir = normalize(cam)
+    //Specular code: "I fear no man, but that thing... it scares me"
+//VIEWDIR = NORMALIZE(CAMWORLDPOS– SURFACEPOS) 
+//HALFVECTOR = NORMALIZE((-LIGHTDIR ) + VIEWDIR) 
+//INTENSITY = MAX( CLAMP( DOT( NORMAL, NORMALIZE(HALFVECTOR) ))SPECULARPOWER , 0 )
+//RESULT = LIGHTCOLOR * SPECULARINTENSITY * INTENSITY 
     return outColor;
 }
 
@@ -139,8 +146,6 @@ float4 main(VS_OUT input) : SV_TARGET
     float4 ambOut = calculateAmbLight(alColor);
     float4 spotOut = calculateSpotLight(spotColor, spotPos, coneDir, coneRatio, input.norm, input.worldpos);
     float4 outputs[4] = { dlOut, pointOut, ambOut,  spotOut};
-    
-    //return float4(spotOut.xyz * baseColor.xyz, baseColor.a);
     
     //This loop should "correct" black lights to have no impact on the overall color of the output.
     for (int i = 0; i < 3; i++)
