@@ -342,8 +342,8 @@ bool Frame()
 	//----------
 
 	//Lighting
-	//Direction light setting (direction is fixed, color is set through camera render function because of the R button functionality)
 	dirLight.vLightDir = XMFLOAT4(0.3f, -1.f, 0.f, 0.f);
+	dirLight.vLightColor = XMFLOAT4(0.f, 0.f, 1.0f, 0.2f);
 
 	//Not actually a direction here, but instead a position of the point light.
 	pointLight.light.vLightDir = XMFLOAT4(0.4f, -0.23f, 0.f, 0.f);
@@ -396,7 +396,7 @@ bool Render()
 	{
 		// Generate the view matrix based on the camera's position.
 		
-		m_Camera->Render(viewMatrix, lightSwitch, dirLight, pointLight);
+		m_Camera->Render(viewMatrix, lightSwitch, dirLight, pointLight, spotLight);
 
 		//Get the view matrix from the camera
 		m_Camera->GetViewMatrix(viewMatrix);
@@ -442,16 +442,6 @@ bool Render()
 			//----------------------------------
 			clearWVP(con, viewMatrix, projectionMatrix);
 
-			//Light constant buffer
-			if (lightSwitch)
-			{
-				//This will get caught in pixel shader and ignored, thus "turning off" the light.
-				dirLight.vLightColor = XMFLOAT4(0.f, 0.f, 0.f, 0.0f);
-			}
-			else
-			{
-				dirLight.vLightColor = XMFLOAT4(0.f, 0.f, 1.f, 0.2f);
-			}
 			//Update dirLight buffer
 			con->UpdateSubresource(dirLightConstantBuffer.Get(), 0, nullptr, &dirLight, 0, 0);
 			con->PSSetConstantBuffers(0, 1, dirLightConstantBuffer.GetAddressOf());

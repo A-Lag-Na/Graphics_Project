@@ -52,13 +52,24 @@ struct VS_OUT
 //float4 outColor = saturate((dot(ldirection, wnorm))) * dlcol * baseColor;
 //return outColor;
 
-float4 calculateDirLight(float4 dlColor, float4 dlDir, float3 surfaceNormal)
+float3 calculateDirLight(float4 dlColor, float4 dlDir, float3 surfaceNormal, float3 surfacePosition, float3 cameraPos, float specularPower, float specularIntensity)
 {
      float4 lightColor = dlColor;
      float3 ldirection = -normalize(dlDir);
      float3 wnorm = normalize(surfaceNormal);
      float4 outColor = saturate((dot(ldirection, wnorm))) * dlColor;
-     return outColor;
+     
+    
+        //Specular code: "I fear no man, but that thing... it scares me"
+//VIEWDIR = NORMALIZE(CAMWORLDPOS– SURFACEPOS) 
+//HALFVECTOR = NORMALIZE((-LIGHTDIR ) + VIEWDIR) 
+//INTENSITY = MAX( CLAMP( DOT( NORMAL, NORMALIZE(HALFVECTOR) ))SPECULARPOWER , 0 )
+//RESULT = LIGHTCOLOR * SPECULARINTENSITY * INTENSITY 
+    float3 viewDir = normalize(cameraPos - surfacePosition);
+    float3 halfVector = normalize((-ldirection) + viewDir);
+    float intensity = max(pow(saturate(dot(surfaceNormal, normalize(halfVector))), specularPower), 0);
+    float4 specular = dlColor * specularIntensity * intensity;
+    return outColor + specular;
 }
 
 //Point light formula implementation
@@ -72,7 +83,7 @@ float4 calculateDirLight(float4 dlColor, float4 dlDir, float3 surfaceNormal)
 //ATTENUATION = 1.0 – CLAMP( MAGNITUDE(
 //LIGHTPOS– SURFACEPOS) / LIGHTRADIUS ) 
 
-float4 calculatePointLight(float4 pointColor, float4 pointPos, float4 pointRad, float3 surfaceNormal, float3 surfacePosition, float3 cameraPos)
+float3 calculatePointLight(float4 pointColor, float4 pointPos, float4 pointRad, float3 surfaceNormal, float3 surfacePosition, float3 cameraPos, float specularPower, float specularIntensity)
 {
     float3 lightDir = normalize(pointPos.xyz - surfacePosition);
     float lightRatio = saturate(dot(lightDir, surfaceNormal));
@@ -81,13 +92,13 @@ float4 calculatePointLight(float4 pointColor, float4 pointPos, float4 pointRad, 
     float attenuation = 1.0f - temp;
     outColor *= (attenuation * attenuation);
     
-    float3 viewDir = normalize(cam)
-    //Specular code: "I fear no man, but that thing... it scares me"
-//VIEWDIR = NORMALIZE(CAMWORLDPOS– SURFACEPOS) 
-//HALFVECTOR = NORMALIZE((-LIGHTDIR ) + VIEWDIR) 
-//INTENSITY = MAX( CLAMP( DOT( NORMAL, NORMALIZE(HALFVECTOR) ))SPECULARPOWER , 0 )
-//RESULT = LIGHTCOLOR * SPECULARINTENSITY * INTENSITY 
-    return outColor;
+    float3 viewDir = normalize(cameraPos - surfacePosition);
+    float3 halfVector = normalize((normalize(-lightDir)) + normalize(viewDir));
+    
+    //specularpower and specular intensity using placeholder values.
+    float intensity = max(pow(saturate(dot(surfaceNormal, normalize(halfVector))), specularPower), 0);
+    float4 specular = pointColor * specularIntensity * intensity;
+    return outColor + specular;
 }
 
 //Spotlight formula from slides
@@ -100,7 +111,7 @@ float4 calculatePointLight(float4 pointColor, float4 pointPos, float4 pointRad, 
 //It's a surprise tool we'll need later
 //ATTENUATION = 1.0 – CLAMP( ( INNERCONERATIO - SURFACERATIO ) / ( INNERCONERATIO – OUTERCONERATIO ) ) 
 
-float4 calculateSpotLight(float4 spotColor, float4 spotPos, float4 coneDir, float4 coneRatio, float3 surfaceNormal, float3 surfacePosition)
+float3 calculateSpotLight(float4 spotColor, float4 spotPos, float4 coneDir, float4 coneRatio, float3 surfaceNormal, float3 surfacePosition, float3 cameraPos, float specularPower, float specularIntensity)
 {
     //points towards the light
     float3 lightDir = normalize(spotPos.xyz - surfacePosition);
@@ -110,11 +121,16 @@ float4 calculateSpotLight(float4 spotColor, float4 spotPos, float4 coneDir, floa
     float lightRatio = saturate(dot(lightDir, normalize(surfaceNormal)));
     //mult spot factor
     float4 outColor = lightRatio * spotColor;
-    //coneRatio. y is inner cone, coneRatio.x is outer.
+    //coneRatio. y is inner cone, coneRatio.x is outer. 2.0 is hardcoded radius for spotlight
     float attenuation1 = 1.0f - length(spotPos.xyz - surfacePosition) / 2.0f;
     float attenuation2 = 1.0f - saturate((coneRatio.y - surfaceRatio) / (coneRatio.y - coneRatio.x));
     outColor *= (attenuation1 * attenuation2);
-    return outColor;
+    
+    float3 viewDir = normalize(cameraPos - surfacePosition);
+    float3 halfVector = normalize((-lightDir) + viewDir);
+    float intensity = max(pow(saturate(dot(surfaceNormal, normalize(halfVector))), specularPower), 0);
+    float3 specular = spotColor * specularIntensity * intensity;
+    return outColor.xyz + specular;
 }
 
 float4 calculateAmbLight(float4 alColor)
@@ -137,15 +153,17 @@ float4 main(VS_OUT input) : SV_TARGET
     float4 coneDir = _conedir;
     float4 coneRatio = _coneratio;
     float4 cameraPos = input.camerapos;
+    float specularPower = 2.0f;
+    float specularIntensity = 0.4f;
     
     //Get the base color from the texture file
 	baseColor = baseTexture.Sample(linfilter, input.tex);
     
-    float4 dlOut = calculateDirLight(dlCol, dlDir, input.norm);
-    float4 pointOut = calculatePointLight(pointColor, pointPos, pointRad, input.norm, input.worldpos);
-    float4 ambOut = calculateAmbLight(alColor);
-    float4 spotOut = calculateSpotLight(spotColor, spotPos, coneDir, coneRatio, input.norm, input.worldpos);
-    float4 outputs[4] = { dlOut, pointOut, ambOut,  spotOut};
+    float3 dlOut = calculateDirLight(dlCol, dlDir, input.norm, input.worldpos, cameraPos.xyz, specularPower, specularIntensity);
+    float3 pointOut = calculatePointLight(pointColor, pointPos, pointRad, input.norm, input.worldpos, cameraPos.xyz, specularPower, specularIntensity);
+    float3 ambOut = calculateAmbLight(alColor);
+    float3 spotOut = calculateSpotLight(spotColor, spotPos, coneDir, coneRatio, input.norm, input.worldpos, cameraPos.xyz, specularPower, specularIntensity);
+    float3 outputs[4] = { dlOut, pointOut, ambOut,  spotOut};
     
     //This loop should "correct" black lights to have no impact on the overall color of the output.
     for (int i = 0; i < 3; i++)
