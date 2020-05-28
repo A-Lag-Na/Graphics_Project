@@ -118,6 +118,7 @@ void Camera::Render(XMMATRIX& viewMatrix, bool& lightSwitch, Light& dirLight, Po
 {
 	CameraMove(m_viewMatrix);
 	ControlLights(lightSwitch, dirLight, pointLight, spotLight);
+	viewMatrix = m_viewMatrix;
 }
 
 void Camera::CameraMove(XMMATRIX& myCamera)

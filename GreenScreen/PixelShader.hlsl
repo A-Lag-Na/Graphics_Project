@@ -91,13 +91,16 @@ float3 calculatePointLight(float4 pointColor, float4 pointPos, float4 pointRad, 
     float temp = length(pointPos.xyz - surfacePosition) / pointRad.x; //saturate
     float attenuation = 1.0f - temp;
     outColor *= (attenuation * attenuation);
+   
     
-    float3 viewDir = normalize(cameraPos - surfacePosition);
-    float3 halfVector = normalize((normalize(-lightDir)) + normalize(viewDir));
+    // alternate method (thanks Clark and Dan)
+    //As specular power (specular hardness) increases, highlights become narrower, specular intensity is a brightness multiplier.
+    float3 vToCamera    = normalize(cameraPos - surfacePosition);
+    float3 vReflect     = reflect(-lightDir, surfaceNormal);
+    float fSpecDot      = saturate(dot(vToCamera, vReflect));
+    fSpecDot            = pow(fSpecDot, specularPower);
+    float4 specular     = float4(1.0f, 1.0f, 1.0f, 1.0f) * specularIntensity * fSpecDot;
     
-    //specularpower and specular intensity using placeholder values.
-    float intensity = max(pow(saturate(dot(surfaceNormal, normalize(halfVector))), specularPower), 0);
-    float4 specular = pointColor * specularIntensity * intensity;
     return outColor + specular;
 }
 
@@ -153,8 +156,8 @@ float4 main(VS_OUT input) : SV_TARGET
     float4 coneDir = _conedir;
     float4 coneRatio = _coneratio;
     float4 cameraPos = input.camerapos;
-    float specularPower = 2.0f;
-    float specularIntensity = 0.4f;
+    float specularPower = 32.0f;
+    float specularIntensity = 2.0f;
     
     //Get the base color from the texture file
 	baseColor = baseTexture.Sample(linfilter, input.tex);
