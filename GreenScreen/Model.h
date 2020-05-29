@@ -5,6 +5,10 @@
 
 #include "PixelShader.h"
 #include "VertexShader.h"
+#include "TransparencyPixelShader.h"
+#include "TransparencyVertexShader.h"
+#include "ParticleVertexShader.h"
+#include "ParticlePixelShader.h"
 #include "islandmodel.h"
 #include"cubeobj.h"
 //Using this to get access to SimpleMesh, and keep things clean/simple
@@ -17,7 +21,6 @@ class Model
 public:
 
 
-
 	Model();
 	Model(const Model&);
 	~Model();
@@ -27,6 +30,7 @@ public:
 	bool LoadModel(char* filename);
 	void Shutdown();
 	void Render(ID3D11DeviceContext*, ID3D11VertexShader*, ID3D11PixelShader*, ID3D11InputLayout*, ID3D11RenderTargetView*, ID3D11ShaderResourceView*, ID3D11SamplerState*);
+	void RenderMultiple(ID3D11DeviceContext*, ID3D11VertexShader*, ID3D11PixelShader*, ID3D11InputLayout*, ID3D11RenderTargetView*, ID3D11ShaderResourceView*, ID3D11SamplerState*);
 
 	int GetIndexCount();
 
@@ -35,6 +39,7 @@ private:
 	bool InitializeBuffers(ID3D11Device* device);
 	void ShutdownBuffers();
 	void RenderBuffers(ID3D11DeviceContext*, ID3D11VertexShader*, ID3D11PixelShader*, ID3D11InputLayout*, ID3D11RenderTargetView*, ID3D11ShaderResourceView*, ID3D11SamplerState*);
+
 	
 
 private:

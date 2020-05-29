@@ -77,14 +77,12 @@ bool Model::Initialize(ID3D11Device* device, char filename[256], float scalingFa
 
 	m_scale = scalingFactor;
 
-	// Load in the sky dome model.
 	result = LoadModel(filename);
 	if (!result)
 	{
 		return false;
 	}
 
-	// Load the sky dome into a vertex and index buffer for rendering.
 	result = InitializeBuffers(device);
 	if (!result)
 	{
@@ -347,6 +345,7 @@ void Model::RenderBuffers(ID3D11DeviceContext* deviceContext, ID3D11VertexShader
 	deviceContext->VSSetShader(vertexShader, nullptr, 0);
 	deviceContext->PSSetShader(pixelShader, nullptr, 0);
 
+	
 	if (SRV != nullptr)
 	{
 		//This contains the texture being loaded in.
@@ -358,4 +357,35 @@ void Model::RenderBuffers(ID3D11DeviceContext* deviceContext, ID3D11VertexShader
 		deviceContext->PSSetSamplers(0, 1, &sampler);
 	}
 	deviceContext->DrawIndexed(m_indexCount, 0, 0);
+}
+
+void Model::RenderMultiple(ID3D11DeviceContext* deviceContext, ID3D11VertexShader* vertexShader, ID3D11PixelShader* pixelShader, ID3D11InputLayout* inputLayout, ID3D11RenderTargetView* view, ID3D11ShaderResourceView* SRV, ID3D11SamplerState* sampler)
+{
+	// Set vertex buffer stride and offset.
+	unsigned int stride = sizeof(SimpleVertex);
+	unsigned int offset = 0;
+
+	// setup the pipeline
+	deviceContext->IASetInputLayout(inputLayout);
+	// Set the vertex buffer to active in the input assembler so it can be rendered.
+	deviceContext->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
+	// Set the index buffer to active in the input assembler so it can be rendered.
+	deviceContext->IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
+	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	deviceContext->VSSetShader(vertexShader, nullptr, 0);
+	deviceContext->PSSetShader(pixelShader, nullptr, 0);
+
+
+	if (SRV != nullptr)
+	{
+		//This contains the texture being loaded in.
+		deviceContext->PSSetShaderResources(0, 1, &SRV);
+	}
+	if (sampler)
+	{
+		//The sampler reads from the SRV to get the texture data.
+		deviceContext->PSSetSamplers(0, 1, &sampler);
+	}
+	deviceContext->DrawIndexedInstanced(m_indexCount,3,0,0,0);
 }

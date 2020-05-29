@@ -37,6 +37,7 @@ const float SCREEN_NEAR = 0.1f;
 
 Camera* m_Camera = 0;
 Model* m_Model = 0;
+Model* m_Cube = 0;
 //Model* planeModel = 0;
 Model* islandModel = 0;
 Model* pointCube = 0;
@@ -61,8 +62,12 @@ buffers, and will need more specific names for them.*/
 Microsoft::WRL::ComPtr<ID3D11InputLayout>	vertexFormat;
 Microsoft::WRL::ComPtr<ID3D11VertexShader>	vertexShader;
 Microsoft::WRL::ComPtr<ID3D11VertexShader>	skyVertexShader;
+Microsoft::WRL::ComPtr<ID3D11VertexShader>  transparentVertexShader;
+Microsoft::WRL::ComPtr<ID3D11VertexShader>  particleVertexShader;
 Microsoft::WRL::ComPtr<ID3D11PixelShader>	pixelShader;
 Microsoft::WRL::ComPtr<ID3D11PixelShader>	skyPixelShader;
+Microsoft::WRL::ComPtr<ID3D11PixelShader>   transparentPixelShader;
+Microsoft::WRL::ComPtr<ID3D11PixelShader>   particlePixelShader;
 
 Microsoft::WRL::ComPtr<ID3D11Buffer>	vertexBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	indexBuffer;
@@ -74,6 +79,7 @@ Microsoft::WRL::ComPtr<ID3D11Buffer>	dirLightConstantBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	pointLightConstantBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	ambLightConstantBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	spotLightConstantBuffer;
+Microsoft::WRL::ComPtr<ID3D11Buffer>	transparentConstantBuffer;
 
 
 Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> corvetteSRV;
@@ -82,6 +88,9 @@ Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> sunsetSRV;
 
 Microsoft::WRL::ComPtr < ID3D11SamplerState> myLinearSampler;
 
+ID3D11BlendState* m_alphaEnableBlendingState = 0;
+ID3D11BlendState* m_alphaDisableBlendingState = 0;
+
 WVP constantBufferData;
 XMFLOAT4 camerapos;
 
@@ -89,7 +98,7 @@ Light dirLight;
 PointLight pointLight;
 Light ambLight;
 SpotLight spotLight;
-
+SimpleTransparent m_transparency;
 
 bool lightSwitch = false;
 
@@ -136,6 +145,39 @@ HRESULT createConstBuffer(T data, ID3D11Buffer** bufferAddress)
 	return myDevice->CreateBuffer(&desc, &srd, bufferAddress);
 }
 
+void TurnOnAlphaBlending()
+{
+	float blendFactor[4];
+
+
+	// Setup the blend factor.
+	blendFactor[0] = 0.0f;
+	blendFactor[1] = 0.0f;
+	blendFactor[2] = 0.0f;
+	blendFactor[3] = 0.0f;
+
+	// Turn on the alpha blending.
+	myContext->OMSetBlendState(m_alphaEnableBlendingState, blendFactor, 0xffffffff);
+
+	return;
+}
+
+void TurnOffAlphaBlending()
+{
+	float blendFactor[4];
+
+
+	// Setup the blend factor.
+	blendFactor[0] = 0.0f;
+	blendFactor[1] = 0.0f;
+	blendFactor[2] = 0.0f;
+	blendFactor[3] = 0.0f;
+
+	// Turn off the alpha blending.
+	myContext->OMSetBlendState(m_alphaDisableBlendingState, blendFactor, 0xffffffff);
+
+	return;
+}
 bool Initialize(int screenWidth, int screenHeight)
 {
 	bool result;
@@ -178,7 +220,35 @@ bool Initialize(int screenWidth, int screenHeight)
 	//Cameraposition constant buffer
 	hr = createConstBuffer<XMFLOAT4>(camerapos, cameraConstantBuffer.GetAddressOf());	
 
+	//Transparent  Constant Buffer
+	hr = createConstBuffer<SimpleTransparent>(m_transparency, transparentConstantBuffer.GetAddressOf());
+
 	// End of constant buffers
+	// Create an alpha enabled blend state description.
+	D3D11_BLEND_DESC blendStateDescription;
+
+	for (size_t i = 0; i < 8; i++)
+	{
+		
+		blendStateDescription.RenderTarget[i].BlendEnable = TRUE;
+		blendStateDescription.RenderTarget[i].SrcBlend = D3D11_BLEND_ONE;
+		blendStateDescription.RenderTarget[i].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+		blendStateDescription.RenderTarget[i].BlendOp = D3D11_BLEND_OP_ADD;
+		blendStateDescription.RenderTarget[i].SrcBlendAlpha = D3D11_BLEND_ONE;
+		blendStateDescription.RenderTarget[i].DestBlendAlpha = D3D11_BLEND_ZERO;
+		blendStateDescription.RenderTarget[i].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+		blendStateDescription.RenderTarget[i].RenderTargetWriteMask = 0x0f;
+
+		hr = myDevice->CreateBlendState(&blendStateDescription, &m_alphaEnableBlendingState);
+	}
+	
+	for (size_t i = 0; i < 8; i++)
+	{
+
+		blendStateDescription.RenderTarget[i].BlendEnable = FALSE;
+	}
+
+	hr = myDevice->CreateBlendState(&blendStateDescription, &m_alphaDisableBlendingState);
 
 	//Initalize Geometry Renderers here
 
@@ -197,9 +267,16 @@ bool Initialize(int screenWidth, int screenHeight)
 	{
 		return false;
 	}
+
+	m_Cube = new Model;
+	if (!m_Cube)
+	{
+		return false;
+	}
+
 	// Initialize the model object.
 	//For now, gotta pass in vertex and index count for each model rendered (.h or hardcoded)
-	result = m_Model->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), corvetteobj_data, corvetteobj_indicies, 3453, 8112, 40.f);
+	//result = m_Model->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), corvetteobj_data, corvetteobj_indicies, 3453, 8112, 40.f);
 
 	m_ModelLoader = new ModelLoading;
 	if (!m_ModelLoader)
@@ -222,8 +299,9 @@ bool Initialize(int screenWidth, int screenHeight)
 
 	// Initialize the model object.
 	//For now, gotta pass in vertex and index count for each model rendered (.h or hardcoded)
-	result = m_Model->Initialize( *myDevice.GetAddressOf(),"../corvetteModel.txt", 40.0f );
+	result = m_Model->Initialize( *myDevice.GetAddressOf(),"../corvetteModel.txt", 40.0f);
 	
+	result = m_Cube->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), cubeobj_data, cubeobj_indicies, 788, 1692, 100.f);
 	//Create and initialize plane model
 	//planeModel = new Model;
 	//result = planeModel->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), planeObj_data, planeObj_indicies, 873, 2256, 1.f);
@@ -262,6 +340,11 @@ void Shutdown()
 		m_Model = 0;
 	}
 
+	if (m_Cube)
+	{
+		delete m_Cube;
+		m_Cube = 0;
+	}
 
 	if (m_ModelLoader)
 	{
@@ -282,11 +365,13 @@ void Shutdown()
 		delete m_SkySphere;
 		m_SkySphere = nullptr;
 	}
+
 }
 
 bool Frame()
 {
 	bool result;
+	
 
 	Initialize(800, 800);
 
@@ -299,10 +384,16 @@ bool Frame()
 	// Create the vertex shader
 	HRESULT hr = myDevice->CreateVertexShader(VertexShader, sizeof(VertexShader), nullptr, vertexShader.GetAddressOf());
 	hr = myDevice->CreatePixelShader(PixelShader, sizeof(PixelShader), nullptr, pixelShader.GetAddressOf());
-
+	
 	// Create the pixel shader
 	hr = myDevice->CreateVertexShader(SkyboxVertexShader, sizeof(SkyboxVertexShader), nullptr, skyVertexShader.GetAddressOf());
 	hr = myDevice->CreatePixelShader(SkyboxPixelShader, sizeof(SkyboxPixelShader), nullptr, skyPixelShader.GetAddressOf());
+
+	hr = myDevice->CreateVertexShader(TransparencyVertexShader, sizeof(TransparencyVertexShader), nullptr, transparentVertexShader.GetAddressOf());
+	hr = myDevice->CreatePixelShader(TransparencyPixelShader, sizeof(TransparencyPixelShader), nullptr, transparentPixelShader.GetAddressOf());
+
+	hr = myDevice->CreateVertexShader(ParticleVertexShader, sizeof(ParticleVertexShader), nullptr, particleVertexShader.GetAddressOf());
+	hr = myDevice->CreatePixelShader(ParticlePixelShader, sizeof(ParticlePixelShader), nullptr, particlePixelShader.GetAddressOf());
 
 	// Define the input layout
 	D3D11_INPUT_ELEMENT_DESC layout[] =
@@ -311,6 +402,7 @@ bool Frame()
 		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
+
 	UINT numElements = ARRAYSIZE(layout);
 
 	// Create the input layout
@@ -359,8 +451,11 @@ bool Frame()
 	spotLight.coneDir = XMFLOAT4(1.f, -1.f, 0.f, 0.f);
 	//Inner > outer, narrows as ratio approaches 1.
 	spotLight.coneRatio = XMFLOAT4(0.8f, 0.95f, 0.f, 0.f);
-	//--------------------------------------------------------------------------	
 
+	//Transparent initialization
+	m_transparency.blendAmount = 0.7f;
+	//--------------------------------------------------------------------------	
+	
 	// Render the graphics scene.
 	result = Render();
 	if (!result)
@@ -471,7 +566,9 @@ bool Render()
 			//Update CameraPos buffer
 			con->UpdateSubresource(cameraConstantBuffer.Get(), 0, nullptr, &camerapos, 0, 0);
 			con->VSSetConstantBuffers(1, 1, cameraConstantBuffer.GetAddressOf());
-			//------------------------------
+			
+			//con->UpdateSubresource(transparentConstantBuffer.Get(), 0, nullptr, &m_transparency, 0, 0);
+			//con->PSSetConstantBuffers(1, 1, transparentConstantBuffer.GetAddressOf());
 
 			//clearWVP clears and updates WVP buffers. Render renders models.
 			//--------------------------------------------------
@@ -485,6 +582,11 @@ bool Render()
 
 			clearWVP(con, viewMatrix, projectionMatrix);
 			m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
+
+			TurnOnAlphaBlending();
+			clearWVP(con, viewMatrix, projectionMatrix);
+			m_Cube->RenderMultiple(con, *transparentVertexShader.GetAddressOf(), *transparentPixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
+			TurnOffAlphaBlending();
 
 			clearWVP(con, viewMatrix, projectionMatrix);
 			m_Grid->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());

@@ -1,3 +1,4 @@
+
 #pragma pack_matrix(row_major)
 
 cbuffer WVP : register(b0)
@@ -14,7 +15,7 @@ struct VS_IN
 struct VS_OUT
 {
     float4 pos : SV_POSITION;
-    float3 tex : TEXCOORD;
+    float2 tex : TEXCOORD;
 };
 
 VS_OUT main(VS_IN input)
@@ -27,7 +28,8 @@ VS_OUT main(VS_IN input)
     output.pos = mul(output.pos, v);
     output.pos = mul(output.pos, p);
     
-    output.tex = input.pos;
-    
+    // Store the texture coordinates for the pixel shader.
+    output.tex = input.tex;
+
     return output;
 }

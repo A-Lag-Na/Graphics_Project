@@ -66,3 +66,8 @@ struct WVP
 {
     XMMATRIX w, v, p;
 };
+
+struct SimpleTransparent
+{
+    float blendAmount;
+};
