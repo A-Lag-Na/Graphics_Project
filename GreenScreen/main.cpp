@@ -46,6 +46,7 @@ Model* spotCube = 0;
 Grid* m_Grid = 0;
 SkySphere* m_SkySphere = 0;
 ModelLoading* m_ModelLoader = 0;
+
 GWindow win;
 GEventReceiver msgs;
 GDirectX11Surface d3d11;
@@ -316,7 +317,7 @@ bool Initialize(int screenWidth, int screenHeight)
 
 	//Cube for showing the position of pointlight.
 	spotCube = new Model;
-	result = pointCube->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), cubeobj_data, cubeobj_indicies, 788, 1692, 1000.f);
+	result = spotCube->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), cubeobj_data, cubeobj_indicies, 788, 1692, 1000.f);
 
 	//End geometry renderers.
 
@@ -331,7 +332,6 @@ void Shutdown()
 		delete m_Camera;
 		m_Camera = 0;
 	}
-
 	// Release the model object.
 	if (m_Model)
 	{
@@ -344,6 +344,21 @@ void Shutdown()
 	{
 		delete m_Cube;
 		m_Cube = 0;
+	}
+	if (islandModel)
+	{
+		delete islandModel;
+		islandModel = 0;
+	}
+	if (pointCube)
+	{
+		delete  pointCube;
+		pointCube = 0;
+	}
+	if (spotCube)
+	{
+		delete spotCube;
+		spotCube = 0;
 	}
 
 	if (m_ModelLoader)
@@ -364,6 +379,17 @@ void Shutdown()
 		m_SkySphere->Shutdown();
 		delete m_SkySphere;
 		m_SkySphere = nullptr;
+	}
+
+	if (m_alphaEnableBlendingState)
+	{
+		delete m_alphaEnableBlendingState;
+		m_alphaEnableBlendingState = nullptr;
+	}
+	if (m_alphaDisableBlendingState)
+	{
+		delete m_alphaDisableBlendingState;
+		m_alphaDisableBlendingState = nullptr;
 	}
 
 }
