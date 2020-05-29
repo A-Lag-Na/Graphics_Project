@@ -27,10 +27,8 @@ struct SimpleIndex
 };
 struct Light
 {
-    //4th digit is unused. Needs to be a multiple of 16 bytes for constant buffer reasons.
     XMFLOAT4 vLightColor;
-
-    //Direction variable holds position for point light instead of direction, and is unused in ambient light.
+    //Direction variable holds position for point light, spot light instead of direction, and is unused in ambient light.
     XMFLOAT4 vLightDir;
 };
 

@@ -114,10 +114,11 @@ bool Camera::Initialize(int screenWidth, int screenHeight , float SCREEN_NEAR, f
 	return true;
 }
 
-void Camera::Render(XMMATRIX& viewMatrix, bool& lightSwitch, Light& dirLight, PointLight& pointLight)
+void Camera::Render(XMMATRIX& viewMatrix, bool& lightSwitch, Light& dirLight, PointLight& pointLight, SpotLight& spotLight)
 {
 	CameraMove(m_viewMatrix);
-	ControlLights(lightSwitch, dirLight, pointLight);
+	ControlLights(lightSwitch, dirLight, pointLight, spotLight);
+	viewMatrix = m_viewMatrix;
 }
 
 void Camera::CameraMove(XMMATRIX& myCamera)
@@ -193,11 +194,19 @@ void Camera::CameraMove(XMMATRIX& myCamera)
 	w = nullptr;
 }
 
-void Camera::ControlLights(bool& lightSwitch, Light& dirLight, PointLight& pointLight)
+void Camera::ControlLights(bool& lightSwitch, Light& dirLight, PointLight& pointLight, SpotLight& spotLight)
 {
 
-	//R, dir light on/off
-	lightSwitch = GetAsyncKeyState(0x52);
+	//R, dir light off
+	if (GetAsyncKeyState(0x52))
+	{
+		dirLight.vLightColor = XMFLOAT4(0.f,0.f,0.f,0.2f);
+	}
+	//4, dir light on
+	if (GetAsyncKeyState(0x34))
+	{
+		dirLight.vLightColor = XMFLOAT4(0.f, 0.f, 1.f, 0.2f);
+	}
 	//T, change directional light direction
 	if (GetAsyncKeyState(0x54))
 	{
@@ -213,6 +222,17 @@ void Camera::ControlLights(bool& lightSwitch, Light& dirLight, PointLight& point
 	{
 		pointLight.light.vLightColor = XMFLOAT4(1.f, 0.f, 0.f, 0.f);
 	}
+	//C, disable spot light
+	if (GetAsyncKeyState(0x56))
+	{
+		spotLight.light.vLightColor = XMFLOAT4(0.f, 0.f, 0.f, 0.0f);
+	}
+	//V, enable spot light
+	if (GetAsyncKeyState(0x43))
+	{
+		spotLight.light.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
+	}
+
 
 	//Arrow keys to move point light
 	//Left arrow, -X direction
@@ -244,6 +264,68 @@ void Camera::ControlLights(bool& lightSwitch, Light& dirLight, PointLight& point
 	if (GetAsyncKeyState(0x28))
 	{
 		pointLight.light.vLightDir.z -= 0.01f;
+	}
+
+	//Keys to adjust spot light
+	//numpad 4, -X direction
+	if (GetAsyncKeyState(0x64))
+	{
+		spotLight.coneDir.x -= 0.05f;
+	}
+	//numpad 6, +X direction
+	if (GetAsyncKeyState(0x66))
+	{
+		spotLight.coneDir.x += 0.05f;
+	}
+	//numpad 9, +Y direction
+	if (GetAsyncKeyState(0x69))
+	{
+		spotLight.coneDir.y += 0.05f;
+	}
+	//numpad 7, -Y direction
+	if (GetAsyncKeyState(0x67))
+	{
+		spotLight.coneDir.y -= 0.05f;
+	}
+	//numpad 8, +Z direction (away from camera)
+	if (GetAsyncKeyState(0x68))
+	{
+		spotLight.coneDir.z += 0.05f;
+	}
+	//numpad 5, -Z direction (towards camera)
+	if (GetAsyncKeyState(0x65))
+	{
+		spotLight.coneDir.z -= 0.05f;
+	}
+	//J, -X position
+	if (GetAsyncKeyState(0x4A))
+	{
+		spotLight.light.vLightDir.x -= 0.05f;
+	}
+	//L, +X position
+	if (GetAsyncKeyState(0x4C))
+	{
+		spotLight.light.vLightDir.x += 0.05f;
+	}
+	//O, +Y position
+	if (GetAsyncKeyState(0x55))
+	{
+		spotLight.light.vLightDir.y += 0.05f;
+	}
+	//U, -Y position
+	if (GetAsyncKeyState(0x4F))
+	{
+		spotLight.light.vLightDir.y -= 0.05f;
+	}
+	//I, +Z position (away from camera)
+	if (GetAsyncKeyState(0x49))
+	{
+		spotLight.light.vLightDir.z += 0.05f;
+	}
+	//K, -Z position (towards camera)
+	if (GetAsyncKeyState(0x4B))
+	{
+		spotLight.light.vLightDir.z -= 0.05f;
 	}
 
 }
