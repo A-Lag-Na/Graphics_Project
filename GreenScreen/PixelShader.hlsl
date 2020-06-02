@@ -134,12 +134,23 @@ float3 calculateSpotLight(float4 spotColor, float4 spotPos, float4 coneDir, floa
     float attenuation1 = 1.0f - length(spotPos.xyz - surfacePosition) / 2.0f;
     float attenuation2 = 1.0f - saturate((coneRatio.y - surfaceRatio) / (coneRatio.y - coneRatio.x));
     outColor *= (attenuation1 * attenuation2);
+    return outColor;
     
-    float3 viewDir = normalize(cameraPos - surfacePosition);
-    float3 halfVector = normalize((-lightDir) + viewDir);
-    float intensity = max(pow(saturate(dot(surfaceNormal, normalize(halfVector))), specularPower), 0);
-    float3 specular = spotColor * specularIntensity * intensity;
-    return outColor.xyz + specular;
+    // alternate method (thanks Clark and Dan)
+    //As specular power (specular hardness) increases, highlights become narrower, specular intensity is a brightness multiplier.
+    //if (outColor.x == zero.x && outColor.y == zero.y && outColor.z == zero.z)
+    //{
+    //    return outColor;
+    //}
+    //else
+    //{
+    //    float3 vToCamera = normalize(cameraPos - surfacePosition);
+    //    float3 vReflect = reflect(-lightDir, surfaceNormal);
+    //    float fSpecDot = saturate(dot(vToCamera, vReflect));
+    //    fSpecDot = pow(fSpecDot, specularPower);
+    //    float4 specular = float4(1.0f, 1.0f, 1.0f, 1.0f) * specularIntensity * fSpecDot;
+    //    return outColor + specular;
+    //}
 }
 
 float4 calculateAmbLight(float4 alColor)
