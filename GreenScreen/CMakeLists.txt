@@ -51,6 +51,7 @@ add_executable (GreenScreen
 	SkySphere.cpp
 	Particles.h
 	Particles.cpp
+	Planet.h
 	${VERTEX_SHADERS}
 	${PIXEL_SHADERS}
 )
