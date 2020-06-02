@@ -23,6 +23,7 @@ set(PIXEL_SHADERS
 	SkyboxPixelShader.hlsl
 	TransparencyPixelShader.hlsl
 	ParticlePixelShader.hlsl
+	ReflectiveShader.hlsl
 )
 
 # Add any new C/C++ source code here

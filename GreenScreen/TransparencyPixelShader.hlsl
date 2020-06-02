@@ -1,11 +1,9 @@
-
-
 Texture2D diffuse : register(t0);
 SamplerState samp : register(s0);
 
 cbuffer TransparentBuffer : register(b0)
 {
-    float blendAmount;
+    float4 blendAmount;
 };
 
 struct VS_OUT
@@ -22,7 +20,7 @@ float4 main(VS_OUT input) : SV_TARGET
     color = diffuse.Sample(samp, input.tex);
     
    // Set the alpha value of this pixel to the blending amount to create the alpha blending effect.
-    color.a = blendAmount;
+    color.a = blendAmount.x;
 
     return color;
 }

@@ -67,5 +67,5 @@ struct WVP
 
 struct SimpleTransparent
 {
-    float blendAmount;
+    XMFLOAT4 blendAmount;
 };

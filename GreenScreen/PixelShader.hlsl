@@ -95,13 +95,19 @@ float3 calculatePointLight(float4 pointColor, float4 pointPos, float4 pointRad, 
     
     // alternate method (thanks Clark and Dan)
     //As specular power (specular hardness) increases, highlights become narrower, specular intensity is a brightness multiplier.
-    float3 vToCamera    = normalize(cameraPos - surfacePosition);
-    float3 vReflect     = reflect(-lightDir, surfaceNormal);
-    float fSpecDot      = saturate(dot(vToCamera, vReflect));
-    fSpecDot            = pow(fSpecDot, specularPower);
-    float4 specular     = float4(1.0f, 1.0f, 1.0f, 1.0f) * specularIntensity * fSpecDot;
-    
-    return outColor + specular;
+    if (outColor.x == zero.x && outColor.y == zero.y && outColor.z == zero.z)
+    {
+        return outColor;
+    }
+    else
+    {
+        float3 vToCamera = normalize(cameraPos - surfacePosition);
+        float3 vReflect = reflect(-lightDir, surfaceNormal);
+        float fSpecDot = saturate(dot(vToCamera, vReflect));
+        fSpecDot = pow(fSpecDot, specularPower);
+        float4 specular = float4(1.0f, 1.0f, 1.0f, 1.0f) * specularIntensity * fSpecDot;
+        return outColor + specular;
+    }    
 }
 
 //Spotlight formula from slides

@@ -36,7 +36,6 @@ VS_OUT main(VS_IN input)
     output.pos = mul(output.pos, p);
     output.tex = input.tex;
     output.norm = mul(float3(input.norm), (float3x3) w).xyz;
-    //Doing the math here cause XMVECTORs and XMMATRIXs are a pain
     output.camerapos = cameraPos;
 	return  output;
 }

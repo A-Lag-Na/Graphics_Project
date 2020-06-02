@@ -479,7 +479,7 @@ bool Frame()
 	spotLight.coneRatio = XMFLOAT4(0.8f, 0.95f, 0.f, 0.f);
 
 	//Transparent initialization
-	m_transparency.blendAmount = 0.7f;
+	m_transparency.blendAmount.x = 0.7f;
 	//--------------------------------------------------------------------------	
 	
 	// Render the graphics scene.
@@ -580,8 +580,8 @@ bool Render()
 			con->PSSetConstantBuffers(3, 1, spotLightConstantBuffer.GetAddressOf());
 
 			//Update CameraPos buffer
-			con->UpdateSubresource(cameraConstantBuffer.Get(), 0, nullptr, &camerapos, 0, 0);
-			con->VSSetConstantBuffers(1, 1, cameraConstantBuffer.GetAddressOf());
+			//con->UpdateSubresource(cameraConstantBuffer.Get(), 0, nullptr, &camerapos, 0, 0);
+			//con->VSSetConstantBuffers(1, 1, cameraConstantBuffer.GetAddressOf());
 			
 			//con->UpdateSubresource(transparentConstantBuffer.Get(), 0, nullptr, &m_transparency, 0, 0);
 			//con->PSSetConstantBuffers(1, 1, transparentConstantBuffer.GetAddressOf());
