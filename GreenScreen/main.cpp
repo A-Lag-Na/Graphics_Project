@@ -47,7 +47,9 @@ Model* m_Planet03 = 0;
 Model* islandModel = 0;
 Model* pointCube = 0;
 Model* spotCube = 0;
-Model* reflectCube = 0;
+
+//Let's get weird.
+SkySphere* reflectCube = 0;
 
 Grid* m_Grid = 0;
 SkySphere* m_SkySphere = 0;
@@ -354,8 +356,8 @@ bool Initialize(int screenWidth, int screenHeight)
 	result = spotCube->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), cubeobj_data, cubeobj_indicies, 788, 1692, 1000.f);
 
 	//Cube to reflect skybox
-	reflectCube = new Model;
-	result = reflectCube->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), cubeobj_data, cubeobj_indicies, 788, 1692, 1000.f);
+	reflectCube = new SkySphere;
+	result = reflectCube->Initialize(*myDevice.GetAddressOf(), "../skyCubeModel.txt");
 
 	//End geometry renderers.
 
@@ -534,7 +536,7 @@ bool Frame()
 	pointLight.radius = XMFLOAT4(1.2f, 0.f, 0.f, 0.f);
 
 	//AmbLight has no direction or position
-	//ambLight.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.01f);
+	ambLight.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.01f);
 
 	//Spotlight initialization
 	spotLight.light.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.1f);
@@ -557,10 +559,16 @@ bool Frame()
 	return true;
 }
 
-void clearWVP(ID3D11DeviceContext* con, XMMATRIX& viewMatrix, XMMATRIX& projectionMatrix, float xslide = 0, float yslide = 0, float zslide = 0)
+void clearWVP(ID3D11DeviceContext* con, XMMATRIX& viewMatrix, XMMATRIX& projectionMatrix, float xslide = 0, float yslide = 0, float zslide = 0, float xscale = 1, float yscale = 1, float zscale = 1)
 {
 	ZeroMemory(&constantBufferData, sizeof(WVP));
-	constantBufferData.w = XMMatrixTranslation(xslide, yslide, zslide);
+	constantBufferData.w = XMMatrixSet
+	(
+		xscale, 0, 0, 0,
+		0, yscale, 0, 0,
+		0, 0, zscale, 0,
+		xslide, yslide, zslide, 1
+	);
 
 	// added by clark
 	constantBufferData.v = XMMatrixInverse(NULL, viewMatrix);
@@ -671,8 +679,8 @@ bool Render()
 			con->PSSetConstantBuffers(3, 1, spotLightConstantBuffer.GetAddressOf());
 
 			//Update CameraPos buffer
-			//con->UpdateSubresource(cameraConstantBuffer.Get(), 0, nullptr, &camerapos, 0, 0);
-			//con->VSSetConstantBuffers(1, 1, cameraConstantBuffer.GetAddressOf());
+			con->UpdateSubresource(cameraConstantBuffer.Get(), 0, nullptr, &camerapos, 0, 0);
+			con->VSSetConstantBuffers(1, 1, cameraConstantBuffer.GetAddressOf());
 			
 			//con->UpdateSubresource(transparentConstantBuffer.Get(), 0, nullptr, &m_transparency, 0, 0);
 			//con->PSSetConstantBuffers(4, 1, transparentConstantBuffer.GetAddressOf());
@@ -687,11 +695,12 @@ bool Render()
 			clearWVP(con, viewMatrix, projectionMatrix, temp.x, temp.y, temp.z);
 			spotCube->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
 
-			clearWVP(con, viewMatrix, projectionMatrix, -0.5, 0.2, 0.f);
-			reflectCube->Render(con, *vertexShader.GetAddressOf(), *reflectivePixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
-
 			clearWVP(con, viewMatrix, projectionMatrix);
 			m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
+
+			clearWVP(con, viewMatrix, projectionMatrix, -0.5, 0.2, 0, 0.01f, 0.01f, 0.01f);
+			reflectCube->Render(con, *vertexShader.GetAddressOf(), *reflectivePixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, sunsetSRV.Get(), myLinearSampler.Get());
+
 
 			/*TurnOnAlphaBlending();
 			clearWVP(con, viewMatrix, projectionMatrix);

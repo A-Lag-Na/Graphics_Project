@@ -1,7 +1,30 @@
 Texture2D diffuse : register(t0);
 SamplerState samp : register(s0);
 
-cbuffer TransparentBuffer : register(b0)
+cbuffer dirLight : register(b0)
+{
+    float4 _dlcol;
+    float4 _dldir;
+}
+cbuffer pointLight : register(b1)
+{
+    float4 _pointcol;
+    float4 _pointpos;
+    float4 _pointrad;
+}
+cbuffer ambLight : register(b2)
+{
+    float4 _alcol;
+    float4 _aldir;
+}
+cbuffer spotLight : register(b3)
+{
+    float4 _slcol;
+    float4 _sldir;
+    float4 _conedir;
+    float4 _coneratio;
+}
+cbuffer TransparentBuffer : register(b4)
 {
     float4 blendAmount;
 };
