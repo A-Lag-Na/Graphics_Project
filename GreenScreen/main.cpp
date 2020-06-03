@@ -528,18 +528,18 @@ bool Frame()
 
 	//Lighting
 	dirLight.vLightDir = XMFLOAT4(0.3f, -1.f, 0.f, 0.f);
-	dirLight.vLightColor = XMFLOAT4(0.f, 0.f, 1.0f, 0.2f);
+	dirLight.vLightColor = XMFLOAT4(0.f, 0.5f, 0.0f, 0.2f);
 
 	//Not actually a direction here, but instead a position of the point light.
 	pointLight.light.vLightDir = XMFLOAT4(0.4f, -0.23f, 0.f, 0.f);
-	pointLight.light.vLightColor = XMFLOAT4(1.f, 0.f, 0.f, 1.f);
+	pointLight.light.vLightColor = XMFLOAT4(0.f, 0.f, 1.f, 1.f);
 	pointLight.radius = XMFLOAT4(1.2f, 0.f, 0.f, 0.f);
 
 	//AmbLight has no direction or position
-	ambLight.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.01f);
+	ambLight.vLightColor = XMFLOAT4(0.f, 0.f, 0.f, 0.00f);
 
 	//Spotlight initialization
-	spotLight.light.vLightColor = XMFLOAT4(1.f, 1.f, 1.f, 0.1f);
+	spotLight.light.vLightColor = XMFLOAT4(1.f, 0.5f, 0.f, 0.1f);
 	spotLight.light.vLightDir = XMFLOAT4(-0.2f, -0.2f, 0.f, 0.0f);
 	spotLight.coneDir = XMFLOAT4(1.f, -1.f, 0.f, 0.f);
 	//Inner > outer, narrows as ratio approaches 1.

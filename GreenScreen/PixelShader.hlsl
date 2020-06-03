@@ -155,7 +155,7 @@ float3 calculateSpotLight(float4 spotColor, float4 spotPos, float4 coneDir, floa
 
 float4 calculateAmbLight(float4 alColor)
 {
-    return alColor;
+    return unlight;
 }
 
 float4 main(VS_OUT input) : SV_TARGET

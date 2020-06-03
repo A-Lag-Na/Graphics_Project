@@ -1,5 +1,3 @@
-
-
 TextureCube diffuse : register(t0);
 SamplerState samp : register(s0);
 
@@ -16,7 +14,7 @@ struct VS_OUT
 
 float4 main(VS_OUT input) : SV_TARGET
 {
-    float3 vReflect = reflect(input.camerapos.xyz, input.norm);
+    float3 vReflect = reflect(input.camerapos.xyz, -input.norm);
     float4 vReflectColor = diffuse.Sample(samp, vReflect);
     return vReflectColor;
 }
