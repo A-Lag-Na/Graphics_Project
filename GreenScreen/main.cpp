@@ -42,6 +42,7 @@ Model* m_Cube = 0;
 Model* islandModel = 0;
 Model* pointCube = 0;
 Model* spotCube = 0;
+Model* reflectCube = 0;
 
 Grid* m_Grid = 0;
 SkySphere* m_SkySphere = 0;
@@ -69,6 +70,7 @@ Microsoft::WRL::ComPtr<ID3D11PixelShader>	pixelShader;
 Microsoft::WRL::ComPtr<ID3D11PixelShader>	skyPixelShader;
 Microsoft::WRL::ComPtr<ID3D11PixelShader>   transparentPixelShader;
 Microsoft::WRL::ComPtr<ID3D11PixelShader>   particlePixelShader;
+Microsoft::WRL::ComPtr<ID3D11PixelShader>   reflectivePixelShader;
 
 Microsoft::WRL::ComPtr<ID3D11Buffer>	vertexBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	indexBuffer;
@@ -319,6 +321,10 @@ bool Initialize(int screenWidth, int screenHeight)
 	spotCube = new Model;
 	result = spotCube->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), cubeobj_data, cubeobj_indicies, 788, 1692, 1000.f);
 
+	//Cube to reflect skybox
+	reflectCube = new Model;
+	result = reflectCube->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), cubeobj_data, cubeobj_indicies, 788, 1692, 1000.f);
+
 	//End geometry renderers.
 
 	return true;
@@ -359,6 +365,11 @@ void Shutdown()
 	{
 		delete spotCube;
 		spotCube = 0;
+	}
+	if (reflectCube)
+	{
+		delete reflectCube;
+		reflectCube = 0;
 	}
 
 	if (m_ModelLoader)
@@ -420,6 +431,8 @@ bool Frame()
 
 	hr = myDevice->CreateVertexShader(ParticleVertexShader, sizeof(ParticleVertexShader), nullptr, particleVertexShader.GetAddressOf());
 	hr = myDevice->CreatePixelShader(ParticlePixelShader, sizeof(ParticlePixelShader), nullptr, particlePixelShader.GetAddressOf());
+
+	hr = myDevice->CreatePixelShader(ReflectiveShader, sizeof(ReflectiveShader), nullptr, reflectivePixelShader.GetAddressOf());
 
 	// Define the input layout
 	D3D11_INPUT_ELEMENT_DESC layout[] =
@@ -584,7 +597,7 @@ bool Render()
 			//con->VSSetConstantBuffers(1, 1, cameraConstantBuffer.GetAddressOf());
 			
 			//con->UpdateSubresource(transparentConstantBuffer.Get(), 0, nullptr, &m_transparency, 0, 0);
-			//con->PSSetConstantBuffers(1, 1, transparentConstantBuffer.GetAddressOf());
+			//con->PSSetConstantBuffers(4, 1, transparentConstantBuffer.GetAddressOf());
 
 			//clearWVP clears and updates WVP buffers. Render renders models.
 			//--------------------------------------------------
@@ -594,7 +607,10 @@ bool Render()
 
 			temp = spotLight.light.vLightDir;
 			clearWVP(con, viewMatrix, projectionMatrix, temp.x, temp.y, temp.z);
-			pointCube->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
+			spotCube->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
+
+			clearWVP(con, viewMatrix, projectionMatrix, -0.5, 0.2, 0.f);
+			reflectCube->Render(con, *vertexShader.GetAddressOf(), *reflectivePixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
 
 			clearWVP(con, viewMatrix, projectionMatrix);
 			m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
