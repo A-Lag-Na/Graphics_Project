@@ -17,6 +17,8 @@ using namespace CORE;
 using namespace SYSTEM;
 using namespace GRAPHICS;
 
+#include <time.h>  
+
 //Added includes
 #include "Camera.h"
 #include "Model.h"
@@ -38,6 +40,9 @@ const float SCREEN_NEAR = 0.1f;
 Camera* m_Camera = 0;
 Model* m_Model = 0;
 Model* m_Cube = 0;
+Model* m_Planet01 = 0;
+Model* m_Planet02 = 0;
+Model* m_Planet03 = 0;
 //Model* planeModel = 0;
 Model* islandModel = 0;
 Model* pointCube = 0;
@@ -88,6 +93,12 @@ Microsoft::WRL::ComPtr<ID3D11Buffer>	transparentConstantBuffer;
 Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> corvetteSRV;
 Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> placeholderSRV;
 Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> sunsetSRV;
+Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> Planet01SRV;
+Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> Planet02SRV;
+Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> Planet03SRV;
+Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> Planet04SRV;
+Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> Planet05SRV;
+Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> Planet06SRV;
 
 Microsoft::WRL::ComPtr < ID3D11SamplerState> myLinearSampler;
 
@@ -228,7 +239,7 @@ bool Initialize(int screenWidth, int screenHeight)
 
 	// End of constant buffers
 	// Create an alpha enabled blend state description.
-	D3D11_BLEND_DESC blendStateDescription;
+	/*D3D11_BLEND_DESC blendStateDescription;
 
 	for (size_t i = 0; i < 8; i++)
 	{
@@ -243,15 +254,15 @@ bool Initialize(int screenWidth, int screenHeight)
 		blendStateDescription.RenderTarget[i].RenderTargetWriteMask = 0x0f;
 
 		hr = myDevice->CreateBlendState(&blendStateDescription, &m_alphaEnableBlendingState);
-	}
-	
-	for (size_t i = 0; i < 8; i++)
-	{
+	}*/
+	//
+	//for (size_t i = 0; i < 8; i++)
+	//{
 
-		blendStateDescription.RenderTarget[i].BlendEnable = FALSE;
-	}
+	//	blendStateDescription.RenderTarget[i].BlendEnable = FALSE;
+	//}
 
-	hr = myDevice->CreateBlendState(&blendStateDescription, &m_alphaDisableBlendingState);
+	//hr = myDevice->CreateBlendState(&blendStateDescription, &m_alphaDisableBlendingState);
 
 	//Initalize Geometry Renderers here
 
@@ -277,6 +288,22 @@ bool Initialize(int screenWidth, int screenHeight)
 		return false;
 	}
 
+	m_Planet01 = new Model;
+	if (!m_Planet01)
+	{
+		return false;
+	}
+	m_Planet02 = new Model;
+	if (!m_Planet01)
+	{
+		return false;
+	}
+	m_Planet03 = new Model;
+	if (!m_Planet03)
+	{
+		return false;
+	}
+
 	// Initialize the model object.
 	//For now, gotta pass in vertex and index count for each model rendered (.h or hardcoded)
 	//result = m_Model->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), corvetteobj_data, corvetteobj_indicies, 3453, 8112, 40.f);
@@ -286,6 +313,7 @@ bool Initialize(int screenWidth, int screenHeight)
 	{
 		return false;
 	}
+
 
 	//Skysphere stuff
 	//only run ModelLoader if you need new one
@@ -304,7 +332,11 @@ bool Initialize(int screenWidth, int screenHeight)
 	//For now, gotta pass in vertex and index count for each model rendered (.h or hardcoded)
 	result = m_Model->Initialize( *myDevice.GetAddressOf(),"../corvetteModel.txt", 40.0f);
 	
-	result = m_Cube->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), cubeobj_data, cubeobj_indicies, 788, 1692, 100.f);
+	result = m_Cube->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), Planet_data, Planet_indicies, 788, 1692, 100.f);
+
+	result = m_Planet01->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), Planet_data, Planet_indicies, 1681, 9360, 2500.f);
+	result = m_Planet02->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), Planet_data, Planet_indicies, 1681, 9360, 4500.f);
+	result = m_Planet03->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), Planet_data, Planet_indicies, 1681, 9360, 6500.f);
 	//Create and initialize plane model
 	//planeModel = new Model;
 	//result = planeModel->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), planeObj_data, planeObj_indicies, 873, 2256, 1.f);
@@ -350,6 +382,21 @@ void Shutdown()
 	{
 		delete m_Cube;
 		m_Cube = 0;
+	}
+	if (m_Planet01)
+	{
+		delete m_Planet01;
+		m_Planet01 = 0;
+	}
+	if (m_Planet02)
+	{
+		delete m_Planet02;
+		m_Planet02 = 0;
+	}
+	if (m_Planet03)
+	{
+		delete m_Planet03;
+		m_Planet03 = 0;
 	}
 	if (islandModel)
 	{
@@ -456,7 +503,12 @@ bool Frame()
 
 	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../vette_color.dds", nullptr, &corvetteSRV);
 	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../placeholderTexture.dds", nullptr, &placeholderSRV);
-
+	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../Planet01.dds", nullptr, &Planet01SRV);
+	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../Planet02.dds", nullptr, &Planet02SRV);
+	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../Planet03.dds", nullptr, &Planet03SRV);
+	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../Planet04.dds", nullptr, &Planet04SRV);
+	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../Planet05.dds", nullptr, &Planet05SRV);
+	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../Planet06.dds", nullptr, &Planet06SRV);
 	//sunsetSRV will show up black with default pixel shader.
 	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../SunsetSkybox.dds", nullptr, &sunsetSRV);
 
@@ -520,14 +572,40 @@ void clearWVP(ID3D11DeviceContext* con, XMMATRIX& viewMatrix, XMMATRIX& projecti
 	return;
 }
 
+void clearWVP(ID3D11DeviceContext* con, XMMATRIX& viewMatrix, XMMATRIX& projectionMatrix, XMMATRIX& worldMatrix)
+{
+	ZeroMemory(&constantBufferData, sizeof(WVP));
+	constantBufferData.w = worldMatrix;
+
+	// added by clark
+	constantBufferData.v = XMMatrixInverse(NULL, viewMatrix);
+	constantBufferData.p = projectionMatrix;
+
+	// change the constant buffer data here per draw / model
+	con->UpdateSubresource(WVPconstantBuffer.Get(), 0, nullptr, &constantBufferData, 0, 0);
+	con->VSSetConstantBuffers(0, 1, WVPconstantBuffer.GetAddressOf());
+	return;
+}
 
 bool Render()
 {
 	XMMATRIX viewMatrix, projectionMatrix, worldMatrix, tempView;
+	XMMATRIX matRot, matTrans, matFinal;
+	float orbitRadius = 1.0f;
+	float angle = 0;
+	static float lastTime = (float)clock();
 
 	// Render Loop here
 	while (+win.ProcessWindowEvents())
 	{
+		float currTime = (float)clock();
+		float timeDelta = (currTime - lastTime) * 0.0001f;
+
+		angle += (timeDelta / 2) * XM_PI;
+
+
+		lastTime = currTime;
+
 		// Generate the view matrix based on the camera's position.
 		
 		m_Camera->Render(viewMatrix, lightSwitch, dirLight, pointLight, spotLight);
@@ -615,10 +693,43 @@ bool Render()
 			clearWVP(con, viewMatrix, projectionMatrix);
 			m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
 
-			TurnOnAlphaBlending();
+			/*TurnOnAlphaBlending();
 			clearWVP(con, viewMatrix, projectionMatrix);
 			m_Cube->RenderMultiple(con, *transparentVertexShader.GetAddressOf(), *transparentPixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
-			TurnOffAlphaBlending();
+			TurnOffAlphaBlending();*/
+
+			// START PLANETS
+			matRot = XMMatrixRotationY(angle);
+			matTrans = XMMatrixTranslation(0.f, .20f, orbitRadius);
+			matFinal = matTrans * matRot;
+
+
+			clearWVP(con, viewMatrix, projectionMatrix, matFinal);
+			m_Planet01->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, Planet01SRV.Get(), myLinearSampler.Get());
+
+			matRot = XMMatrixRotationY(angle + 2.094f);
+			matTrans = XMMatrixTranslation(0.f, .20f, orbitRadius + 1.5f);
+			matFinal = matTrans * matRot;
+
+			clearWVP(con, viewMatrix, projectionMatrix, matFinal);
+			m_Planet02->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, Planet02SRV.Get(), myLinearSampler.Get());
+
+			matRot = XMMatrixRotationY(angle + 4.188f);
+			matTrans = XMMatrixTranslation(0.f, .20f, orbitRadius + .5f);
+			matFinal = matTrans * matRot;
+
+
+			clearWVP(con, viewMatrix, projectionMatrix, matFinal);
+			m_Planet03->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, Planet03SRV.Get(), myLinearSampler.Get());
+
+			matRot = XMMatrixRotationY(angle + 2.617f);
+			matTrans = XMMatrixTranslation(0.f, .20f, orbitRadius + 1.0f);
+			matFinal = matTrans * matRot;
+
+			clearWVP(con, viewMatrix, projectionMatrix, matFinal);
+			m_Planet02->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, Planet04SRV.Get(), myLinearSampler.Get());
+
+			//END PLANETS
 
 			clearWVP(con, viewMatrix, projectionMatrix);
 			m_Grid->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
