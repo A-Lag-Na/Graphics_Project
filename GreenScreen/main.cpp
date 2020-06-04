@@ -339,9 +339,6 @@ bool Initialize(int screenWidth, int screenHeight)
 	result = m_Planet01->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), Planet_data, Planet_indicies, 1681, 9360, 2500.f);
 	result = m_Planet02->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), Planet_data, Planet_indicies, 1681, 9360, 4500.f);
 	result = m_Planet03->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), Planet_data, Planet_indicies, 1681, 9360, 6500.f);
-	//Create and initialize plane model
-	//planeModel = new Model;
-	//result = planeModel->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), planeObj_data, planeObj_indicies, 873, 2256, 1.f);
 
 	//Create and initialize island model
 	islandModel = new Model;
@@ -355,9 +352,9 @@ bool Initialize(int screenWidth, int screenHeight)
 	spotCube = new Model;
 	result = spotCube->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), cubeobj_data, cubeobj_indicies, 788, 1692, 1000.f);
 
-	//Cube to reflect skybox
+	//Sphere to reflect skybox
 	reflectCube = new SkySphere;
-	result = reflectCube->Initialize(*myDevice.GetAddressOf(), "../skyCubeModel.txt");
+	result = reflectCube->Initialize(*myDevice.GetAddressOf(), "../skyModel.txt");
 
 	//End geometry renderers.
 
@@ -698,7 +695,7 @@ bool Render()
 			clearWVP(con, viewMatrix, projectionMatrix);
 			m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
 
-			clearWVP(con, viewMatrix, projectionMatrix, -0.5, 0.2, 0, 0.01f, 0.01f, 0.01f);
+			clearWVP(con, viewMatrix, projectionMatrix, -0.5, 0.2, 0, 0.1f, 0.1f, 0.1f);
 			reflectCube->Render(con, *vertexShader.GetAddressOf(), *reflectivePixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, sunsetSRV.Get(), myLinearSampler.Get());
 
 
