@@ -708,7 +708,7 @@ bool Render()
 			spotCube->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
 
 			clearWVP(con, viewMatrix, projectionMatrix);
-			m_Model->Render(con, *vertexShader.GetAddressOf(), *wavePixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
+			m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
 
 			clearWVP(con, viewMatrix, projectionMatrix, -0.5, 0.2, 0, 0.1f, 0.1f, 0.1f);
 			reflectCube->Render(con, *vertexShader.GetAddressOf(), *reflectivePixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, sunsetSRV.Get(), myLinearSampler.Get());
@@ -756,7 +756,7 @@ bool Render()
 			m_Grid->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
 
 			clearWVP(con, viewMatrix, projectionMatrix, 0.f, -0.3);
-			islandModel->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
+			islandModel->Render(con, *vertexShader.GetAddressOf(), *wavePixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
 			//-----------------------------
 
 			swap->Present(1, 0);

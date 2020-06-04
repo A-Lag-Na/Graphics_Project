@@ -13,8 +13,8 @@ struct VS_OUT
 
 float4 main(VS_OUT input) : SV_TARGET
 {
-//    float3 toCamera = normalize(input.camerapos.xyz - input.worldpos);
-//    float3 vReflect = reflect(-toCamera, input.norm);
-    float4 vReflectColor = diffuse.Sample(samp, input.norm);
+    float3 toCamera = normalize(input.camerapos.xyz - input.worldpos);
+    float3 vReflect = reflect(-toCamera, normalize(input.norm));
+    float4 vReflectColor = diffuse.Sample(samp, vReflect);
     return vReflectColor;
 }

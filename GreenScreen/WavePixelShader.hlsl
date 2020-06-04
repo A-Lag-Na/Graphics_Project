@@ -18,10 +18,11 @@ struct VS_OUT
 
 float4 main(VS_OUT input) : SV_TARGET
 {
-    float frequency;
-    float waveHeight;
-    waveHeight = 0.4f;
-    input.tex.x += sin(input.tex.y + deltaTime) * waveHeight;
-    float outColor = baseTexture.Sample(linfilter, input.tex);
+    //float frequency;
+    //float waveHeight;
+    //waveHeight = 0.4f;
+    input.tex += (deltaTime.x / 1000.f) * float2(0.1f, 0.1f);
+    //input.tex.x += 0.01f;
+    float4 outColor = baseTexture.Sample(linfilter, input.tex);
     return outColor;
 }
