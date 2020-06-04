@@ -170,6 +170,8 @@ bool SkySphere::InitializeBuffers(ID3D11Device* device)
 	for (i = 0; i < m_vertexCount; i++)
 	{
 		vertices[i].Pos = XMFLOAT3(m_model[i].Pos.x, m_model[i].Pos.y, m_model[i].Pos.z);
+		vertices[i].Normal = XMFLOAT3(m_model[i].Normal.x, m_model[i].Normal.y, m_model[i].Normal.z);
+		vertices[i].Tex = XMFLOAT2(m_model[i].Tex.x, m_model[i].Tex.y);
 		indices[i] = i;
 	}
 
