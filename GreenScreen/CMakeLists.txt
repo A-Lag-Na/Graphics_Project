@@ -24,6 +24,7 @@ set(PIXEL_SHADERS
 	TransparencyPixelShader.hlsl
 	ParticlePixelShader.hlsl
 	ReflectiveShader.hlsl
+	WavePixelShader.hlsl
 )
 
 # Add any new C/C++ source code here

@@ -1,7 +1,6 @@
 TextureCube diffuse : register(t0);
 SamplerState samp : register(s0);
 
-
 struct VS_OUT
 {
     float3 localpos : LOCAL_POSITION;
