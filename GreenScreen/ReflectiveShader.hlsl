@@ -14,12 +14,8 @@ struct VS_OUT
 
 float4 main(VS_OUT input) : SV_TARGET
 {
-    float3 vReflect = reflect(input.camerapos.xyz, -input.norm);
+    float3 toCamera = normalize(input.camerapos.xyz - input.worldpos);
+    float3 vReflect = reflect(-toCamera, input.norm);
     float4 vReflectColor = diffuse.Sample(samp, vReflect);
     return vReflectColor;
 }
-
-//Reflective material half-remembered snippet
-//float3 vReflect     = reflect(-lightDir, surfaceNormal); (might be +lightDir)
-//float3 vReflectColor = diffuse.Sample(samp, input.tex);
-//Probably best in its own pixelShader, can add this to output for lights interaction
