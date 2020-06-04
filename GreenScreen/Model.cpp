@@ -264,6 +264,10 @@ bool Model::InitializeBuffers(ID3D11Device* device)
 		vertices[i].Pos.x = m_model[i].Pos.x / m_scale;
 		vertices[i].Pos.y = m_model[i].Pos.y / m_scale;
 		vertices[i].Pos.z = m_model[i].Pos.z / m_scale;
+
+		vertices[i].Normal = XMFLOAT3(m_model[i].Normal.x, m_model[i].Normal.y, m_model[i].Normal.z);
+		vertices[i].Tex = XMFLOAT2(m_model[i].Tex.x, m_model[i].Tex.y);
+
 		indices[i] = i;
 	} 
 
