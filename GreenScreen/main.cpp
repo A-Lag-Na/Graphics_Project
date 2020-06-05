@@ -106,6 +106,8 @@ Microsoft::WRL::ComPtr < ID3D11SamplerState> myLinearSampler;
 
 ID3D11BlendState* m_alphaEnableBlendingState = 0;
 ID3D11BlendState* m_alphaDisableBlendingState = 0;
+ID3D11RasterizerState* m_BackFaceCulling = 0;
+ID3D11RasterizerState* m_FrontFaceCulling = 0;
 
 WVP constantBufferData;
 XMFLOAT4 camerapos;
@@ -161,16 +163,16 @@ HRESULT createConstBuffer(T data, ID3D11Buffer** bufferAddress)
 	return myDevice->CreateBuffer(&desc, &srd, bufferAddress);
 }
 
-void TurnOnAlphaBlending()
+void TurnOnAlphaBlending( float x, float y, float z, float w)
 {
 	float blendFactor[4];
 
 
 	// Setup the blend factor.
-	blendFactor[0] = 0.0f;
-	blendFactor[1] = 0.0f;
-	blendFactor[2] = 0.0f;
-	blendFactor[3] = 0.0f;
+	blendFactor[0] = x;
+	blendFactor[1] = y;
+	blendFactor[2] = z;
+	blendFactor[3] = w;
 
 	// Turn on the alpha blending.
 	myContext->OMSetBlendState(m_alphaEnableBlendingState, blendFactor, 0xffffffff);
@@ -194,6 +196,17 @@ void TurnOffAlphaBlending()
 
 	return;
 }
+
+void TurnOnFrontFaceCulling()
+{
+	myContext->RSSetState(m_FrontFaceCulling);
+}
+
+void TurnOnBackFaceCulling()
+{
+	myContext->RSSetState(m_BackFaceCulling);
+}
+
 bool Initialize(int screenWidth, int screenHeight)
 {
 	bool result;
@@ -241,7 +254,7 @@ bool Initialize(int screenWidth, int screenHeight)
 
 	// End of constant buffers
 	// Create an alpha enabled blend state description.
-	/*D3D11_BLEND_DESC blendStateDescription;
+	D3D11_BLEND_DESC blendStateDescription;
 
 	for (size_t i = 0; i < 8; i++)
 	{
@@ -254,18 +267,35 @@ bool Initialize(int screenWidth, int screenHeight)
 		blendStateDescription.RenderTarget[i].DestBlendAlpha = D3D11_BLEND_ZERO;
 		blendStateDescription.RenderTarget[i].BlendOpAlpha = D3D11_BLEND_OP_ADD;
 		blendStateDescription.RenderTarget[i].RenderTargetWriteMask = 0x0f;
+	}
 
-		hr = myDevice->CreateBlendState(&blendStateDescription, &m_alphaEnableBlendingState);
-	}*/
-	//
-	//for (size_t i = 0; i < 8; i++)
-	//{
+	hr = myDevice->CreateBlendState(&blendStateDescription, &m_alphaEnableBlendingState);
+	
+	for (size_t i = 0; i < 8; i++)
+	{
+		blendStateDescription.RenderTarget[i].BlendEnable = FALSE;
+	}
 
-	//	blendStateDescription.RenderTarget[i].BlendEnable = FALSE;
-	//}
+	hr = myDevice->CreateBlendState(&blendStateDescription, &m_alphaDisableBlendingState);
 
-	//hr = myDevice->CreateBlendState(&blendStateDescription, &m_alphaDisableBlendingState);
+	D3D11_RASTERIZER_DESC rasterizerDescription;
 
+	rasterizerDescription.FillMode = D3D11_FILL_SOLID;
+	rasterizerDescription.CullMode = D3D11_CULL_FRONT;
+	rasterizerDescription.FrontCounterClockwise = FALSE;
+	rasterizerDescription.DepthBias = 0;
+	rasterizerDescription.DepthBiasClamp = 0.0f;
+	rasterizerDescription.SlopeScaledDepthBias = 0.0f;
+	rasterizerDescription.DepthClipEnable = TRUE;
+	rasterizerDescription.ScissorEnable = FALSE;
+	rasterizerDescription.MultisampleEnable = FALSE;
+	rasterizerDescription.AntialiasedLineEnable = FALSE;
+
+	hr = myDevice->CreateRasterizerState(&rasterizerDescription, &m_FrontFaceCulling);
+
+	rasterizerDescription.CullMode = D3D11_CULL_BACK;
+
+	hr = myDevice->CreateRasterizerState(&rasterizerDescription, &m_BackFaceCulling);
 	//Initalize Geometry Renderers here
 
 	//Create Grid
@@ -334,7 +364,7 @@ bool Initialize(int screenWidth, int screenHeight)
 	//For now, gotta pass in vertex and index count for each model rendered (.h or hardcoded)
 	result = m_Model->Initialize( *myDevice.GetAddressOf(),"../corvetteModel.txt", 40.0f);
 	
-	result = m_Cube->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), Planet_data, Planet_indicies, 788, 1692, 100.f);
+	result = m_Cube->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), cubeobj_data, cubeobj_indicies, 788, 1692, 10.f);
 
 	result = m_Planet01->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), Planet_data, Planet_indicies, 1681, 9360, 2500.f);
 	result = m_Planet02->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), Planet_data, Planet_indicies, 1681, 9360, 4500.f);
@@ -543,7 +573,7 @@ bool Frame()
 	spotLight.coneRatio = XMFLOAT4(0.8f, 0.95f, 0.f, 0.f);
 
 	//Transparent initialization
-	m_transparency.blendAmount.x = 0.7f;
+	m_transparency.blendAmount.x = 0.1f;
 	//--------------------------------------------------------------------------	
 	
 	// Render the graphics scene.
@@ -679,8 +709,27 @@ bool Render()
 			con->UpdateSubresource(cameraConstantBuffer.Get(), 0, nullptr, &camerapos, 0, 0);
 			con->VSSetConstantBuffers(1, 1, cameraConstantBuffer.GetAddressOf());
 			
-			//con->UpdateSubresource(transparentConstantBuffer.Get(), 0, nullptr, &m_transparency, 0, 0);
-			//con->PSSetConstantBuffers(4, 1, transparentConstantBuffer.GetAddressOf());
+			if (GetAsyncKeyState(VK_HOME) & 0x1)
+			{
+				m_transparency.blendAmount.x += 0.1;
+
+				if (m_transparency.blendAmount.x >= 1)
+				{
+					m_transparency.blendAmount.x = 1;
+				}
+			}
+
+			if (GetAsyncKeyState(VK_END) & 0x1)
+			{
+				m_transparency.blendAmount.x -= 0.1;
+
+				if (m_transparency.blendAmount.x <= 0)
+				{
+					m_transparency.blendAmount.x = 0;
+				}
+			}
+			con->UpdateSubresource(transparentConstantBuffer.Get(), 0, nullptr, &m_transparency, 0, 0);
+			con->PSSetConstantBuffers(6, 1, transparentConstantBuffer.GetAddressOf());
 
 			//clearWVP clears and updates WVP buffers. Render renders models.
 			//--------------------------------------------------
@@ -699,10 +748,18 @@ bool Render()
 			reflectCube->Render(con, *vertexShader.GetAddressOf(), *reflectivePixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, sunsetSRV.Get(), myLinearSampler.Get());
 
 
-			/*TurnOnAlphaBlending();
-			clearWVP(con, viewMatrix, projectionMatrix);
-			m_Cube->RenderMultiple(con, *transparentVertexShader.GetAddressOf(), *transparentPixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
-			TurnOffAlphaBlending();*/
+			//TRANSPARENCY
+			TurnOnAlphaBlending(0.0f, 0.0f, 0.0f, 1.0f);
+
+			clearWVP(con, viewMatrix, projectionMatrix, 0.3, 0.3, 0.3);
+			TurnOnFrontFaceCulling();
+			m_Cube->Render(con, *vertexShader.GetAddressOf(), *transparentPixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
+			
+			clearWVP(con, viewMatrix, projectionMatrix, 0.3, 0.3, 0.3);
+			TurnOnBackFaceCulling();
+			m_Cube->Render(con, *vertexShader.GetAddressOf(), *transparentPixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
+
+			TurnOffAlphaBlending();
 
 			// START PLANETS
 			matRot = XMMatrixRotationY(angle);
