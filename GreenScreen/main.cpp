@@ -73,11 +73,13 @@ Microsoft::WRL::ComPtr<ID3D11VertexShader>	vertexShader;
 Microsoft::WRL::ComPtr<ID3D11VertexShader>	skyVertexShader;
 Microsoft::WRL::ComPtr<ID3D11VertexShader>  transparentVertexShader;
 Microsoft::WRL::ComPtr<ID3D11VertexShader>  particleVertexShader;
+
 Microsoft::WRL::ComPtr<ID3D11PixelShader>	pixelShader;
 Microsoft::WRL::ComPtr<ID3D11PixelShader>	skyPixelShader;
 Microsoft::WRL::ComPtr<ID3D11PixelShader>   transparentPixelShader;
 Microsoft::WRL::ComPtr<ID3D11PixelShader>   particlePixelShader;
 Microsoft::WRL::ComPtr<ID3D11PixelShader>   reflectivePixelShader;
+Microsoft::WRL::ComPtr<ID3D11PixelShader>   wavePixelShader;
 
 Microsoft::WRL::ComPtr<ID3D11Buffer>	vertexBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	indexBuffer;
@@ -90,6 +92,8 @@ Microsoft::WRL::ComPtr<ID3D11Buffer>	pointLightConstantBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	ambLightConstantBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	spotLightConstantBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	transparentConstantBuffer;
+Microsoft::WRL::ComPtr<ID3D11Buffer>	timeConstantBuffer;
+
 
 
 Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> corvetteSRV;
@@ -117,6 +121,8 @@ PointLight pointLight;
 Light ambLight;
 SpotLight spotLight;
 SimpleTransparent m_transparency;
+
+XMFLOAT4 timePassed;
 
 bool lightSwitch = false;
 
@@ -251,6 +257,9 @@ bool Initialize(int screenWidth, int screenHeight)
 
 	//Transparent  Constant Buffer
 	hr = createConstBuffer<SimpleTransparent>(m_transparency, transparentConstantBuffer.GetAddressOf());
+
+	//Time Constant Buffer
+	hr = createConstBuffer<XMFLOAT4>(timePassed, timeConstantBuffer.GetAddressOf());
 
 	// End of constant buffers
 	// Create an alpha enabled blend state description.
@@ -510,6 +519,8 @@ bool Frame()
 
 	hr = myDevice->CreatePixelShader(ReflectiveShader, sizeof(ReflectiveShader), nullptr, reflectivePixelShader.GetAddressOf());
 
+	hr = myDevice->CreatePixelShader(WavePixelShader, sizeof(WavePixelShader), nullptr, wavePixelShader.GetAddressOf());
+
 	// Define the input layout
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
@@ -635,6 +646,7 @@ bool Render()
 	{
 		float currTime = (float)clock();
 		float timeDelta = (currTime - lastTime) * 0.0001f;
+		timePassed.x = currTime;
 
 		angle += (timeDelta / 2) * XM_PI;
 
@@ -731,6 +743,9 @@ bool Render()
 			con->UpdateSubresource(transparentConstantBuffer.Get(), 0, nullptr, &m_transparency, 0, 0);
 			con->PSSetConstantBuffers(6, 1, transparentConstantBuffer.GetAddressOf());
 
+			con->UpdateSubresource(timeConstantBuffer.Get(), 0, nullptr, &timePassed, 0, 0);
+			con->PSSetConstantBuffers(5, 1, timeConstantBuffer.GetAddressOf());
+
 			//clearWVP clears and updates WVP buffers. Render renders models.
 			//--------------------------------------------------
 			XMFLOAT4 temp = pointLight.light.vLightDir;
@@ -798,7 +813,7 @@ bool Render()
 			m_Grid->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
 
 			clearWVP(con, viewMatrix, projectionMatrix, 0.f, -0.3);
-			islandModel->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
+			islandModel->Render(con, *vertexShader.GetAddressOf(), *wavePixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
 			//-----------------------------
 
 			swap->Present(1, 0);

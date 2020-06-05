@@ -10,6 +10,7 @@
 #include "ParticleVertexShader.h"
 #include "ParticlePixelShader.h"
 #include "ReflectiveShader.h"
+#include "WavePixelShader.h"
 
 #include "islandmodel.h"
 #include"cubeobj.h"
