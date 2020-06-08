@@ -16,6 +16,7 @@ set(VERTEX_SHADERS
 	SkyboxVertexShader.hlsl
 	TransparencyVertexShader.hlsl
 	ParticleVertexShader.hlsl
+	WaveVertexShader.hlsl
 )
 set(PIXEL_SHADERS 
 	# add pixel shader (.hlsl) files here
@@ -25,6 +26,7 @@ set(PIXEL_SHADERS
 	ParticlePixelShader.hlsl
 	ReflectiveShader.hlsl
 	WavePixelShader.hlsl
+	TesselatePixelShader.hlsl
 )
 
 # Add any new C/C++ source code here

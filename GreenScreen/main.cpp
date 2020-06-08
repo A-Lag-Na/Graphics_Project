@@ -73,6 +73,9 @@ Microsoft::WRL::ComPtr<ID3D11VertexShader>	vertexShader;
 Microsoft::WRL::ComPtr<ID3D11VertexShader>	skyVertexShader;
 Microsoft::WRL::ComPtr<ID3D11VertexShader>  transparentVertexShader;
 Microsoft::WRL::ComPtr<ID3D11VertexShader>  particleVertexShader;
+Microsoft::WRL::ComPtr<ID3D11VertexShader>  waveVertexShader;
+
+Microsoft::WRL::ComPtr<ID3D11VertexShader>   variableVertexShader;
 
 Microsoft::WRL::ComPtr<ID3D11PixelShader>	pixelShader;
 Microsoft::WRL::ComPtr<ID3D11PixelShader>	skyPixelShader;
@@ -80,6 +83,7 @@ Microsoft::WRL::ComPtr<ID3D11PixelShader>   transparentPixelShader;
 Microsoft::WRL::ComPtr<ID3D11PixelShader>   particlePixelShader;
 Microsoft::WRL::ComPtr<ID3D11PixelShader>   reflectivePixelShader;
 Microsoft::WRL::ComPtr<ID3D11PixelShader>   wavePixelShader;
+Microsoft::WRL::ComPtr<ID3D11PixelShader>   tesselatePixelShader;
 
 Microsoft::WRL::ComPtr<ID3D11Buffer>	vertexBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	indexBuffer;
@@ -521,6 +525,12 @@ bool Frame()
 
 	hr = myDevice->CreatePixelShader(WavePixelShader, sizeof(WavePixelShader), nullptr, wavePixelShader.GetAddressOf());
 
+	hr = myDevice->CreatePixelShader(TesselatePixelShader, sizeof(TesselatePixelShader), nullptr, tesselatePixelShader.GetAddressOf());
+
+	hr = myDevice->CreateVertexShader(WaveVertexShader, sizeof(WaveVertexShader), nullptr, waveVertexShader.GetAddressOf());
+
+	variableVertexShader = vertexShader;
+
 	// Define the input layout
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
@@ -757,11 +767,18 @@ bool Render()
 			spotCube->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
 
 			clearWVP(con, viewMatrix, projectionMatrix);
-			m_Model->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
+			m_Model->Render(con, *vertexShader.GetAddressOf(), *wavePixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
 
+			if (GetAsyncKeyState(0x4D) & 0x1)
+			{
+				variableVertexShader = waveVertexShader;
+			}
+			if(GetAsyncKeyState(0x4E) & 0x1)
+			{
+				variableVertexShader = vertexShader;
+			}
 			clearWVP(con, viewMatrix, projectionMatrix, -0.5, 0.2, 0, 0.1f, 0.1f, 0.1f);
-			reflectCube->Render(con, *vertexShader.GetAddressOf(), *reflectivePixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, sunsetSRV.Get(), myLinearSampler.Get());
-
+			reflectCube->Render(con, *variableVertexShader.GetAddressOf(), *reflectivePixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, sunsetSRV.Get(), myLinearSampler.Get());
 
 			//TRANSPARENCY
 			TurnOnAlphaBlending(0.0f, 0.0f, 0.0f, 1.0f);
@@ -813,7 +830,7 @@ bool Render()
 			m_Grid->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
 
 			clearWVP(con, viewMatrix, projectionMatrix, 0.f, -0.3);
-			islandModel->Render(con, *vertexShader.GetAddressOf(), *wavePixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
+			islandModel->Render(con, *vertexShader.GetAddressOf(), *tesselatePixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
 			//-----------------------------
 
 			swap->Present(1, 0);

@@ -11,6 +11,8 @@
 #include "ParticlePixelShader.h"
 #include "ReflectiveShader.h"
 #include "WavePixelShader.h"
+#include "TesselatePixelShader.h"
+#include "WaveVertexShader.h"
 
 #include "islandmodel.h"
 #include"cubeobj.h"
