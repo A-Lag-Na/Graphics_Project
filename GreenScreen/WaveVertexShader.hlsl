@@ -8,6 +8,10 @@ cbuffer camera : register(b1)
 {
     float4 cameraPos;
 }
+cbuffer time : register(b2)
+{
+    float4 deltaTime;
+}
 
 struct VS_IN
 {
@@ -27,15 +31,15 @@ struct VS_OUT
 
 VS_OUT main(VS_IN input)
 {
+    float waveHeight = 0.01f;
     VS_OUT output;
     output.localpos = input.pos.xyz;
     output.pos = float4(input.pos, 1.0f);
     output.pos = mul(output.pos, w);
-    output.pos.y += sin(output.pos.x * 1.0f) * 1.0f;
+    output.pos.y += sin(output.pos.x * deltaTime.x / 100.f) * waveHeight;
     output.worldpos = output.pos;
     output.pos = mul(output.pos, v);
     output.pos = mul(output.pos, p);
-    
     output.tex = input.tex;
     output.norm = mul(float3(input.norm), (float3x3) w).xyz;
     output.camerapos = cameraPos;

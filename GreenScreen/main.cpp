@@ -753,8 +753,13 @@ bool Render()
 			con->UpdateSubresource(transparentConstantBuffer.Get(), 0, nullptr, &m_transparency, 0, 0);
 			con->PSSetConstantBuffers(6, 1, transparentConstantBuffer.GetAddressOf());
 
+			//Update time buffer for wavePixelShader
 			con->UpdateSubresource(timeConstantBuffer.Get(), 0, nullptr, &timePassed, 0, 0);
 			con->PSSetConstantBuffers(5, 1, timeConstantBuffer.GetAddressOf());
+
+			//Update time buffer for waveVertexShader
+			con->UpdateSubresource(timeConstantBuffer.Get(), 0, nullptr, &timePassed, 0, 0);
+			con->VSSetConstantBuffers(2, 1, timeConstantBuffer.GetAddressOf());
 
 			//clearWVP clears and updates WVP buffers. Render renders models.
 			//--------------------------------------------------
