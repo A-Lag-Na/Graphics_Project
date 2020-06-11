@@ -415,6 +415,12 @@ void Shutdown()
 		delete m_Camera;
 		m_Camera = 0;
 	}
+	//Release Grid object.
+	if (m_Grid)
+	{
+		delete m_Grid;
+		m_Grid = nullptr;
+	}
 	// Release the model object.
 	if (m_Model)
 	{
@@ -470,13 +476,6 @@ void Shutdown()
 		m_ModelLoader = nullptr;
 	}
 
-	//Release Grid object.
-	if (m_Grid)
-	{
-		delete m_Grid;
-		m_Grid = nullptr;
-	}
-
 	if (m_SkySphere)
 	{
 		m_SkySphere->Shutdown();
@@ -484,16 +483,16 @@ void Shutdown()
 		m_SkySphere = nullptr;
 	}
 
-	if (m_alphaEnableBlendingState)
-	{
-		delete m_alphaEnableBlendingState;
-		m_alphaEnableBlendingState = nullptr;
-	}
-	if (m_alphaDisableBlendingState)
-	{
-		delete m_alphaDisableBlendingState;
-		m_alphaDisableBlendingState = nullptr;
-	}
+	//if (m_alphaEnableBlendingState)
+	//{
+	//	delete m_alphaEnableBlendingState;
+	//	m_alphaEnableBlendingState = nullptr;
+	//}
+	//if (m_alphaDisableBlendingState)
+	//{
+	//	delete m_alphaDisableBlendingState;
+	//	m_alphaDisableBlendingState = nullptr;
+	//}
 
 }
 
@@ -590,7 +589,7 @@ bool Frame()
 	ambLight.vLightColor = XMFLOAT4(0.f, 0.f, 0.f, 0.00f);
 
 	//Spotlight initialization
-	spotLight.light.vLightColor = XMFLOAT4(1.f, 0.5f, 0.f, 0.1f);
+	spotLight.light.vLightColor = XMFLOAT4(1.f, 0.2f, 0.f, 0.1f);
 	spotLight.light.vLightDir = XMFLOAT4(-0.2f, -0.2f, 0.f, 0.0f);
 	spotLight.coneDir = XMFLOAT4(1.f, -1.f, 0.f, 0.f);
 	//Inner > outer, narrows as ratio approaches 1.

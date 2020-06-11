@@ -1,9 +1,12 @@
 Camera Controls:
 WASD for horizontal, forwards/backwards movement.
 QE for vertical movement.
-Hold R to toggle directional light on/off.
+Press R/4 to toggle directional light off/on.
 T to move directional light towards +X.
 Arrow Keys and Right Control, Right Shift to move Point Light (Represented by cube).
+IJKL for spotlight X and Z axis postitional movement. UO for Y axis movement.
+8456 for spotlight X and Z axis directional movement. 79 for Y axis movement.
+MN to turn on/off reflective sphere's wave vertex shader.
 FG to disable/renable point light.
 
 Grid is hard-coded. Corvette is rendered from file using .obj loading.
