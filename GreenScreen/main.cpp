@@ -269,11 +269,14 @@ bool Initialize(int screenWidth, int screenHeight)
 	// Create an alpha enabled blend state description.
 	D3D11_BLEND_DESC blendStateDescription;
 
+	blendStateDescription.AlphaToCoverageEnable = FALSE;
+	blendStateDescription.IndependentBlendEnable = FALSE;
+
 	for (size_t i = 0; i < 8; i++)
 	{
 		
 		blendStateDescription.RenderTarget[i].BlendEnable = TRUE;
-		blendStateDescription.RenderTarget[i].SrcBlend = D3D11_BLEND_ONE;
+		blendStateDescription.RenderTarget[i].SrcBlend = D3D11_BLEND_SRC_ALPHA;
 		blendStateDescription.RenderTarget[i].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
 		blendStateDescription.RenderTarget[i].BlendOp = D3D11_BLEND_OP_ADD;
 		blendStateDescription.RenderTarget[i].SrcBlendAlpha = D3D11_BLEND_ONE;
