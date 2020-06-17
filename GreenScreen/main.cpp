@@ -98,8 +98,6 @@ Microsoft::WRL::ComPtr<ID3D11Buffer>	spotLightConstantBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	transparentConstantBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	timeConstantBuffer;
 
-
-
 Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> corvetteSRV;
 Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> placeholderSRV;
 Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> sunsetSRV;
@@ -111,6 +109,10 @@ Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> Planet05SRV;
 Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> Planet06SRV;
 
 Microsoft::WRL::ComPtr < ID3D11SamplerState> myLinearSampler;
+
+D3D11_VIEWPORT fullView;
+D3D11_VIEWPORT topView;
+D3D11_VIEWPORT bottomView;
 
 ID3D11BlendState* m_alphaEnableBlendingState = 0;
 ID3D11BlendState* m_alphaDisableBlendingState = 0;
@@ -215,6 +217,43 @@ void TurnOnFrontFaceCulling()
 void TurnOnBackFaceCulling()
 {
 	myContext->RSSetState(m_BackFaceCulling);
+}
+
+void SetupViewports(D3D11_VIEWPORT fullView, D3D11_VIEWPORT topView, D3D11_VIEWPORT bottomView)
+{
+	unsigned int widthTemp, heightTemp;
+	unsigned int nTopLeftX = 0;
+	unsigned int nTopLeftY = 0;
+	win.GetClientWidth(widthTemp);
+	win.GetClientHeight(heightTemp);
+	win.GetClientTopLeft(nTopLeftX, nTopLeftY);
+
+	//Setup fullView
+	fullView.Width = static_cast<float>(widthTemp);
+	fullView.Height = static_cast<float>(heightTemp);
+	fullView.MinDepth = 0.0f;
+	fullView.MaxDepth = 1.0f;
+	fullView.TopLeftX = static_cast<float>(nTopLeftX);
+	fullView.TopLeftY = static_cast<float>(nTopLeftY);
+
+	//Setup topView
+	topView.Width = static_cast<float>(widthTemp);
+	topView.Height = static_cast<float>(heightTemp) / 2.0f;
+	topView.MinDepth = 0.0f;
+	topView.MaxDepth = 1.0f;
+	topView.TopLeftX = static_cast<float>(nTopLeftX);
+	topView.TopLeftY = static_cast<float>(nTopLeftY);
+
+	//Setup bottomView
+	topView.Width = static_cast<float>(widthTemp);
+	topView.Height = static_cast<float>(heightTemp) / 2.0f;
+	topView.MinDepth = 0.0f;
+	topView.MaxDepth = 1.0f;
+	topView.TopLeftX = static_cast<float>(nTopLeftX);
+	topView.TopLeftY = static_cast<float>(nTopLeftY) - (static_cast<float>(heightTemp) / 2.0f);
+
+	//pImmediateContext->RSSetViewports(1, &viewport);
+	return;
 }
 
 bool Initialize(int screenWidth, int screenHeight)
@@ -403,6 +442,13 @@ bool Initialize(int screenWidth, int screenHeight)
 	result = reflectCube->Initialize(*myDevice.GetAddressOf(), "../skyModel.txt");
 
 	//End geometry renderers.
+
+	//Initialize viewport data
+
+	// Update the viewport transform to cover the client area.
+	
+	SetupViewports(fullView, topView, bottomView);
+
 
 	return true;
 }
@@ -656,6 +702,8 @@ bool Render()
 	// Render Loop here
 	while (+win.ProcessWindowEvents())
 	{
+		
+
 		float currTime = (float)clock();
 		float timeDelta = (currTime - lastTime) * 0.0001f;
 		timePassed.x = currTime;
@@ -692,6 +740,13 @@ bool Render()
 		
 			con->ClearRenderTargetView(view, clr);
 			con->ClearDepthStencilView(dsview, D3D11_CLEAR_DEPTH, 1, 0);
+
+			// draw entire scene
+			//con->RSSetViewports(1, &fullView);
+
+			//// split screen
+			//con->RSSetViewports(1, &viewportLEFT);
+			//con->RSSetViewports(1, &viewportRIGHT);
 
 			//Get camera position here
 			float cameraX, cameraY, cameraZ, cameraW;
