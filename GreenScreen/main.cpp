@@ -48,12 +48,9 @@ Model* m_Cube = 0;
 Model* m_Planet01 = 0;
 Model* m_Planet02 = 0;
 Model* m_Planet03 = 0;
-//Model* planeModel = 0;
 Model* islandModel = 0;
 Model* pointCube = 0;
 Model* spotCube = 0;
-
-//Let's get weird.
 SkySphere* reflectCube = 0;
 
 Grid* m_Grid = 0;
@@ -140,6 +137,7 @@ vector<pair<UINT, FLOAT>> draw_order;
 vector<pair<UINT, XMVECTOR>> draw_positions;
 
 bool lightSwitch = false;
+bool splitscreenSwitch = false;
 
 //---------------------------------------------
 
@@ -230,7 +228,7 @@ void TurnOnBackFaceCulling()
 	myContext->RSSetState(m_BackFaceCulling);
 }
 
-void SetupViewports(D3D11_VIEWPORT fullView, D3D11_VIEWPORT topView, D3D11_VIEWPORT bottomView)
+void SetupViewports(D3D11_VIEWPORT& fullView, D3D11_VIEWPORT& topView, D3D11_VIEWPORT& bottomView)
 {
 	unsigned int widthTemp, heightTemp;
 	unsigned int nTopLeftX = 0;
@@ -256,14 +254,12 @@ void SetupViewports(D3D11_VIEWPORT fullView, D3D11_VIEWPORT topView, D3D11_VIEWP
 	topView.TopLeftY = static_cast<float>(nTopLeftY);
 
 	//Setup bottomView
-	topView.Width = static_cast<float>(widthTemp);
-	topView.Height = static_cast<float>(heightTemp) / 2.0f;
-	topView.MinDepth = 0.0f;
-	topView.MaxDepth = 1.0f;
-	topView.TopLeftX = static_cast<float>(nTopLeftX);
-	topView.TopLeftY = static_cast<float>(nTopLeftY) - (static_cast<float>(heightTemp) / 2.0f);
-
-	//pImmediateContext->RSSetViewports(1, &viewport);
+	bottomView.Width = static_cast<float>(widthTemp);
+	bottomView.Height = static_cast<float>(heightTemp) / 2.0f;
+	bottomView.MinDepth = 0.0f;
+	bottomView.MaxDepth = 1.0f;
+	bottomView.TopLeftX = static_cast<float>(nTopLeftX);
+	bottomView.TopLeftY = static_cast<float>(nTopLeftY) + (static_cast<float>(heightTemp) / 2.0f);
 	return;
 }
 
@@ -454,8 +450,8 @@ bool Initialize(int screenWidth, int screenHeight)
 
 	//End geometry renderers.
 
-	cube00 = XMVectorSet(-.5f, 0.0f, 0.0f, 1.0f);
-	cube01 = XMVectorSet(-1.0f, -0.3f, 0.6f, 1.0f);
+	cube00 = XMVectorSet(-.5f, 0.2f, 1.0f, 1.0f);
+	cube01 = XMVectorSet(-1.0f, 0.2f, 1.0f, 1.0f);
 	cube02 = XMVectorSet(0.4f, 0.2f, 1.0f, 1.0f);
 
 	draw_positions.push_back(make_pair(0, cube00));
@@ -547,18 +543,6 @@ void Shutdown()
 		delete m_SkySphere;
 		m_SkySphere = nullptr;
 	}
-
-	//if (m_alphaEnableBlendingState)
-	//{
-	//	delete m_alphaEnableBlendingState;
-	//	m_alphaEnableBlendingState = nullptr;
-	//}
-	//if (m_alphaDisableBlendingState)
-	//{
-	//	delete m_alphaDisableBlendingState;
-	//	m_alphaDisableBlendingState = nullptr;
-	//}
-
 }
 
 bool Frame()
@@ -616,8 +600,6 @@ bool Frame()
 
 	//Texturing
 	//---------
-	// Load corvette Texture
-
 	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../vette_color.dds", nullptr, &corvetteSRV);
 	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../placeholderTexture.dds", nullptr, &placeholderSRV);
 	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../Planet01.dds", nullptr, &Planet01SRV);
@@ -714,125 +696,380 @@ FLOAT distance(XMVECTOR first, XMVECTOR second)
 {
 	XMVECTOR result = second - first;
 	return sqrtf(
-		pow(XMVectorGetX(result), 2)
+		(XMVectorGetX(result) * XMVectorGetX(result))
 		+
-		pow(XMVectorGetY(result), 2)
+		(XMVectorGetY(result) * XMVectorGetY(result))
 		+
-		pow(XMVectorGetZ(result), 2)
+		(XMVectorGetZ(result) * XMVectorGetZ(result))
 	);
+}
+
+void DrawEverything(ID3D11DeviceContext* con, ID3D11RenderTargetView* view, ID3D11DepthStencilView* dsview, float angle)
+{
+	// Generate the view matrix based on the camera's position.
+	XMMATRIX viewMatrix, projectionMatrix, worldMatrix, tempView;
+
+	m_Camera->Render(viewMatrix, lightSwitch, dirLight, pointLight, spotLight);
+
+	//Get the view matrix from the camera
+	m_Camera->GetViewMatrix(viewMatrix);
+	m_Camera->GetWorldMatrix(worldMatrix);
+	m_Camera->GetProjectionMatrix(projectionMatrix);
+
+	//Get camera position here
+	float cameraX, cameraY, cameraZ, cameraW;
+	cameraX = XMVectorGetX(viewMatrix.r[3]);
+	cameraY = XMVectorGetY(viewMatrix.r[3]);
+	cameraZ = XMVectorGetZ(viewMatrix.r[3]);
+	cameraW = XMVectorGetW(viewMatrix.r[3]);
+	camerapos = XMFLOAT4(cameraX, cameraY, cameraZ, cameraW);
+
+
+	//Set SkySphere's world matrix to use camera xyz
+	clearWVP(con, viewMatrix, projectionMatrix, cameraX, cameraY, cameraZ);
+
+	for (UINT i = 0; i < draw_positions.size(); i++)
+	{
+		draw_order.push_back(make_pair(i, distance(viewMatrix.r[3], draw_positions[i].second)));
+	}
+
+	auto compare = [](pair<UINT, FLOAT> a, pair<UINT, FLOAT> b)
+	{return a.second > b.second; };
+
+	sort(draw_order.begin(), draw_order.end(), compare);
+
+	//for (UINT i = 0; i < draw_order.size(); i++)
+	//{
+	//	cout << "Index at: " << draw_order[i].first << '\t' << "Distance: " << draw_order[i].second << '\n';
+	//}
+
+	//Replace the pixel shader here in this render call with the skysphere shader.
+	m_SkySphere->Render(con, *skyVertexShader.GetAddressOf(), *skyPixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, sunsetSRV.Get(), myLinearSampler.Get());
+
+	con->ClearDepthStencilView(dsview, D3D11_CLEAR_DEPTH, 1, 0);
+
+	//Update and set constant buffers (This could be done more efficently by setting multiple PSconstantbuffers at once).
+	//----------------------------------
+	clearWVP(con, viewMatrix, projectionMatrix);
+
+	//Update dirLight buffer
+	con->UpdateSubresource(dirLightConstantBuffer.Get(), 0, nullptr, &dirLight, 0, 0);
+	con->PSSetConstantBuffers(0, 1, dirLightConstantBuffer.GetAddressOf());
+
+	//Update pointLight buffer
+	con->UpdateSubresource(pointLightConstantBuffer.Get(), 0, nullptr, &pointLight, 0, 0);
+	con->PSSetConstantBuffers(1, 1, pointLightConstantBuffer.GetAddressOf());
+
+	//Update ambLight buffer
+	con->UpdateSubresource(ambLightConstantBuffer.Get(), 0, nullptr, &ambLight, 0, 0);
+	con->PSSetConstantBuffers(2, 1, ambLightConstantBuffer.GetAddressOf());
+
+	//Update Spotlight buffer
+	con->UpdateSubresource(spotLightConstantBuffer.Get(), 0, nullptr, &spotLight, 0, 0);
+	con->PSSetConstantBuffers(3, 1, spotLightConstantBuffer.GetAddressOf());
+
+	//Update CameraPos buffer
+	con->UpdateSubresource(cameraConstantBuffer.Get(), 0, nullptr, &camerapos, 0, 0);
+	con->VSSetConstantBuffers(1, 1, cameraConstantBuffer.GetAddressOf());
+
+	con->UpdateSubresource(transparentConstantBuffer.Get(), 0, nullptr, &m_transparency, 0, 0);
+	con->PSSetConstantBuffers(6, 1, transparentConstantBuffer.GetAddressOf());
+
+	//Update time buffer for wavePixelShader
+	con->UpdateSubresource(timeConstantBuffer.Get(), 0, nullptr, &timePassed, 0, 0);
+	con->PSSetConstantBuffers(5, 1, timeConstantBuffer.GetAddressOf());
+
+	//Update time buffer for waveVertexShader
+	con->UpdateSubresource(timeConstantBuffer.Get(), 0, nullptr, &timePassed, 0, 0);
+	con->VSSetConstantBuffers(2, 1, timeConstantBuffer.GetAddressOf());
+
+	//clearWVP clears and updates WVP buffers. Render renders models.
+	//--------------------------------------------------
+	XMFLOAT4 temp = pointLight.light.vLightDir;
+	clearWVP(con, viewMatrix, projectionMatrix, temp.x, temp.y, temp.z);
+	pointCube->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
+
+	temp = spotLight.light.vLightDir;
+	clearWVP(con, viewMatrix, projectionMatrix, temp.x, temp.y, temp.z);
+	spotCube->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
+
+	clearWVP(con, viewMatrix, projectionMatrix);
+	m_Model->Render(con, *vertexShader.GetAddressOf(), *wavePixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
+
+
+	clearWVP(con, viewMatrix, projectionMatrix, -0.5, 0.2, 0, 0.1f, 0.1f, 0.1f);
+	reflectCube->Render(con, *variableVertexShader.GetAddressOf(), *reflectivePixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, sunsetSRV.Get(), myLinearSampler.Get());
+
+	//Rotation stuff
+	float orbitRadius = 1.0f;
+	XMMATRIX matRot, matTrans, matFinal;
+	// START PLANETS
+	matRot = XMMatrixRotationY(angle);
+	matTrans = XMMatrixTranslation(0.f, .20f, orbitRadius);
+	matFinal = matTrans * matRot;
+
+
+	clearWVP(con, viewMatrix, projectionMatrix, matFinal);
+	m_Planet01->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, Planet01SRV.Get(), myLinearSampler.Get());
+
+	matRot = XMMatrixRotationY(angle + 2.094f);
+	matTrans = XMMatrixTranslation(0.f, .20f, orbitRadius + 1.5f);
+	matFinal = matTrans * matRot;
+
+	clearWVP(con, viewMatrix, projectionMatrix, matFinal);
+	m_Planet02->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, Planet02SRV.Get(), myLinearSampler.Get());
+
+	matRot = XMMatrixRotationY(angle + 4.188f);
+	matTrans = XMMatrixTranslation(0.f, .20f, orbitRadius + .5f);
+	matFinal = matTrans * matRot;
+
+
+	clearWVP(con, viewMatrix, projectionMatrix, matFinal);
+	m_Planet03->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, Planet03SRV.Get(), myLinearSampler.Get());
+
+	matRot = XMMatrixRotationY(angle + 2.617f);
+	matTrans = XMMatrixTranslation(0.f, .20f, orbitRadius + 1.0f);
+	matFinal = matTrans * matRot;
+
+	clearWVP(con, viewMatrix, projectionMatrix, matFinal);
+	m_Planet02->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, Planet04SRV.Get(), myLinearSampler.Get());
+
+	//END PLANETS
+
+	clearWVP(con, viewMatrix, projectionMatrix);
+	m_Grid->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
+
+	clearWVP(con, viewMatrix, projectionMatrix, 0.f, -0.3);
+	islandModel->Render(con, *vertexShader.GetAddressOf(), *tesselatePixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
+
+	//TRANSPARENCY
+	TurnOnAlphaBlending(0.0f, 0.0f, 0.0f, 1.0f);
+
+	for (UINT i = 0; i < draw_order.size(); i++)
+	{
+
+		clearWVP(con, viewMatrix, projectionMatrix,
+			XMVectorGetX(draw_positions[draw_order[i].first].second),
+			XMVectorGetY(draw_positions[draw_order[i].first].second),
+			XMVectorGetZ(draw_positions[draw_order[i].first].second));
+
+		TurnOnFrontFaceCulling();
+		m_Cube->Render(con, *vertexShader.GetAddressOf(), *transparentPixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
+
+
+		clearWVP(con, viewMatrix, projectionMatrix,
+			XMVectorGetX(draw_positions[draw_order[i].first].second),
+			XMVectorGetY(draw_positions[draw_order[i].first].second),
+			XMVectorGetZ(draw_positions[draw_order[i].first].second));
+
+		TurnOnBackFaceCulling();
+		m_Cube->Render(con, *vertexShader.GetAddressOf(), *transparentPixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
+
+	}
+	draw_order.clear();
+	TurnOffAlphaBlending();
+}
+void DrawEverythingFixedCamera(ID3D11DeviceContext* con, ID3D11RenderTargetView* view, ID3D11DepthStencilView* dsview, float angle, XMMATRIX viewMatrix)
+{
+	// Generate the view matrix based on the camera's position.
+	XMMATRIX projectionMatrix, worldMatrix, tempView;
+
+	m_Camera->Render(viewMatrix, lightSwitch, dirLight, pointLight, spotLight);
+
+	//Get the view matrix from the camera
+	m_Camera->GetWorldMatrix(worldMatrix);
+	//viewMatrix is passed in so no need to get...
+	m_Camera->GetProjectionMatrix(projectionMatrix);
+
+	//Get camera position here
+	float cameraX, cameraY, cameraZ, cameraW;
+	cameraX = XMVectorGetX(viewMatrix.r[3]);
+	cameraY = XMVectorGetY(viewMatrix.r[3]);
+	cameraZ = XMVectorGetZ(viewMatrix.r[3]);
+	cameraW = XMVectorGetW(viewMatrix.r[3]);
+	camerapos = XMFLOAT4(cameraX, cameraY, cameraZ, cameraW);
+
+
+	//Set SkySphere's world matrix to use camera xyz
+	clearWVP(con, viewMatrix, projectionMatrix, cameraX, cameraY, cameraZ);
+
+	for (UINT i = 0; i < draw_positions.size(); i++)
+	{
+		draw_order.push_back(make_pair(i, distance(viewMatrix.r[3], draw_positions[i].second)));
+	}
+
+	auto compare = [](pair<UINT, FLOAT> a, pair<UINT, FLOAT> b)
+	{return a.second > b.second; };
+
+	sort(draw_order.begin(), draw_order.end(), compare);
+
+	//for (UINT i = 0; i < draw_order.size(); i++)
+	//{
+	//	cout << "Index at: " << draw_order[i].first << '\t' << "Distance: " << draw_order[i].second << '\n';
+	//}
+
+	//Replace the pixel shader here in this render call with the skysphere shader.
+	m_SkySphere->Render(con, *skyVertexShader.GetAddressOf(), *skyPixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, sunsetSRV.Get(), myLinearSampler.Get());
+
+	con->ClearDepthStencilView(dsview, D3D11_CLEAR_DEPTH, 1, 0);
+
+	//Update and set constant buffers (This could be done more efficently by setting multiple PSconstantbuffers at once).
+	//----------------------------------
+	clearWVP(con, viewMatrix, projectionMatrix);
+
+	//Update dirLight buffer
+	con->UpdateSubresource(dirLightConstantBuffer.Get(), 0, nullptr, &dirLight, 0, 0);
+	con->PSSetConstantBuffers(0, 1, dirLightConstantBuffer.GetAddressOf());
+
+	//Update pointLight buffer
+	con->UpdateSubresource(pointLightConstantBuffer.Get(), 0, nullptr, &pointLight, 0, 0);
+	con->PSSetConstantBuffers(1, 1, pointLightConstantBuffer.GetAddressOf());
+
+	//Update ambLight buffer
+	con->UpdateSubresource(ambLightConstantBuffer.Get(), 0, nullptr, &ambLight, 0, 0);
+	con->PSSetConstantBuffers(2, 1, ambLightConstantBuffer.GetAddressOf());
+
+	//Update Spotlight buffer
+	con->UpdateSubresource(spotLightConstantBuffer.Get(), 0, nullptr, &spotLight, 0, 0);
+	con->PSSetConstantBuffers(3, 1, spotLightConstantBuffer.GetAddressOf());
+
+	//Update CameraPos buffer
+	con->UpdateSubresource(cameraConstantBuffer.Get(), 0, nullptr, &camerapos, 0, 0);
+	con->VSSetConstantBuffers(1, 1, cameraConstantBuffer.GetAddressOf());
+
+	con->UpdateSubresource(transparentConstantBuffer.Get(), 0, nullptr, &m_transparency, 0, 0);
+	con->PSSetConstantBuffers(6, 1, transparentConstantBuffer.GetAddressOf());
+
+	//Update time buffer for wavePixelShader
+	con->UpdateSubresource(timeConstantBuffer.Get(), 0, nullptr, &timePassed, 0, 0);
+	con->PSSetConstantBuffers(5, 1, timeConstantBuffer.GetAddressOf());
+
+	//Update time buffer for waveVertexShader
+	con->UpdateSubresource(timeConstantBuffer.Get(), 0, nullptr, &timePassed, 0, 0);
+	con->VSSetConstantBuffers(2, 1, timeConstantBuffer.GetAddressOf());
+
+	//clearWVP clears and updates WVP buffers. Render renders models.
+	//--------------------------------------------------
+	XMFLOAT4 temp = pointLight.light.vLightDir;
+	clearWVP(con, viewMatrix, projectionMatrix, temp.x, temp.y, temp.z);
+	pointCube->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
+
+	temp = spotLight.light.vLightDir;
+	clearWVP(con, viewMatrix, projectionMatrix, temp.x, temp.y, temp.z);
+	spotCube->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
+
+	clearWVP(con, viewMatrix, projectionMatrix);
+	m_Model->Render(con, *vertexShader.GetAddressOf(), *wavePixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
+
+
+	clearWVP(con, viewMatrix, projectionMatrix, -0.5, 0.2, 0, 0.1f, 0.1f, 0.1f);
+	reflectCube->Render(con, *variableVertexShader.GetAddressOf(), *reflectivePixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, sunsetSRV.Get(), myLinearSampler.Get());
+
+	//Rotation stuff
+	float orbitRadius = 1.0f;
+	XMMATRIX matRot, matTrans, matFinal;
+	// START PLANETS
+	matRot = XMMatrixRotationY(angle);
+	matTrans = XMMatrixTranslation(0.f, .20f, orbitRadius);
+	matFinal = matTrans * matRot;
+
+
+	clearWVP(con, viewMatrix, projectionMatrix, matFinal);
+	m_Planet01->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, Planet01SRV.Get(), myLinearSampler.Get());
+
+	matRot = XMMatrixRotationY(angle + 2.094f);
+	matTrans = XMMatrixTranslation(0.f, .20f, orbitRadius + 1.5f);
+	matFinal = matTrans * matRot;
+
+	clearWVP(con, viewMatrix, projectionMatrix, matFinal);
+	m_Planet02->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, Planet02SRV.Get(), myLinearSampler.Get());
+
+	matRot = XMMatrixRotationY(angle + 4.188f);
+	matTrans = XMMatrixTranslation(0.f, .20f, orbitRadius + .5f);
+	matFinal = matTrans * matRot;
+
+
+	clearWVP(con, viewMatrix, projectionMatrix, matFinal);
+	m_Planet03->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, Planet03SRV.Get(), myLinearSampler.Get());
+
+	matRot = XMMatrixRotationY(angle + 2.617f);
+	matTrans = XMMatrixTranslation(0.f, .20f, orbitRadius + 1.0f);
+	matFinal = matTrans * matRot;
+
+	clearWVP(con, viewMatrix, projectionMatrix, matFinal);
+	m_Planet02->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, Planet04SRV.Get(), myLinearSampler.Get());
+
+	//END PLANETS
+
+	clearWVP(con, viewMatrix, projectionMatrix);
+	m_Grid->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
+
+	clearWVP(con, viewMatrix, projectionMatrix, 0.f, -0.3);
+	islandModel->Render(con, *vertexShader.GetAddressOf(), *tesselatePixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
+
+	//TRANSPARENCY
+	TurnOnAlphaBlending(0.0f, 0.0f, 0.0f, 1.0f);
+
+	for (UINT i = 0; i < draw_order.size(); i++)
+	{
+
+		clearWVP(con, viewMatrix, projectionMatrix,
+			XMVectorGetX(draw_positions[draw_order[i].first].second),
+			XMVectorGetY(draw_positions[draw_order[i].first].second),
+			XMVectorGetZ(draw_positions[draw_order[i].first].second));
+
+		TurnOnFrontFaceCulling();
+		m_Cube->Render(con, *vertexShader.GetAddressOf(), *transparentPixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
+
+
+		clearWVP(con, viewMatrix, projectionMatrix,
+			XMVectorGetX(draw_positions[draw_order[i].first].second),
+			XMVectorGetY(draw_positions[draw_order[i].first].second),
+			XMVectorGetZ(draw_positions[draw_order[i].first].second));
+
+		TurnOnBackFaceCulling();
+		m_Cube->Render(con, *vertexShader.GetAddressOf(), *transparentPixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
+
+	}
+	draw_order.clear();
+	TurnOffAlphaBlending();
 }
 bool Render()
 {
-	XMMATRIX viewMatrix, projectionMatrix, worldMatrix, tempView;
-	XMMATRIX matRot, matTrans, matFinal;
-	float orbitRadius = 1.0f;
+	
 	float angle = 0;
 	static float lastTime = (float)clock();
 
 	// Render Loop here
 	while (+win.ProcessWindowEvents())
 	{
-		
-
 		float currTime = (float)clock();
 		float timeDelta = (currTime - lastTime) * 0.0001f;
 		timePassed.x = currTime;
 
 		angle += (timeDelta / 2) * XM_PI;
 
-
 		lastTime = currTime;
-
-		// Generate the view matrix based on the camera's position.
-		
-		m_Camera->Render(viewMatrix, lightSwitch, dirLight, pointLight, spotLight);
-
-		//Get the view matrix from the camera
-		m_Camera->GetViewMatrix(viewMatrix);
-		m_Camera->GetWorldMatrix(worldMatrix);
-		m_Camera->GetProjectionMatrix(projectionMatrix);
 
 		IDXGISwapChain* swap;
 		ID3D11DeviceContext* con;
 		ID3D11RenderTargetView* view;
 		ID3D11DepthStencilView* dsview;
 
-	
+
 		if (+d3d11.GetImmediateContext((void**)&con) &&
 			+d3d11.GetRenderTargetView((void**)&view) &&
 			+d3d11.GetSwapchain((void**)&swap))
 		{
-			
+
 			+d3d11.GetDepthStencilView((void**)&dsview);
 			ID3D11RenderTargetView* const views[] = { view };
 			con->OMSetRenderTargets(ARRAYSIZE(views), views, dsview);
 
-		
 			con->ClearRenderTargetView(view, clr);
 			con->ClearDepthStencilView(dsview, D3D11_CLEAR_DEPTH, 1, 0);
 
-			// draw entire scene
-			//con->RSSetViewports(1, &fullView);
-
-			//// split screen
-			//con->RSSetViewports(1, &viewportLEFT);
-			//con->RSSetViewports(1, &viewportRIGHT);
-
-			//Get camera position here
-			float cameraX, cameraY, cameraZ, cameraW;
-			cameraX = XMVectorGetX(viewMatrix.r[3]);
-			cameraY = XMVectorGetY(viewMatrix.r[3]);
-			cameraZ = XMVectorGetZ(viewMatrix.r[3]);
-			cameraW = XMVectorGetW(viewMatrix.r[3]);
-			camerapos = XMFLOAT4(cameraX, cameraY, cameraZ, cameraW);
-
-			//Set SkySphere's world matrix to use camera xyz
-			clearWVP(con, viewMatrix, projectionMatrix, cameraX, cameraY, cameraZ);
-
-			for (UINT i = 0; i < draw_positions.size(); i++)
-			{
-				draw_order.push_back(make_pair(i, distance(viewMatrix.r[3], draw_positions[i].second)));
-			}
-			
-			auto compare = [](pair<UINT, FLOAT> a, pair<UINT, FLOAT> b)
-			{return a.second < b.second; };
-
-			sort(draw_order.begin(), draw_order.end(), compare);
-
-			for (UINT i = 0; i < draw_order.size(); i++)
-			{
-				cout << "Index at: " << draw_order[i].first << '\t' << "Distance: " << draw_order[i].second << '\n';
-			}
-
-			//Replace the pixel shader here in this render call with the skysphere shader.
-			m_SkySphere->Render(con, *skyVertexShader.GetAddressOf(), *skyPixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, sunsetSRV.Get(), myLinearSampler.Get());
-
-			con->ClearDepthStencilView(dsview, D3D11_CLEAR_DEPTH, 1, 0);
-
-			//Update and set constant buffers (This could be done more efficently by setting multiple PSconstantbuffers at once).
-			//----------------------------------
-			clearWVP(con, viewMatrix, projectionMatrix);
-
-			//Update dirLight buffer
-			con->UpdateSubresource(dirLightConstantBuffer.Get(), 0, nullptr, &dirLight, 0, 0);
-			con->PSSetConstantBuffers(0, 1, dirLightConstantBuffer.GetAddressOf());
-
-			//Update pointLight buffer
-			con->UpdateSubresource(pointLightConstantBuffer.Get(), 0, nullptr, &pointLight, 0, 0);
-			con->PSSetConstantBuffers(1, 1, pointLightConstantBuffer.GetAddressOf());
-
-			//Update ambLight buffer
-			con->UpdateSubresource(ambLightConstantBuffer.Get(), 0, nullptr, &ambLight, 0, 0);
-			con->PSSetConstantBuffers(2, 1, ambLightConstantBuffer.GetAddressOf());
-
-			//Update Spotlight buffer
-			con->UpdateSubresource(spotLightConstantBuffer.Get(), 0, nullptr, &spotLight, 0, 0);
-			con->PSSetConstantBuffers(3, 1, spotLightConstantBuffer.GetAddressOf());
-
-			//Update CameraPos buffer
-			con->UpdateSubresource(cameraConstantBuffer.Get(), 0, nullptr, &camerapos, 0, 0);
-			con->VSSetConstantBuffers(1, 1, cameraConstantBuffer.GetAddressOf());
-			
+			//Controls and static calls amongst all renders here
 			if (GetAsyncKeyState(VK_HOME) & 0x1)
 			{
 				m_transparency.blendAmount.x += 0.1;
@@ -852,108 +1089,38 @@ bool Render()
 					m_transparency.blendAmount.x = 0;
 				}
 			}
-			con->UpdateSubresource(transparentConstantBuffer.Get(), 0, nullptr, &m_transparency, 0, 0);
-			con->PSSetConstantBuffers(6, 1, transparentConstantBuffer.GetAddressOf());
-
-			//Update time buffer for wavePixelShader
-			con->UpdateSubresource(timeConstantBuffer.Get(), 0, nullptr, &timePassed, 0, 0);
-			con->PSSetConstantBuffers(5, 1, timeConstantBuffer.GetAddressOf());
-
-			//Update time buffer for waveVertexShader
-			con->UpdateSubresource(timeConstantBuffer.Get(), 0, nullptr, &timePassed, 0, 0);
-			con->VSSetConstantBuffers(2, 1, timeConstantBuffer.GetAddressOf());
-
-			//clearWVP clears and updates WVP buffers. Render renders models.
-			//--------------------------------------------------
-			XMFLOAT4 temp = pointLight.light.vLightDir;
-			clearWVP(con, viewMatrix, projectionMatrix, temp.x, temp.y, temp.z);
-			pointCube->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
-
-			temp = spotLight.light.vLightDir;
-			clearWVP(con, viewMatrix, projectionMatrix, temp.x, temp.y, temp.z);
-			spotCube->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
-
-			clearWVP(con, viewMatrix, projectionMatrix);
-			m_Model->Render(con, *vertexShader.GetAddressOf(), *wavePixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
 
 			if (GetAsyncKeyState(0x4D) & 0x1)
 			{
 				variableVertexShader = waveVertexShader;
 			}
-			if(GetAsyncKeyState(0x4E) & 0x1)
+			if (GetAsyncKeyState(0x4E) & 0x1)
 			{
 				variableVertexShader = vertexShader;
 			}
-			clearWVP(con, viewMatrix, projectionMatrix, -0.5, 0.2, 0, 0.1f, 0.1f, 0.1f);
-			reflectCube->Render(con, *variableVertexShader.GetAddressOf(), *reflectivePixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, sunsetSRV.Get(), myLinearSampler.Get());
 
-			
-
-			// START PLANETS
-			matRot = XMMatrixRotationY(angle);
-			matTrans = XMMatrixTranslation(0.f, .20f, orbitRadius);
-			matFinal = matTrans * matRot;
-
-
-			clearWVP(con, viewMatrix, projectionMatrix, matFinal);
-			m_Planet01->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, Planet01SRV.Get(), myLinearSampler.Get());
-
-			matRot = XMMatrixRotationY(angle + 2.094f);
-			matTrans = XMMatrixTranslation(0.f, .20f, orbitRadius + 1.5f);
-			matFinal = matTrans * matRot;
-
-			clearWVP(con, viewMatrix, projectionMatrix, matFinal);
-			m_Planet02->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, Planet02SRV.Get(), myLinearSampler.Get());
-
-			matRot = XMMatrixRotationY(angle + 4.188f);
-			matTrans = XMMatrixTranslation(0.f, .20f, orbitRadius + .5f);
-			matFinal = matTrans * matRot;
-
-
-			clearWVP(con, viewMatrix, projectionMatrix, matFinal);
-			m_Planet03->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, Planet03SRV.Get(), myLinearSampler.Get());
-
-			matRot = XMMatrixRotationY(angle + 2.617f);
-			matTrans = XMMatrixTranslation(0.f, .20f, orbitRadius + 1.0f);
-			matFinal = matTrans * matRot;
-
-			clearWVP(con, viewMatrix, projectionMatrix, matFinal);
-			m_Planet02->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, Planet04SRV.Get(), myLinearSampler.Get());
-
-			//END PLANETS
-
-			clearWVP(con, viewMatrix, projectionMatrix);
-			m_Grid->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
-
-			clearWVP(con, viewMatrix, projectionMatrix, 0.f, -0.3);
-			islandModel->Render(con, *vertexShader.GetAddressOf(), *tesselatePixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
-		
-			//TRANSPARENCY
-			TurnOnAlphaBlending(0.0f, 0.0f, 0.0f, 1.0f);
-
-			for (UINT i = 0; i < draw_order.size(); i++)
+			// draw entire scene
+			if (GetAsyncKeyState(VK_LSHIFT) &0x1)
 			{
-
-				clearWVP(con, viewMatrix, projectionMatrix,
-					XMVectorGetX(draw_positions[draw_order[i].first].second),
-					XMVectorGetY(draw_positions[draw_order[i].first].second),
-					XMVectorGetY(draw_positions[draw_order[i].first].second));
-
-				TurnOnFrontFaceCulling();
-				m_Cube->Render(con, *vertexShader.GetAddressOf(), *transparentPixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
-
-
-				clearWVP(con, viewMatrix, projectionMatrix,
-					XMVectorGetX(draw_positions[draw_order[i].first].second),
-					XMVectorGetY(draw_positions[draw_order[i].first].second),
-					XMVectorGetY(draw_positions[draw_order[i].first].second));
-
-				TurnOnBackFaceCulling();
-				m_Cube->Render(con, *vertexShader.GetAddressOf(), *transparentPixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
-
+				splitscreenSwitch = true;
 			}
-			TurnOffAlphaBlending();
-			
+			// draw entire scene
+			if (GetAsyncKeyState(VK_LCONTROL) & 0x1)
+			{
+				splitscreenSwitch = false;
+			}
+			if (splitscreenSwitch)
+			{
+				con->RSSetViewports(1, &topView);
+				DrawEverything(con, view, dsview, angle);
+				con->RSSetViewports(1, &bottomView);
+				DrawEverything(con, view, dsview, angle);
+			}
+			else
+			{
+				con->RSSetViewports(1, &fullView);
+				DrawEverything(con, view, dsview, angle);
+			}			
 			
 			//-----------------------------
 

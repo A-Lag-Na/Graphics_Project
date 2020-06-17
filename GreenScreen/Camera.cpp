@@ -118,7 +118,6 @@ void Camera::Render(XMMATRIX& viewMatrix, bool& lightSwitch, Light& dirLight, Po
 {
 	CameraMove(m_viewMatrix);
 	ControlLights(lightSwitch, dirLight, pointLight, spotLight);
-	viewMatrix = m_viewMatrix;
 }
 
 void Camera::CameraMove(XMMATRIX& myCamera)
@@ -171,12 +170,9 @@ void Camera::CameraMove(XMMATRIX& myCamera)
 	{
 		if (m_currPos.x != m_oldPos.x || m_currPos.y != m_oldPos.y);
 		{
-
-			//float CameraW[4] = { w->_14, w->_24, w->_34, w->_44 };
 			// changed by clark
 			float CameraW[4] = { w->_41, w->_42, w->_43, w->_44 };
 			float ydelta = m_currPos.y - m_oldPos.y;
-			//myCamera = XMMatrixMultiply(myCamera, XMMatrixRotationX(0.01 * ydelta));
 			myCamera = XMMatrixMultiply(XMMatrixRotationX(0.01 * ydelta), myCamera);
 			float xdelta = m_currPos.x - m_oldPos.x;
 			myCamera = XMMatrixMultiply(myCamera, XMMatrixRotationY(0.01 * xdelta));
