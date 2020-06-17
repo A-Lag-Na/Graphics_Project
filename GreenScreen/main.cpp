@@ -17,7 +17,12 @@ using namespace CORE;
 using namespace SYSTEM;
 using namespace GRAPHICS;
 
+using namespace std;
+
 #include <time.h>  
+#include <vector>
+#include <algorithm>
+#include <utility>
 
 //Added includes
 #include "Camera.h"
@@ -130,6 +135,10 @@ SimpleTransparent m_transparency;
 
 XMFLOAT4 timePassed;
 
+XMVECTOR cube00, cube01, cube02;
+vector<pair<UINT, FLOAT>> draw_order;
+vector<pair<UINT, XMVECTOR>> draw_positions;
+
 bool lightSwitch = false;
 
 //---------------------------------------------
@@ -140,6 +149,8 @@ bool Initialize(int, int);
 void Shutdown();
 bool Frame();
 bool Render();
+
+FLOAT distance(XMVECTOR first, XMVECTOR second);
 
 // lets pop a window and use D3D11 to clear to a green screen
 int main()
@@ -419,7 +430,7 @@ bool Initialize(int screenWidth, int screenHeight)
 	//For now, gotta pass in vertex and index count for each model rendered (.h or hardcoded)
 	result = m_Model->Initialize( *myDevice.GetAddressOf(),"../corvetteModel.txt", 40.0f);
 	
-	result = m_Cube->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), cubeobj_data, cubeobj_indicies, 788, 1692, 10.f);
+	result = m_Cube->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), cubeobj_data, cubeobj_indicies, 788, 1692, 100.f);
 
 	result = m_Planet01->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), Planet_data, Planet_indicies, 1681, 9360, 2500.f);
 	result = m_Planet02->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), Planet_data, Planet_indicies, 1681, 9360, 4500.f);
@@ -442,6 +453,14 @@ bool Initialize(int screenWidth, int screenHeight)
 	result = reflectCube->Initialize(*myDevice.GetAddressOf(), "../skyModel.txt");
 
 	//End geometry renderers.
+
+	cube00 = XMVectorSet(-.5f, 0.0f, 0.0f, 1.0f);
+	cube01 = XMVectorSet(-1.0f, -0.3f, 0.6f, 1.0f);
+	cube02 = XMVectorSet(0.4f, 0.2f, 1.0f, 1.0f);
+
+	draw_positions.push_back(make_pair(0, cube00));
+	draw_positions.push_back(make_pair(1, cube01));
+	draw_positions.push_back(make_pair(2, cube02));
 
 	//Initialize viewport data
 
@@ -691,6 +710,17 @@ void clearWVP(ID3D11DeviceContext* con, XMMATRIX& viewMatrix, XMMATRIX& projecti
 	return;
 }
 
+FLOAT distance(XMVECTOR first, XMVECTOR second)
+{
+	XMVECTOR result = second - first;
+	return sqrtf(
+		pow(XMVectorGetX(result), 2)
+		+
+		pow(XMVectorGetY(result), 2)
+		+
+		pow(XMVectorGetZ(result), 2)
+	);
+}
 bool Render()
 {
 	XMMATRIX viewMatrix, projectionMatrix, worldMatrix, tempView;
@@ -758,6 +788,21 @@ bool Render()
 
 			//Set SkySphere's world matrix to use camera xyz
 			clearWVP(con, viewMatrix, projectionMatrix, cameraX, cameraY, cameraZ);
+
+			for (UINT i = 0; i < draw_positions.size(); i++)
+			{
+				draw_order.push_back(make_pair(i, distance(viewMatrix.r[3], draw_positions[i].second)));
+			}
+			
+			auto compare = [](pair<UINT, FLOAT> a, pair<UINT, FLOAT> b)
+			{return a.second < b.second; };
+
+			sort(draw_order.begin(), draw_order.end(), compare);
+
+			for (UINT i = 0; i < draw_order.size(); i++)
+			{
+				cout << "Index at: " << draw_order[i].first << '\t' << "Distance: " << draw_order[i].second << '\n';
+			}
 
 			//Replace the pixel shader here in this render call with the skysphere shader.
 			m_SkySphere->Render(con, *skyVertexShader.GetAddressOf(), *skyPixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, sunsetSRV.Get(), myLinearSampler.Get());
@@ -842,18 +887,7 @@ bool Render()
 			clearWVP(con, viewMatrix, projectionMatrix, -0.5, 0.2, 0, 0.1f, 0.1f, 0.1f);
 			reflectCube->Render(con, *variableVertexShader.GetAddressOf(), *reflectivePixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, sunsetSRV.Get(), myLinearSampler.Get());
 
-			//TRANSPARENCY
-			TurnOnAlphaBlending(0.0f, 0.0f, 0.0f, 1.0f);
-
-			clearWVP(con, viewMatrix, projectionMatrix, 0.3, 0.3, 0.3);
-			TurnOnFrontFaceCulling();
-			m_Cube->Render(con, *vertexShader.GetAddressOf(), *transparentPixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
 			
-			clearWVP(con, viewMatrix, projectionMatrix, 0.3, 0.3, 0.3);
-			TurnOnBackFaceCulling();
-			m_Cube->Render(con, *vertexShader.GetAddressOf(), *transparentPixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
-
-			TurnOffAlphaBlending();
 
 			// START PLANETS
 			matRot = XMMatrixRotationY(angle);
@@ -893,6 +927,34 @@ bool Render()
 
 			clearWVP(con, viewMatrix, projectionMatrix, 0.f, -0.3);
 			islandModel->Render(con, *vertexShader.GetAddressOf(), *tesselatePixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
+		
+			//TRANSPARENCY
+			TurnOnAlphaBlending(0.0f, 0.0f, 0.0f, 1.0f);
+
+			for (UINT i = 0; i < draw_order.size(); i++)
+			{
+
+				clearWVP(con, viewMatrix, projectionMatrix,
+					XMVectorGetX(draw_positions[draw_order[i].first].second),
+					XMVectorGetY(draw_positions[draw_order[i].first].second),
+					XMVectorGetY(draw_positions[draw_order[i].first].second));
+
+				TurnOnFrontFaceCulling();
+				m_Cube->Render(con, *vertexShader.GetAddressOf(), *transparentPixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
+
+
+				clearWVP(con, viewMatrix, projectionMatrix,
+					XMVectorGetX(draw_positions[draw_order[i].first].second),
+					XMVectorGetY(draw_positions[draw_order[i].first].second),
+					XMVectorGetY(draw_positions[draw_order[i].first].second));
+
+				TurnOnBackFaceCulling();
+				m_Cube->Render(con, *vertexShader.GetAddressOf(), *transparentPixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
+
+			}
+			TurnOffAlphaBlending();
+			
+			
 			//-----------------------------
 
 			swap->Present(1, 0);
