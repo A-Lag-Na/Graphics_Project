@@ -9,7 +9,7 @@ IJKL for spotlight X and Z axis postitional movement. UO for Y axis movement.
 MN to turn on/off reflective sphere's wave vertex shader.
 FG to disable/renable point light.
 
-Left shift to enable split-screen. Left Control to disable.
+Left shift to enable split-screen. Left Control to disable. (Top screen is a static view, bottom screen moves with normal camera controls).
 
 Grid is hard-coded. Corvette is rendered from file using .obj loading.
 
