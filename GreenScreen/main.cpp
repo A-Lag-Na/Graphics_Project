@@ -107,8 +107,7 @@ Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> Planet01SRV;
 Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> Planet02SRV;
 Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> Planet03SRV;
 Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> Planet04SRV;
-Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> Planet05SRV;
-Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> Planet06SRV;
+
 
 Microsoft::WRL::ComPtr < ID3D11SamplerState> myLinearSampler;
 
@@ -602,12 +601,11 @@ bool Frame()
 	//---------
 	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../vette_color.dds", nullptr, &corvetteSRV);
 	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../placeholderTexture.dds", nullptr, &placeholderSRV);
-	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../Planet01.dds", nullptr, &Planet01SRV);
-	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../Planet02.dds", nullptr, &Planet02SRV);
-	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../Planet03.dds", nullptr, &Planet03SRV);
+	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../Planet1.dds", nullptr, &Planet01SRV);
+	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../Planet2.dds", nullptr, &Planet02SRV);
+	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../Planet3.dds", nullptr, &Planet03SRV);
 	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../Planet04.dds", nullptr, &Planet04SRV);
-	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../Planet05.dds", nullptr, &Planet05SRV);
-	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../Planet06.dds", nullptr, &Planet06SRV);
+
 	//sunsetSRV will show up black with default pixel shader.
 	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../SunsetSkybox.dds", nullptr, &sunsetSRV);
 
