@@ -35,6 +35,11 @@ void Camera::SetRotation(float x, float y, float z)
 	m_RotZ = z;
 }
 
+void Camera::SetProjMatrix(XMMATRIX projMatrix)
+{
+	m_projectionMatrix = projMatrix;
+}
+
 XMFLOAT3 Camera::GetPosition()
 { 
 	return { m_PosX, m_PosY, m_PosZ };
@@ -69,7 +74,6 @@ bool Camera::Initialize(int screenWidth, int screenHeight , float SCREEN_NEAR, f
 	// Create the projection matrix for 3D rendering.
 	m_projectionMatrix = XMMatrixPerspectiveFovLH( fieldOfView, screenAspect, SCREEN_NEAR, SCREEN_DEPTH);
 	
-
 	// Initialize the world matrix to the identity matrix.
 	m_worldMatrix = XMMatrixIdentity();
 

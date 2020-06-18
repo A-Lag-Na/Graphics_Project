@@ -43,6 +43,9 @@ const float SCREEN_DEPTH = 1000.0f;
 const float SCREEN_NEAR = 0.1f;
 
 Camera* m_Camera = 0;
+Camera* topCamera = 0;
+Camera* bottomCamera = 0;
+
 Model* m_Model = 0;
 Model* m_Cube = 0;
 Model* m_Planet01 = 0;
@@ -280,10 +283,8 @@ bool Initialize(int screenWidth, int screenHeight)
 	{
 		return false;
 	}
-
-	// Set the initial position of the camera.
-	m_Camera->Initialize(screenWidth, screenHeight, SCREEN_NEAR, SCREEN_DEPTH);
-	m_Camera->SetPosition(0.0f, 0.0f, -20.0f);
+	topCamera = new Camera;
+	bottomCamera = new Camera;
 	//-----------
 
 	// Constant Buffer Creation
@@ -469,6 +470,15 @@ bool Initialize(int screenWidth, int screenHeight)
 	
 	SetupViewports(fullView, topView, bottomView);
 
+	// Set the initial position of the camera.
+	unsigned int widthTemp, heightTemp;
+	win.GetClientWidth(widthTemp);
+	win.GetClientHeight(heightTemp);
+
+	topCamera->Initialize(static_cast<float>(widthTemp), static_cast<float>(heightTemp), SCREEN_NEAR, SCREEN_DEPTH);
+	topCamera->Initialize(static_cast<float>(widthTemp) / 2.f, static_cast<float>(heightTemp) / 2.f, SCREEN_NEAR, SCREEN_DEPTH);
+	bottomCamera->Initialize(static_cast<float>(widthTemp) / 2.f, static_cast<float>(heightTemp) / 2.f, SCREEN_NEAR, SCREEN_DEPTH);
+
 
 	return true;
 }
@@ -480,6 +490,18 @@ void Shutdown()
 	{
 		delete m_Camera;
 		m_Camera = 0;
+	}
+	// Release the camera object.
+	if (topCamera)
+	{
+		delete topCamera;
+		topCamera = 0;
+	}
+	// Release the camera object.
+	if (bottomCamera)
+	{
+		delete bottomCamera;
+		bottomCamera = 0;
 	}
 	//Release Grid object.
 	if (m_Grid)
@@ -882,17 +904,15 @@ void DrawEverything(ID3D11DeviceContext* con, ID3D11RenderTargetView* view, ID3D
 	draw_order.clear();
 	TurnOffAlphaBlending();
 }
-void DrawEverythingFixedCamera(ID3D11DeviceContext* con, ID3D11RenderTargetView* view, ID3D11DepthStencilView* dsview, float angle, XMMATRIX viewMatrix)
+void DrawEverythingFixedCamera(ID3D11DeviceContext* con, ID3D11RenderTargetView* view, ID3D11DepthStencilView* dsview, float angle, Camera* camera, XMMATRIX viewMatrix)
 {
 	// Generate the view matrix based on the camera's position.
 	XMMATRIX projectionMatrix, worldMatrix, tempView;
-
-	m_Camera->Render(viewMatrix, lightSwitch, dirLight, pointLight, spotLight);
+	camera->Render(viewMatrix, lightSwitch, dirLight, pointLight, spotLight);
 
 	//Get the view matrix from the camera
-	m_Camera->GetWorldMatrix(worldMatrix);
-	//viewMatrix is passed in so no need to get...
-	m_Camera->GetProjectionMatrix(projectionMatrix);
+	camera->GetWorldMatrix(worldMatrix);
+	camera->GetProjectionMatrix(projectionMatrix);
 
 	//Get camera position here
 	float cameraX, cameraY, cameraZ, cameraW;
@@ -901,7 +921,6 @@ void DrawEverythingFixedCamera(ID3D11DeviceContext* con, ID3D11RenderTargetView*
 	cameraZ = XMVectorGetZ(viewMatrix.r[3]);
 	cameraW = XMVectorGetW(viewMatrix.r[3]);
 	camerapos = XMFLOAT4(cameraX, cameraY, cameraZ, cameraW);
-
 
 	//Set SkySphere's world matrix to use camera xyz
 	clearWVP(con, viewMatrix, projectionMatrix, cameraX, cameraY, cameraZ);
@@ -915,11 +934,6 @@ void DrawEverythingFixedCamera(ID3D11DeviceContext* con, ID3D11RenderTargetView*
 	{return a.second > b.second; };
 
 	sort(draw_order.begin(), draw_order.end(), compare);
-
-	//for (UINT i = 0; i < draw_order.size(); i++)
-	//{
-	//	cout << "Index at: " << draw_order[i].first << '\t' << "Distance: " << draw_order[i].second << '\n';
-	//}
 
 	//Replace the pixel shader here in this render call with the skysphere shader.
 	m_SkySphere->Render(con, *skyVertexShader.GetAddressOf(), *skyPixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, sunsetSRV.Get(), myLinearSampler.Get());
@@ -956,6 +970,10 @@ void DrawEverythingFixedCamera(ID3D11DeviceContext* con, ID3D11RenderTargetView*
 	//Update time buffer for wavePixelShader
 	con->UpdateSubresource(timeConstantBuffer.Get(), 0, nullptr, &timePassed, 0, 0);
 	con->PSSetConstantBuffers(5, 1, timeConstantBuffer.GetAddressOf());
+
+	//Update time buffer for waveVertexShader
+	con->UpdateSubresource(timeConstantBuffer.Get(), 0, nullptr, &timePassed, 0, 0);
+	con->VSSetConstantBuffers(2, 1, timeConstantBuffer.GetAddressOf());
 
 	//Update color buffer for flatColorPixelShader
 	PScolor = XMFLOAT4(0.f, 1.f, 0.f, 1.f);
@@ -1117,6 +1135,15 @@ bool Render()
 				variableVertexShader = vertexShader;
 			}
 
+			float cameraX, cameraY, cameraZ, cameraW;
+			XMMATRIX viewMatrixTemp;
+			XMFLOAT4 cameraposTemp;
+			m_Camera->GetViewMatrix(viewMatrixTemp);
+			cameraX = XMVectorGetX(viewMatrixTemp.r[3]);
+			cameraY = XMVectorGetY(viewMatrixTemp.r[3]);
+			cameraZ = XMVectorGetZ(viewMatrixTemp.r[3]);
+			cameraW = XMVectorGetW(viewMatrixTemp.r[3]);
+
 			// draw entire scene
 			if (GetAsyncKeyState(VK_LSHIFT) &0x1)
 			{
@@ -1130,13 +1157,23 @@ bool Render()
 			if (splitscreenSwitch)
 			{
 				con->RSSetViewports(1, &topView);
-				DrawEverything(con, view, dsview, angle);
+				DrawEverythingFixedCamera(con, view, dsview, angle, topCamera, viewMatrixTemp);				
+				//topCamera->SetPosition(cameraX, cameraY, cameraZ);
+
 				con->RSSetViewports(1, &bottomView);
-				DrawEverything(con, view, dsview, angle);
+
+				// Set the initial position of the camera.
+				//bottomCamera->SetPosition(cameraX, cameraY, cameraZ);
+				DrawEverythingFixedCamera(con, view, dsview, angle, bottomCamera, viewMatrixTemp);
 			}
 			else
 			{
 				con->RSSetViewports(1, &fullView);
+				// Set the initial position of the camera.
+				unsigned int widthTemp, heightTemp;
+				win.GetClientWidth(widthTemp);
+				win.GetClientHeight(heightTemp);
+				//m_Camera->SetPosition(cameraX, cameraY, cameraZ);
 				DrawEverything(con, view, dsview, angle);
 			}			
 			
