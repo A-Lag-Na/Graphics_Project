@@ -471,13 +471,15 @@ bool Initialize(int screenWidth, int screenHeight)
 	SetupViewports(fullView, topView, bottomView);
 
 	// Set the initial position of the camera.
-	unsigned int widthTemp, heightTemp;
+	unsigned int widthTemp, heightTemp, halfWidth, halfHeight;
 	win.GetClientWidth(widthTemp);
 	win.GetClientHeight(heightTemp);
+	halfWidth = static_cast<float>(widthTemp) / 2.f;
+	halfHeight = static_cast<float>(heightTemp) / 2.f;
 
-	topCamera->Initialize(static_cast<float>(widthTemp), static_cast<float>(heightTemp), SCREEN_NEAR, SCREEN_DEPTH);
-	topCamera->Initialize(static_cast<float>(widthTemp) / 2.f, static_cast<float>(heightTemp) / 2.f, SCREEN_NEAR, SCREEN_DEPTH);
-	bottomCamera->Initialize(static_cast<float>(widthTemp) / 2.f, static_cast<float>(heightTemp) / 2.f, SCREEN_NEAR, SCREEN_DEPTH);
+	m_Camera->Initialize(static_cast<float>(widthTemp), static_cast<float>(heightTemp), SCREEN_NEAR, SCREEN_DEPTH);
+	topCamera->Initialize(widthTemp, halfHeight, SCREEN_NEAR, SCREEN_DEPTH);
+	bottomCamera->Initialize(widthTemp, halfHeight, SCREEN_NEAR, SCREEN_DEPTH);
 
 
 	return true;
@@ -730,30 +732,8 @@ FLOAT distance(XMVECTOR first, XMVECTOR second)
 	);
 }
 
-void DrawEverything(ID3D11DeviceContext* con, ID3D11RenderTargetView* view, ID3D11DepthStencilView* dsview, float angle)
+void DrawEverything(ID3D11DeviceContext* con, ID3D11RenderTargetView* view, ID3D11DepthStencilView* dsview, float angle, XMMATRIX& viewMatrix, XMMATRIX& projectionMatrix)
 {
-	// Generate the view matrix based on the camera's position.
-	XMMATRIX viewMatrix, projectionMatrix, worldMatrix, tempView;
-
-	m_Camera->Render(viewMatrix, lightSwitch, dirLight, pointLight, spotLight);
-
-	//Get the view matrix from the camera
-	m_Camera->GetViewMatrix(viewMatrix);
-	m_Camera->GetWorldMatrix(worldMatrix);
-	m_Camera->GetProjectionMatrix(projectionMatrix);
-
-	//Get camera position here
-	float cameraX, cameraY, cameraZ, cameraW;
-	cameraX = XMVectorGetX(viewMatrix.r[3]);
-	cameraY = XMVectorGetY(viewMatrix.r[3]);
-	cameraZ = XMVectorGetZ(viewMatrix.r[3]);
-	cameraW = XMVectorGetW(viewMatrix.r[3]);
-	camerapos = XMFLOAT4(cameraX, cameraY, cameraZ, cameraW);
-
-
-	//Set SkySphere's world matrix to use camera xyz
-	clearWVP(con, viewMatrix, projectionMatrix, cameraX, cameraY, cameraZ);
-
 	for (UINT i = 0; i < draw_positions.size(); i++)
 	{
 		draw_order.push_back(make_pair(i, distance(viewMatrix.r[3], draw_positions[i].second)));
@@ -904,7 +884,30 @@ void DrawEverything(ID3D11DeviceContext* con, ID3D11RenderTargetView* view, ID3D
 	draw_order.clear();
 	TurnOffAlphaBlending();
 }
-void DrawEverythingFixedCamera(ID3D11DeviceContext* con, ID3D11RenderTargetView* view, ID3D11DepthStencilView* dsview, float angle, Camera* camera, XMMATRIX viewMatrix)
+void DrawWithCamera(ID3D11DeviceContext* con, ID3D11RenderTargetView* view, ID3D11DepthStencilView* dsview, float angle, Camera* camera)
+{
+	// Generate the view matrix based on the camera's position.
+	XMMATRIX viewMatrix, projectionMatrix, worldMatrix, tempView;
+
+	camera->Render(viewMatrix, lightSwitch, dirLight, pointLight, spotLight);
+
+	//Get the view matrix from the camera
+	camera->GetViewMatrix(viewMatrix);
+	camera->GetWorldMatrix(worldMatrix);
+	camera->GetProjectionMatrix(projectionMatrix);
+
+	//Get camera position here
+	float cameraX, cameraY, cameraZ, cameraW;
+	cameraX = XMVectorGetX(viewMatrix.r[3]);
+	cameraY = XMVectorGetY(viewMatrix.r[3]);
+	cameraZ = XMVectorGetZ(viewMatrix.r[3]);
+	cameraW = XMVectorGetW(viewMatrix.r[3]);
+	camerapos = XMFLOAT4(cameraX, cameraY, cameraZ, cameraW);
+	//Set SkySphere's world matrix to use camera xyz
+	clearWVP(con, viewMatrix, projectionMatrix, cameraX, cameraY, cameraZ);
+	DrawEverything(con, view, dsview, angle, viewMatrix, projectionMatrix);
+}
+void DrawFixed(ID3D11DeviceContext* con, ID3D11RenderTargetView* view, ID3D11DepthStencilView* dsview, float angle, Camera* camera, XMMATRIX& viewMatrix)
 {
 	// Generate the view matrix based on the camera's position.
 	XMMATRIX projectionMatrix, worldMatrix, tempView;
@@ -921,154 +924,9 @@ void DrawEverythingFixedCamera(ID3D11DeviceContext* con, ID3D11RenderTargetView*
 	cameraZ = XMVectorGetZ(viewMatrix.r[3]);
 	cameraW = XMVectorGetW(viewMatrix.r[3]);
 	camerapos = XMFLOAT4(cameraX, cameraY, cameraZ, cameraW);
-
 	//Set SkySphere's world matrix to use camera xyz
 	clearWVP(con, viewMatrix, projectionMatrix, cameraX, cameraY, cameraZ);
-
-	for (UINT i = 0; i < draw_positions.size(); i++)
-	{
-		draw_order.push_back(make_pair(i, distance(viewMatrix.r[3], draw_positions[i].second)));
-	}
-
-	auto compare = [](pair<UINT, FLOAT> a, pair<UINT, FLOAT> b)
-	{return a.second > b.second; };
-
-	sort(draw_order.begin(), draw_order.end(), compare);
-
-	//Replace the pixel shader here in this render call with the skysphere shader.
-	m_SkySphere->Render(con, *skyVertexShader.GetAddressOf(), *skyPixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, sunsetSRV.Get(), myLinearSampler.Get());
-
-	con->ClearDepthStencilView(dsview, D3D11_CLEAR_DEPTH, 1, 0);
-
-	//Update and set constant buffers (This could be done more efficently by setting multiple PSconstantbuffers at once).
-	//----------------------------------
-	clearWVP(con, viewMatrix, projectionMatrix);
-
-	//Update dirLight buffer
-	con->UpdateSubresource(dirLightConstantBuffer.Get(), 0, nullptr, &dirLight, 0, 0);
-	con->PSSetConstantBuffers(0, 1, dirLightConstantBuffer.GetAddressOf());
-
-	//Update pointLight buffer
-	con->UpdateSubresource(pointLightConstantBuffer.Get(), 0, nullptr, &pointLight, 0, 0);
-	con->PSSetConstantBuffers(1, 1, pointLightConstantBuffer.GetAddressOf());
-
-	//Update ambLight buffer
-	con->UpdateSubresource(ambLightConstantBuffer.Get(), 0, nullptr, &ambLight, 0, 0);
-	con->PSSetConstantBuffers(2, 1, ambLightConstantBuffer.GetAddressOf());
-
-	//Update Spotlight buffer
-	con->UpdateSubresource(spotLightConstantBuffer.Get(), 0, nullptr, &spotLight, 0, 0);
-	con->PSSetConstantBuffers(3, 1, spotLightConstantBuffer.GetAddressOf());
-
-	//Update CameraPos buffer
-	con->UpdateSubresource(cameraConstantBuffer.Get(), 0, nullptr, &camerapos, 0, 0);
-	con->VSSetConstantBuffers(1, 1, cameraConstantBuffer.GetAddressOf());
-
-	con->UpdateSubresource(transparentConstantBuffer.Get(), 0, nullptr, &m_transparency, 0, 0);
-	con->PSSetConstantBuffers(6, 1, transparentConstantBuffer.GetAddressOf());
-
-	//Update time buffer for wavePixelShader
-	con->UpdateSubresource(timeConstantBuffer.Get(), 0, nullptr, &timePassed, 0, 0);
-	con->PSSetConstantBuffers(5, 1, timeConstantBuffer.GetAddressOf());
-
-	//Update time buffer for waveVertexShader
-	con->UpdateSubresource(timeConstantBuffer.Get(), 0, nullptr, &timePassed, 0, 0);
-	con->VSSetConstantBuffers(2, 1, timeConstantBuffer.GetAddressOf());
-
-	//Update color buffer for flatColorPixelShader
-	PScolor = XMFLOAT4(0.f, 1.f, 0.f, 1.f);
-	con->UpdateSubresource(colorConstantBuffer.Get(), 0, nullptr, &PScolor, 0, 0);
-	con->PSSetConstantBuffers(7, 1, colorConstantBuffer.GetAddressOf());
-
-	//Update time buffer for waveVertexShader
-	con->UpdateSubresource(timeConstantBuffer.Get(), 0, nullptr, &timePassed, 0, 0);
-	con->VSSetConstantBuffers(2, 1, timeConstantBuffer.GetAddressOf());
-
-	//clearWVP clears and updates WVP buffers. Render renders models.
-	//--------------------------------------------------
-	XMFLOAT4 temp = pointLight.light.vLightDir;
-	clearWVP(con, viewMatrix, projectionMatrix, temp.x, temp.y, temp.z);
-	pointCube->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
-
-	temp = spotLight.light.vLightDir;
-	clearWVP(con, viewMatrix, projectionMatrix, temp.x, temp.y, temp.z);
-	spotCube->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
-
-	clearWVP(con, viewMatrix, projectionMatrix);
-
-	m_Model->Render(con, *vertexShader.GetAddressOf(), *wavePixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
-
-	clearWVP(con, viewMatrix, projectionMatrix, -0.5, 0.2, 0, 0.1f, 0.1f, 0.1f);
-	reflectCube->Render(con, *variableVertexShader.GetAddressOf(), *reflectivePixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, sunsetSRV.Get(), myLinearSampler.Get());
-
-	//Rotation stuff
-	float orbitRadius = 1.0f;
-	XMMATRIX matRot, matTrans, matFinal;
-	// START PLANETS
-	matRot = XMMatrixRotationY(angle);
-	matTrans = XMMatrixTranslation(0.f, .20f, orbitRadius);
-	matFinal = matTrans * matRot;
-
-
-	clearWVP(con, viewMatrix, projectionMatrix, matFinal);
-	m_Planet01->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, Planet01SRV.Get(), myLinearSampler.Get());
-
-	matRot = XMMatrixRotationY(angle + 2.094f);
-	matTrans = XMMatrixTranslation(0.f, .20f, orbitRadius + 1.5f);
-	matFinal = matTrans * matRot;
-
-	clearWVP(con, viewMatrix, projectionMatrix, matFinal);
-	m_Planet02->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, Planet02SRV.Get(), myLinearSampler.Get());
-
-	matRot = XMMatrixRotationY(angle + 4.188f);
-	matTrans = XMMatrixTranslation(0.f, .20f, orbitRadius + .5f);
-	matFinal = matTrans * matRot;
-
-
-	clearWVP(con, viewMatrix, projectionMatrix, matFinal);
-	m_Planet03->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, Planet03SRV.Get(), myLinearSampler.Get());
-
-	matRot = XMMatrixRotationY(angle + 2.617f);
-	matTrans = XMMatrixTranslation(0.f, .20f, orbitRadius + 1.0f);
-	matFinal = matTrans * matRot;
-
-	clearWVP(con, viewMatrix, projectionMatrix, matFinal);
-	m_Planet02->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, Planet04SRV.Get(), myLinearSampler.Get());
-
-	//END PLANETS
-
-	clearWVP(con, viewMatrix, projectionMatrix);
-	m_Grid->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
-
-	clearWVP(con, viewMatrix, projectionMatrix, 0.f, -0.3);
-	islandModel->Render(con, *vertexShader.GetAddressOf(), *tesselatePixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
-
-	//TRANSPARENCY
-	TurnOnAlphaBlending(0.0f, 0.0f, 0.0f, 1.0f);
-
-	for (UINT i = 0; i < draw_order.size(); i++)
-	{
-
-		clearWVP(con, viewMatrix, projectionMatrix,
-			XMVectorGetX(draw_positions[draw_order[i].first].second),
-			XMVectorGetY(draw_positions[draw_order[i].first].second),
-			XMVectorGetZ(draw_positions[draw_order[i].first].second));
-
-		TurnOnFrontFaceCulling();
-		m_Cube->Render(con, *vertexShader.GetAddressOf(), *transparentPixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
-
-
-		clearWVP(con, viewMatrix, projectionMatrix,
-			XMVectorGetX(draw_positions[draw_order[i].first].second),
-			XMVectorGetY(draw_positions[draw_order[i].first].second),
-			XMVectorGetZ(draw_positions[draw_order[i].first].second));
-
-		TurnOnBackFaceCulling();
-		m_Cube->Render(con, *vertexShader.GetAddressOf(), *transparentPixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, placeholderSRV.Get(), myLinearSampler.Get());
-
-	}
-	draw_order.clear();
-	TurnOffAlphaBlending();
+	DrawEverything(con, view, dsview, angle, viewMatrix, projectionMatrix);
 }
 bool Render()
 {
@@ -1137,7 +995,6 @@ bool Render()
 
 			float cameraX, cameraY, cameraZ, cameraW;
 			XMMATRIX viewMatrixTemp;
-			XMFLOAT4 cameraposTemp;
 			m_Camera->GetViewMatrix(viewMatrixTemp);
 			cameraX = XMVectorGetX(viewMatrixTemp.r[3]);
 			cameraY = XMVectorGetY(viewMatrixTemp.r[3]);
@@ -1157,14 +1014,14 @@ bool Render()
 			if (splitscreenSwitch)
 			{
 				con->RSSetViewports(1, &topView);
-				DrawEverythingFixedCamera(con, view, dsview, angle, topCamera, viewMatrixTemp);				
+				DrawFixed(con, view, dsview, angle, topCamera, viewMatrixTemp);				
 				//topCamera->SetPosition(cameraX, cameraY, cameraZ);
 
 				con->RSSetViewports(1, &bottomView);
 
 				// Set the initial position of the camera.
 				//bottomCamera->SetPosition(cameraX, cameraY, cameraZ);
-				DrawEverythingFixedCamera(con, view, dsview, angle, bottomCamera, viewMatrixTemp);
+				DrawWithCamera(con, view, dsview, angle, bottomCamera);
 			}
 			else
 			{
@@ -1174,7 +1031,7 @@ bool Render()
 				win.GetClientWidth(widthTemp);
 				win.GetClientHeight(heightTemp);
 				//m_Camera->SetPosition(cameraX, cameraY, cameraZ);
-				DrawEverything(con, view, dsview, angle);
+				DrawWithCamera(con, view, dsview, angle, m_Camera);
 			}			
 			
 			//-----------------------------
