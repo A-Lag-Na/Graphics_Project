@@ -99,6 +99,7 @@ Microsoft::WRL::ComPtr<ID3D11Buffer>	ambLightConstantBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	spotLightConstantBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	transparentConstantBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	timeConstantBuffer;
+Microsoft::WRL::ComPtr<ID3D11Buffer>	colorConstantBuffer;
 
 Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> corvetteSRV;
 Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> placeholderSRV;
@@ -135,6 +136,8 @@ XMFLOAT4 timePassed;
 XMVECTOR cube00, cube01, cube02;
 vector<pair<UINT, FLOAT>> draw_order;
 vector<pair<UINT, XMVECTOR>> draw_positions;
+
+XMFLOAT4 PScolor = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
 bool lightSwitch = false;
 bool splitscreenSwitch = false;
@@ -310,6 +313,9 @@ bool Initialize(int screenWidth, int screenHeight)
 
 	//Time Constant Buffer
 	hr = createConstBuffer<XMFLOAT4>(timePassed, timeConstantBuffer.GetAddressOf());
+
+	//Color Constant Buffer
+	hr = createConstBuffer<XMFLOAT4>(PScolor, colorConstantBuffer.GetAddressOf());
 
 	// End of constant buffers
 	// Create an alpha enabled blend state description.
@@ -783,6 +789,15 @@ void DrawEverything(ID3D11DeviceContext* con, ID3D11RenderTargetView* view, ID3D
 	con->UpdateSubresource(timeConstantBuffer.Get(), 0, nullptr, &timePassed, 0, 0);
 	con->VSSetConstantBuffers(2, 1, timeConstantBuffer.GetAddressOf());
 
+	//Update color buffer for flatColorPixelShader
+	PScolor = XMFLOAT4(0.f, 1.f, 0.f, 1.f);
+	con->UpdateSubresource(colorConstantBuffer.Get(), 0, nullptr, &PScolor, 0, 0);
+	con->PSSetConstantBuffers(7, 1, colorConstantBuffer.GetAddressOf());
+
+	//Update time buffer for waveVertexShader
+	con->UpdateSubresource(timeConstantBuffer.Get(), 0, nullptr, &timePassed, 0, 0);
+	con->VSSetConstantBuffers(2, 1, timeConstantBuffer.GetAddressOf());
+
 	//clearWVP clears and updates WVP buffers. Render renders models.
 	//--------------------------------------------------
 	XMFLOAT4 temp = pointLight.light.vLightDir;
@@ -794,8 +809,8 @@ void DrawEverything(ID3D11DeviceContext* con, ID3D11RenderTargetView* view, ID3D
 	spotCube->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
 
 	clearWVP(con, viewMatrix, projectionMatrix);
-	m_Model->Render(con, *vertexShader.GetAddressOf(), *wavePixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
 
+	m_Model->Render(con, *vertexShader.GetAddressOf(), *wavePixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
 
 	clearWVP(con, viewMatrix, projectionMatrix, -0.5, 0.2, 0, 0.1f, 0.1f, 0.1f);
 	reflectCube->Render(con, *variableVertexShader.GetAddressOf(), *reflectivePixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, sunsetSRV.Get(), myLinearSampler.Get());
@@ -944,6 +959,11 @@ void DrawEverythingFixedCamera(ID3D11DeviceContext* con, ID3D11RenderTargetView*
 	con->UpdateSubresource(timeConstantBuffer.Get(), 0, nullptr, &timePassed, 0, 0);
 	con->PSSetConstantBuffers(5, 1, timeConstantBuffer.GetAddressOf());
 
+	//Update color buffer for flatColorPixelShader
+	PScolor = XMFLOAT4(0.f, 1.f, 0.f, 1.f);
+	con->UpdateSubresource(colorConstantBuffer.Get(), 0, nullptr, &PScolor, 0, 0);
+	con->PSSetConstantBuffers(7, 1, colorConstantBuffer.GetAddressOf());
+
 	//Update time buffer for waveVertexShader
 	con->UpdateSubresource(timeConstantBuffer.Get(), 0, nullptr, &timePassed, 0, 0);
 	con->VSSetConstantBuffers(2, 1, timeConstantBuffer.GetAddressOf());
@@ -959,8 +979,8 @@ void DrawEverythingFixedCamera(ID3D11DeviceContext* con, ID3D11RenderTargetView*
 	spotCube->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
 
 	clearWVP(con, viewMatrix, projectionMatrix);
-	m_Model->Render(con, *vertexShader.GetAddressOf(), *wavePixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
 
+	m_Model->Render(con, *vertexShader.GetAddressOf(), *wavePixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, corvetteSRV.Get(), myLinearSampler.Get());
 
 	clearWVP(con, viewMatrix, projectionMatrix, -0.5, 0.2, 0, 0.1f, 0.1f, 0.1f);
 	reflectCube->Render(con, *variableVertexShader.GetAddressOf(), *reflectivePixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, sunsetSRV.Get(), myLinearSampler.Get());
