@@ -26,11 +26,14 @@ public:
 	void GetWorldMatrix(XMMATRIX&);
 	void GetProjectionMatrix(XMMATRIX&);
 	void CameraMove(XMMATRIX&);
+	void CameraLookAt(XMMATRIX&, XMMATRIX&);
 	void ControlLights(bool&, Light&, PointLight&, SpotLight&);
 
 private:
+
 	float m_PosX, m_PosY, m_PosZ;
 	float m_RotX, m_RotY, m_RotZ;
+	XMVECTOR up, position, lookAt;
 	XMMATRIX m_viewMatrix;
 	XMMATRIX m_worldMatrix;
 	XMMATRIX m_projectionMatrix;

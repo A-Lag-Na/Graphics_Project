@@ -77,7 +77,7 @@ bool Camera::Initialize(int screenWidth, int screenHeight , float SCREEN_NEAR, f
 	// Initialize the world matrix to the identity matrix.
 	m_worldMatrix = XMMatrixIdentity();
 
-	XMVECTOR up, position, lookAt;
+	
 	float yaw, pitch, roll;
 	XMMATRIX rotationMatrix, tempView;
 
@@ -120,6 +120,7 @@ bool Camera::Initialize(int screenWidth, int screenHeight , float SCREEN_NEAR, f
 
 void Camera::Render(XMMATRIX& viewMatrix, bool& lightSwitch, Light& dirLight, PointLight& pointLight, SpotLight& spotLight)
 {
+	
 	CameraMove(m_viewMatrix);
 	ControlLights(lightSwitch, dirLight, pointLight, spotLight);
 }
@@ -192,6 +193,12 @@ void Camera::CameraMove(XMMATRIX& myCamera)
 	}
 	m_oldPos = m_currPos;
 	w = nullptr;
+}
+
+void Camera::CameraLookAt(XMMATRIX& myCamera, XMMATRIX& myObject)
+{
+	XMVECTOR tempPos = myObject.r[3];
+	m_viewMatrix = XMMatrixLookAtLH(tempPos, lookAt, up);
 }
 
 void Camera::ControlLights(bool& lightSwitch, Light& dirLight, PointLight& pointLight, SpotLight& spotLight)

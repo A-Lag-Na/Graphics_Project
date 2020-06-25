@@ -51,6 +51,7 @@ Model* m_Cube = 0;
 Model* m_Planet01 = 0;
 Model* m_Planet02 = 0;
 Model* m_Planet03 = 0;
+Model* m_Moon = 0;
 Model* islandModel = 0;
 Model* pointCube = 0;
 Model* spotCube = 0;
@@ -111,7 +112,7 @@ Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> Planet01SRV;
 Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> Planet02SRV;
 Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> Planet03SRV;
 Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> Planet04SRV;
-
+Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> MoonSRV;
 
 Microsoft::WRL::ComPtr < ID3D11SamplerState> myLinearSampler;
 
@@ -404,6 +405,12 @@ bool Initialize(int screenWidth, int screenHeight)
 		return false;
 	}
 
+	m_Moon = new Model;
+	if (!m_Moon)
+	{
+		return false;
+	}
+
 	// Initialize the model object.
 	//For now, gotta pass in vertex and index count for each model rendered (.h or hardcoded)
 	//result = m_Model->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), corvetteobj_data, corvetteobj_indicies, 3453, 8112, 40.f);
@@ -437,7 +444,7 @@ bool Initialize(int screenWidth, int screenHeight)
 	result = m_Planet01->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), Planet_data, Planet_indicies, 1681, 9360, 2500.f);
 	result = m_Planet02->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), Planet_data, Planet_indicies, 1681, 9360, 4500.f);
 	result = m_Planet03->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), Planet_data, Planet_indicies, 1681, 9360, 6500.f);
-
+	result = m_Moon->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), Planet_data, Planet_indicies, 1681, 9360, 9000.f);
 	//Create and initialize island model
 	islandModel = new Model;
 	result = islandModel->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), islandmodel_data, islandmodel_indicies, 29546, 100860, 5000.f);
@@ -539,6 +546,11 @@ void Shutdown()
 		delete m_Planet03;
 		m_Planet03 = 0;
 	}
+	if (m_Moon)
+	{
+		delete m_Moon;
+		m_Moon = 0;
+	}
 	if (islandModel)
 	{
 		delete islandModel;
@@ -635,6 +647,7 @@ bool Frame()
 	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../Planet2.dds", nullptr, &Planet02SRV);
 	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../Planet3.dds", nullptr, &Planet03SRV);
 	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../Planet04.dds", nullptr, &Planet04SRV);
+	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../Moon.dds", nullptr, &MoonSRV);
 
 	//sunsetSRV will show up black with default pixel shader.
 	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../SunsetSkybox.dds", nullptr, &sunsetSRV);
@@ -732,7 +745,7 @@ FLOAT distance(XMVECTOR first, XMVECTOR second)
 	);
 }
 
-void DrawEverything(ID3D11DeviceContext* con, ID3D11RenderTargetView* view, ID3D11DepthStencilView* dsview, float angle, XMMATRIX& viewMatrix, XMMATRIX& projectionMatrix)
+void DrawEverything(ID3D11DeviceContext* con, ID3D11RenderTargetView* view, ID3D11DepthStencilView* dsview, float angle, float moonAngle, XMMATRIX& viewMatrix, XMMATRIX& projectionMatrix)
 {
 	for (UINT i = 0; i < draw_positions.size(); i++)
 	{
@@ -818,6 +831,7 @@ void DrawEverything(ID3D11DeviceContext* con, ID3D11RenderTargetView* view, ID3D
 	//Rotation stuff
 	float orbitRadius = 1.0f;
 	XMMATRIX matRot, matTrans, matFinal;
+
 	// START PLANETS
 	matRot = XMMatrixRotationY(angle);
 	matTrans = XMMatrixTranslation(0.f, .20f, orbitRadius);
@@ -837,11 +851,20 @@ void DrawEverything(ID3D11DeviceContext* con, ID3D11RenderTargetView* view, ID3D
 	matRot = XMMatrixRotationY(angle + 4.188f);
 	matTrans = XMMatrixTranslation(0.f, .20f, orbitRadius + .5f);
 	matFinal = matTrans * matRot;
-
+	XMMATRIX earth = matFinal;
 
 	clearWVP(con, viewMatrix, projectionMatrix, matFinal);
 	m_Planet03->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, Planet03SRV.Get(), myLinearSampler.Get());
 
+	
+	matRot = XMMatrixRotationY(moonAngle);
+	matTrans = XMMatrixTranslation(0.f, .15f, .4f);
+	matFinal = matTrans * matRot;
+	matFinal =  matFinal * earth;
+
+	clearWVP(con, viewMatrix, projectionMatrix, matFinal);
+	m_Moon->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, MoonSRV.Get(), myLinearSampler.Get());
+	
 	matRot = XMMatrixRotationY(angle + 2.617f);
 	matTrans = XMMatrixTranslation(0.f, .20f, orbitRadius + 1.0f);
 	matFinal = matTrans * matRot;
@@ -884,7 +907,7 @@ void DrawEverything(ID3D11DeviceContext* con, ID3D11RenderTargetView* view, ID3D
 	draw_order.clear();
 	TurnOffAlphaBlending();
 }
-void DrawWithCamera(ID3D11DeviceContext* con, ID3D11RenderTargetView* view, ID3D11DepthStencilView* dsview, float angle, Camera* camera)
+void DrawWithCamera(ID3D11DeviceContext* con, ID3D11RenderTargetView* view, ID3D11DepthStencilView* dsview, float angle, float moonAngle, Camera* camera)
 {
 	// Generate the view matrix based on the camera's position.
 	XMMATRIX viewMatrix, projectionMatrix, worldMatrix, tempView;
@@ -905,9 +928,9 @@ void DrawWithCamera(ID3D11DeviceContext* con, ID3D11RenderTargetView* view, ID3D
 	camerapos = XMFLOAT4(cameraX, cameraY, cameraZ, cameraW);
 	//Set SkySphere's world matrix to use camera xyz
 	clearWVP(con, viewMatrix, projectionMatrix, cameraX, cameraY, cameraZ);
-	DrawEverything(con, view, dsview, angle, viewMatrix, projectionMatrix);
+	DrawEverything(con, view, dsview, angle, moonAngle,viewMatrix, projectionMatrix);
 }
-void DrawFixed(ID3D11DeviceContext* con, ID3D11RenderTargetView* view, ID3D11DepthStencilView* dsview, float angle, Camera* camera, XMMATRIX& viewMatrix)
+void DrawFixed(ID3D11DeviceContext* con, ID3D11RenderTargetView* view, ID3D11DepthStencilView* dsview, float angle, float moonAngle, Camera* camera, XMMATRIX& viewMatrix)
 {
 	// Generate the view matrix based on the camera's position.
 	XMMATRIX projectionMatrix, worldMatrix, tempView;
@@ -926,12 +949,13 @@ void DrawFixed(ID3D11DeviceContext* con, ID3D11RenderTargetView* view, ID3D11Dep
 	camerapos = XMFLOAT4(cameraX, cameraY, cameraZ, cameraW);
 	//Set SkySphere's world matrix to use camera xyz
 	clearWVP(con, viewMatrix, projectionMatrix, cameraX, cameraY, cameraZ);
-	DrawEverything(con, view, dsview, angle, viewMatrix, projectionMatrix);
+	DrawEverything(con, view, dsview, angle, moonAngle, viewMatrix, projectionMatrix);
 }
 bool Render()
 {
 	
 	float angle = 0;
+	float moonAngle = 0;
 	static float lastTime = (float)clock();
 
 	// Render Loop here
@@ -942,6 +966,8 @@ bool Render()
 		timePassed.x = currTime;
 
 		angle += (timeDelta / 2) * XM_PI;
+
+		moonAngle += (timeDelta / .5f) * XM_PI;
 
 		lastTime = currTime;
 
@@ -1014,14 +1040,14 @@ bool Render()
 			if (splitscreenSwitch)
 			{
 				con->RSSetViewports(1, &topView);
-				DrawFixed(con, view, dsview, angle, topCamera, viewMatrixTemp);				
+				DrawFixed(con, view, dsview, angle, moonAngle,topCamera, viewMatrixTemp);				
 				//topCamera->SetPosition(cameraX, cameraY, cameraZ);
 
 				con->RSSetViewports(1, &bottomView);
 
 				// Set the initial position of the camera.
 				//bottomCamera->SetPosition(cameraX, cameraY, cameraZ);
-				DrawWithCamera(con, view, dsview, angle, bottomCamera);
+				DrawWithCamera(con, view, dsview, angle, moonAngle, bottomCamera);
 			}
 			else
 			{
@@ -1031,7 +1057,7 @@ bool Render()
 				win.GetClientWidth(widthTemp);
 				win.GetClientHeight(heightTemp);
 				//m_Camera->SetPosition(cameraX, cameraY, cameraZ);
-				DrawWithCamera(con, view, dsview, angle, m_Camera);
+				DrawWithCamera(con, view, dsview, angle, moonAngle, m_Camera);
 			}			
 			
 			//-----------------------------
