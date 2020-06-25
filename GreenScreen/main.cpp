@@ -104,6 +104,7 @@ Microsoft::WRL::ComPtr<ID3D11Buffer>	spotLightConstantBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	transparentConstantBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	timeConstantBuffer;
 Microsoft::WRL::ComPtr<ID3D11Buffer>	colorConstantBuffer;
+Microsoft::WRL::ComPtr<ID3D11Buffer>	renderToTextureConstantBuffer;
 
 Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> corvetteSRV;
 Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> placeholderSRV;
@@ -113,6 +114,10 @@ Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> Planet02SRV;
 Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> Planet03SRV;
 Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> Planet04SRV;
 Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> MoonSRV;
+
+Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> renderToTextureSRV;
+Microsoft::WRL::ComPtr < ID3D11RenderTargetView> renderToTextureRTV;
+Microsoft::WRL::ComPtr < ID3D11Texture2D> renderToTexture2D;
 
 Microsoft::WRL::ComPtr < ID3D11SamplerState> myLinearSampler;
 
@@ -144,6 +149,8 @@ XMFLOAT4 PScolor = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
 bool lightSwitch = false;
 bool splitscreenSwitch = false;
+
+unsigned int widthTemp, heightTemp;
 
 //---------------------------------------------
 
@@ -462,7 +469,6 @@ bool Initialize(int screenWidth, int screenHeight)
 	result = reflectCube->Initialize(*myDevice.GetAddressOf(), "../skyModel.txt");
 
 	//End geometry renderers.
-
 	cube00 = XMVectorSet(-.5f, 0.2f, 1.0f, 1.0f);
 	cube01 = XMVectorSet(-1.0f, 0.2f, 1.0f, 1.0f);
 	cube02 = XMVectorSet(0.4f, 0.2f, 1.0f, 1.0f);
@@ -471,10 +477,7 @@ bool Initialize(int screenWidth, int screenHeight)
 	draw_positions.push_back(make_pair(1, cube01));
 	draw_positions.push_back(make_pair(2, cube02));
 
-	//Initialize viewport data
-
-	// Update the viewport transform to cover the client area.
-	
+	//Initialize viewport data	
 	SetupViewports(fullView, topView, bottomView);
 
 	// Set the initial position of the camera.
@@ -487,8 +490,6 @@ bool Initialize(int screenWidth, int screenHeight)
 	m_Camera->Initialize(static_cast<float>(widthTemp), static_cast<float>(heightTemp), SCREEN_NEAR, SCREEN_DEPTH);
 	topCamera->Initialize(widthTemp, halfHeight, SCREEN_NEAR, SCREEN_DEPTH);
 	bottomCamera->Initialize(widthTemp, halfHeight, SCREEN_NEAR, SCREEN_DEPTH);
-
-
 	return true;
 }
 
@@ -647,10 +648,32 @@ bool Frame()
 	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../Planet2.dds", nullptr, &Planet02SRV);
 	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../Planet3.dds", nullptr, &Planet03SRV);
 	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../Planet04.dds", nullptr, &Planet04SRV);
+
 	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../Moon.dds", nullptr, &MoonSRV);
 
 	//sunsetSRV will show up black with default pixel shader.
 	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../SunsetSkybox.dds", nullptr, &sunsetSRV);
+
+
+	CD3D11_TEXTURE2D_DESC renderToTexture2Ddesc = CD3D11_TEXTURE2D_DESC(DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, widthTemp, heightTemp, 1, 0, D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE
+		, D3D11_USAGE_DEFAULT, D3D11_CPU_ACCESS_WRITE);
+	renderToTexture2Ddesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
+	myDevice.Get()->CreateTexture2D(&renderToTexture2Ddesc, nullptr, renderToTexture2D.GetAddressOf());
+	//Setup SRV for renderToTexture
+	CD3D11_SHADER_RESOURCE_VIEW_DESC renderToTextureSRVdesc = CD3D11_SHADER_RESOURCE_VIEW_DESC(renderToTextureConstantBuffer.Get(), DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, 0, 1, D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE);
+
+	//Setup RTV for renderToTexture
+	CD3D11_RENDER_TARGET_VIEW_DESC renderToTextureRTVdesc = {};
+
+	//void CD3D11_RENDER_TARGET_VIEW_DESC(
+	//	ID3D11Texture2D * pTex2D,
+	//	D3D11_RTV_DIMENSION viewDimension, = D3D11_RTV_DIMENSION_TEXTURE2D,
+	//	DXGI_FORMAT         format, = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB 
+	//	UINT                mipSlice,
+	//	UINT                firstArraySlice,
+	//	UINT                arraySize = 1
+	//);
+	////renderToTextureRTVdesc.
 
 	// Create the sample state
 	D3D11_SAMPLER_DESC sampDesc = {};
@@ -953,7 +976,8 @@ void DrawFixed(ID3D11DeviceContext* con, ID3D11RenderTargetView* view, ID3D11Dep
 }
 bool Render()
 {
-	
+	win.GetClientWidth(widthTemp);
+	win.GetClientHeight(heightTemp);
 	float angle = 0;
 	float moonAngle = 0;
 	static float lastTime = (float)clock();
@@ -1052,10 +1076,6 @@ bool Render()
 			else
 			{
 				con->RSSetViewports(1, &fullView);
-				// Set the initial position of the camera.
-				unsigned int widthTemp, heightTemp;
-				win.GetClientWidth(widthTemp);
-				win.GetClientHeight(heightTemp);
 				//m_Camera->SetPosition(cameraX, cameraY, cameraZ);
 				DrawWithCamera(con, view, dsview, angle, moonAngle, m_Camera);
 			}			
