@@ -52,6 +52,7 @@ Model* m_Planet01 = 0;
 Model* m_Planet02 = 0;
 Model* m_Planet03 = 0;
 Model* m_Moon = 0;
+Model* m_Satellite = 0;
 Model* islandModel = 0;
 Model* pointCube = 0;
 Model* spotCube = 0;
@@ -114,6 +115,7 @@ Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> Planet02SRV;
 Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> Planet03SRV;
 Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> Planet04SRV;
 Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> MoonSRV;
+Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> SatelliteSRV;
 
 Microsoft::WRL::ComPtr < ID3D11ShaderResourceView> renderToTextureSRV;
 Microsoft::WRL::ComPtr < ID3D11RenderTargetView> renderToTextureRTV;
@@ -418,6 +420,11 @@ bool Initialize(int screenWidth, int screenHeight)
 		return false;
 	}
 
+	m_Satellite = new Model;
+	if (!m_Satellite)
+	{
+		return false;
+	}
 	// Initialize the model object.
 	//For now, gotta pass in vertex and index count for each model rendered (.h or hardcoded)
 	//result = m_Model->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), corvetteobj_data, corvetteobj_indicies, 3453, 8112, 40.f);
@@ -452,6 +459,9 @@ bool Initialize(int screenWidth, int screenHeight)
 	result = m_Planet02->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), Planet_data, Planet_indicies, 1681, 9360, 4500.f);
 	result = m_Planet03->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), Planet_data, Planet_indicies, 1681, 9360, 6500.f);
 	result = m_Moon->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), Planet_data, Planet_indicies, 1681, 9360, 9000.f);
+
+	result = m_Satellite->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), satellite_data, satellite_indicies, 1640, 2544, 10.f);
+
 	//Create and initialize island model
 	islandModel = new Model;
 	result = islandModel->Initialize(*myDevice.GetAddressOf(), *myContext.GetAddressOf(), islandmodel_data, islandmodel_indicies, 29546, 100860, 5000.f);
@@ -552,6 +562,11 @@ void Shutdown()
 		delete m_Moon;
 		m_Moon = 0;
 	}
+	if (m_Satellite)
+	{
+		delete m_Satellite;
+		m_Satellite = 0;
+	}
 	if (islandModel)
 	{
 		delete islandModel;
@@ -651,19 +666,21 @@ bool Frame()
 
 	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../Moon.dds", nullptr, &MoonSRV);
 
+	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../satellite.dds", nullptr, &SatelliteSRV);
+
 	//sunsetSRV will show up black with default pixel shader.
-	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../SunsetSkybox.dds", nullptr, &sunsetSRV);
+	hr = CreateDDSTextureFromFile(myDevice.Get(), L"../NightSky.dds", nullptr, &sunsetSRV);
 
 
-	CD3D11_TEXTURE2D_DESC renderToTexture2Ddesc = CD3D11_TEXTURE2D_DESC(DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, widthTemp, heightTemp, 1, 0, D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE
-		, D3D11_USAGE_DEFAULT, D3D11_CPU_ACCESS_WRITE);
-	renderToTexture2Ddesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
-	myDevice.Get()->CreateTexture2D(&renderToTexture2Ddesc, nullptr, renderToTexture2D.GetAddressOf());
+	//CD3D11_TEXTURE2D_DESC renderToTexture2Ddesc = CD3D11_TEXTURE2D_DESC(DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, widthTemp, heightTemp, 1, 0, D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE
+	//	, D3D11_USAGE_DEFAULT, D3D11_CPU_ACCESS_WRITE);
+	//renderToTexture2Ddesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
+	//myDevice.Get()->CreateTexture2D(&renderToTexture2Ddesc, nullptr, renderToTexture2D.GetAddressOf());
 	//Setup SRV for renderToTexture
-	CD3D11_SHADER_RESOURCE_VIEW_DESC renderToTextureSRVdesc = CD3D11_SHADER_RESOURCE_VIEW_DESC(renderToTextureConstantBuffer.Get(), DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, 0, 1, D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE);
+	//CD3D11_SHADER_RESOURCE_VIEW_DESC renderToTextureSRVdesc = CD3D11_SHADER_RESOURCE_VIEW_DESC(renderToTextureConstantBuffer.Get(), DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, 0, 1, D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE);
 
 	//Setup RTV for renderToTexture
-	CD3D11_RENDER_TARGET_VIEW_DESC renderToTextureRTVdesc = {};
+	//CD3D11_RENDER_TARGET_VIEW_DESC renderToTextureRTVdesc = {};
 
 	//void CD3D11_RENDER_TARGET_VIEW_DESC(
 	//	ID3D11Texture2D * pTex2D,
@@ -856,6 +873,16 @@ void DrawEverything(ID3D11DeviceContext* con, ID3D11RenderTargetView* view, ID3D
 	XMMATRIX matRot, matTrans, matFinal;
 
 	// START PLANETS
+	
+	matRot = XMMatrixRotationY(angle + 1.09);
+	XMMATRIX tilt = XMMatrixRotationX(45.0f);
+	matTrans = XMMatrixTranslation(0.f, .60f, .5f);
+	matTrans = matTrans * tilt;
+	matFinal = matTrans * matRot;
+
+	clearWVP(con, viewMatrix, projectionMatrix, matFinal);
+	m_Satellite->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, SatelliteSRV.Get(), myLinearSampler.Get());
+
 	matRot = XMMatrixRotationY(angle);
 	matTrans = XMMatrixTranslation(0.f, .20f, orbitRadius);
 	matFinal = matTrans * matRot;
@@ -888,6 +915,7 @@ void DrawEverything(ID3D11DeviceContext* con, ID3D11RenderTargetView* view, ID3D
 	clearWVP(con, viewMatrix, projectionMatrix, matFinal);
 	m_Moon->Render(con, *vertexShader.GetAddressOf(), *pixelShader.GetAddressOf(), *vertexFormat.GetAddressOf(), view, MoonSRV.Get(), myLinearSampler.Get());
 	
+
 	matRot = XMMatrixRotationY(angle + 2.617f);
 	matTrans = XMMatrixTranslation(0.f, .20f, orbitRadius + 1.0f);
 	matFinal = matTrans * matRot;

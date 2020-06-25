@@ -27,6 +27,7 @@ VS_OUT main(VS_IN input)
     output.pos = mul(output.pos, v);
     output.pos = mul(output.pos, p);
     
+    
     output.tex = input.pos;
     
     return output;

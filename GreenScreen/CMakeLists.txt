@@ -55,6 +55,7 @@ add_executable (GreenScreen
 	Particles.h
 	Particles.cpp
 	Planet.h
+	satellite.h
 	${VERTEX_SHADERS}
 	${PIXEL_SHADERS}
 )
